@@ -3,6 +3,7 @@ package com.kuro.money.presenter.main
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
@@ -45,8 +46,13 @@ import com.kuro.money.presenter.utils.SlideUpContent
 import com.kuro.money.presenter.utils.customEnterTransition
 import com.kuro.money.presenter.utils.customExitTransition
 import com.kuro.money.ui.theme.Teal200
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    private val viewModel: MainViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -63,16 +69,15 @@ private fun MainScreen(
     val homeRoute = stringResource(id = R.string.home)
     val shouldOpenTransactionScreen = vm.shouldOpenAddTransactionScreen.collectAsState().value
     val currentRoute = remember { mutableStateOf(homeRoute) }
-    Scaffold(
-        bottomBar = {
-            BottomBar(routeSelected = currentRoute.value) {
-                currentRoute.value = it
-                navController.navigate(currentRoute.value) {
-                    popUpTo(navController.graph.startDestinationId)
-                    launchSingleTop = true
-                }
+    Scaffold(bottomBar = {
+        BottomBar(routeSelected = currentRoute.value) {
+            currentRoute.value = it
+            navController.navigate(currentRoute.value) {
+                popUpTo(navController.graph.startDestinationId)
+                launchSingleTop = true
             }
-        },
+        }
+    },
         floatingActionButton = {
             MainFloatingButton {
                 vm.setOpenAddTransactionScreen(true)
@@ -87,8 +92,7 @@ private fun MainScreen(
         isFloatingActionButtonDocked = true,
         content = {
             Navigation(navController = navController, paddingValues = it)
-        }
-    )
+        })
     SlideUpContent(shouldOpenTransactionScreen) {
         AddTransactionScreen()
     }
@@ -96,8 +100,7 @@ private fun MainScreen(
 
 @Composable
 private fun Navigation(
-    navController: NavHostController,
-    paddingValues: PaddingValues
+    navController: NavHostController, paddingValues: PaddingValues
 ) {
     val homeDestination = stringResource(id = R.string.home)
     val transactionDestination = stringResource(id = R.string.transactions)
@@ -107,21 +110,18 @@ private fun Navigation(
     NavHost(
         navController = navController, startDestination = homeDestination
     ) {
-        composable(
-            homeDestination,
+        composable(homeDestination,
             enterTransition = { customEnterTransition(offsetX = 1000, duration = 700) },
             exitTransition = { customExitTransition(offsetX = -1000, duration = 700) },
             popEnterTransition = { customEnterTransition(offsetX = -1000, duration = 700) },
-            popExitTransition = { customExitTransition(offsetX = 1000, duration = 700) }
-        ) {
+            popExitTransition = { customExitTransition(offsetX = 1000, duration = 700) }) {
 
         }
         composable(transactionDestination,
             enterTransition = { customEnterTransition(offsetX = 1000, duration = 700) },
             exitTransition = { customExitTransition(offsetX = -1000, duration = 700) },
             popEnterTransition = { customEnterTransition(offsetX = -1000, duration = 700) },
-            popExitTransition = { customExitTransition(offsetX = 1000, duration = 700) }) {
-        }
+            popExitTransition = { customExitTransition(offsetX = 1000, duration = 700) }) {}
         composable(addTransactionDestination) {
             // Do nothing
         }
@@ -136,8 +136,7 @@ private fun Navigation(
             enterTransition = { customEnterTransition(offsetX = 1000, duration = 700) },
             exitTransition = { customExitTransition(offsetX = -1000, duration = 700) },
             popEnterTransition = { customEnterTransition(offsetX = -1000, duration = 700) },
-            popExitTransition = { customExitTransition(offsetX = 1000, duration = 700) }) {
-        }
+            popExitTransition = { customExitTransition(offsetX = 1000, duration = 700) }) {}
     }
 }
 
@@ -147,8 +146,7 @@ private fun MainFloatingButton(
 ) {
     val homeRoute = stringResource(id = R.string.home)
     FloatingActionButton(
-        onClick = { onClick(homeRoute) },
-        backgroundColor = Teal200
+        onClick = { onClick(homeRoute) }, backgroundColor = Teal200
     ) {
         Icon(
             imageVector = Icons.Filled.Add,
@@ -160,8 +158,7 @@ private fun MainFloatingButton(
 
 @Composable
 private fun BottomBar(
-    routeSelected: String,
-    onClick: (String) -> Unit
+    routeSelected: String, onClick: (String) -> Unit
 ) {
     val listItems = generateListBottomNavItem(LocalContext.current)
     BottomAppBar(
@@ -170,8 +167,7 @@ private fun BottomBar(
         backgroundColor = Color.White
     ) {
         BottomNavigation(
-            backgroundColor = Color.White,
-            contentColor = Color.Black
+            backgroundColor = Color.White, contentColor = Color.Black
         ) {
             listItems.forEach { item ->
                 BottomNavItem(item, routeSelected, onClick)
@@ -182,29 +178,15 @@ private fun BottomBar(
 
 @Composable
 private fun RowScope.BottomNavItem(
-    item: BottomNavItem,
-    routeSelected: String,
-    onClick: (String) -> Unit
+    item: BottomNavItem, routeSelected: String, onClick: (String) -> Unit
 ) {
     val isSelected = routeSelected == item.route
-    BottomNavigationItem(
-        selected = isSelected, onClick = { onClick(item.route) },
-        icon = {
-            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                if (item.badgeCount > 0) {
-                    BadgedBox(badge = {
-                        Text(text = item.badgeCount.toString())
-                    }) {
-                        if (item.icon != null) {
-                            Icon(
-                                imageVector = item.icon, contentDescription = item.name,
-                                tint = if (isSelected) Color.Black else Color.Black.copy(
-                                    alpha = 0.3f
-                                )
-                            )
-                        }
-                    }
-                } else {
+    BottomNavigationItem(selected = isSelected, onClick = { onClick(item.route) }, icon = {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            if (item.badgeCount > 0) {
+                BadgedBox(badge = {
+                    Text(text = item.badgeCount.toString())
+                }) {
                     if (item.icon != null) {
                         Icon(
                             imageVector = item.icon,
@@ -215,19 +197,28 @@ private fun RowScope.BottomNavItem(
                         )
                     }
                 }
+            } else {
+                if (item.icon != null) {
+                    Icon(
+                        imageVector = item.icon,
+                        contentDescription = item.name,
+                        tint = if (isSelected) Color.Black else Color.Black.copy(
+                            alpha = 0.3f
+                        )
+                    )
+                }
             }
-        },
-        label = {
-            Text(
-                text = item.name,
-                fontWeight = FontWeight.Bold,
-                fontSize = 12.sp,
-                color = if (isSelected) Color.Black else Color.Black.copy(alpha = 0.3f),
-                textAlign = TextAlign.Center,
-                overflow = TextOverflow.Ellipsis,
-                maxLines = 1
-            )
-        },
-        alwaysShowLabel = true
+        }
+    }, label = {
+        Text(
+            text = item.name,
+            fontWeight = FontWeight.Bold,
+            fontSize = 12.sp,
+            color = if (isSelected) Color.Black else Color.Black.copy(alpha = 0.3f),
+            textAlign = TextAlign.Center,
+            overflow = TextOverflow.Ellipsis,
+            maxLines = 1
+        )
+    }, alwaysShowLabel = true
     )
 }

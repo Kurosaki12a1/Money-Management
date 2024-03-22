@@ -128,7 +128,7 @@ dependencies {
 
     // Coil load image from url
     implementation(libs.coil.compose)
-    
+
     implementation("org.mozilla:rhino:1.7.13")
 
 }

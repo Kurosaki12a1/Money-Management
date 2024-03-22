@@ -18,4 +18,8 @@
     <string name="excluded_report">Excluded from report</string>
     <string name="exclude_report_detail">Don\'t include this transaction in reports such as Overview.</string>
     <string name="save">Save</string>
+
+    <string name="expense">EXPENSE</string>
+    <string name="income">INCOME</string>
+    <string name="debt">DEBT/LOAN</string>
 </resources>

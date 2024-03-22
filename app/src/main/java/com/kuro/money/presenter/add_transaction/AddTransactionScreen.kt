@@ -62,6 +62,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kuro.money.R
 import com.kuro.money.extension.noRippleClickable
 import com.kuro.money.presenter.main.MainViewModel
+import com.kuro.money.presenter.select_category.SelectCategoryScreen
 import com.kuro.money.presenter.utils.CustomKeyBoard
 import com.kuro.money.presenter.utils.SlideUpContent
 import com.kuro.money.presenter.utils.TextFieldValueUtils
@@ -72,7 +73,8 @@ import kotlinx.coroutines.launch
 
 @Composable
 fun AddTransactionScreen(
-    mainViewModel: MainViewModel = viewModel()
+    mainViewModel: MainViewModel = viewModel(),
+    addTransactionViewModel: AddTransactionViewModel = viewModel()
 ) {
     val isEnabledCustomKeyBoard = remember { mutableStateOf(false) }
 
@@ -87,6 +89,8 @@ fun AddTransactionScreen(
     val amountFieldValue = remember { mutableStateOf(TextFieldValue()) }
     val shakeEnabled = remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
+
+    val enableCategoryScreen = addTransactionViewModel.enableCategoryScreen.collectAsState().value
 
     BoxWithConstraints(
         modifier = Modifier
@@ -116,9 +120,11 @@ fun AddTransactionScreen(
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 item {
-                    BodyAddTransaction(amountFieldValue) {
-                        isEnabledCustomKeyBoard.value = true
-                    }
+                    BodyAddTransaction(amountFieldValue,
+                        onAmountClick = { isEnabledCustomKeyBoard.value = true },
+                        onSelectCategoryClick = {
+                            addTransactionViewModel.setEnableCategoryScreen(true)
+                        })
                 }
                 item {
                     MoreDetailsTransaction()
@@ -149,8 +155,7 @@ fun AddTransactionScreen(
             SlideUpContent(
                 isVisible = isEnabledCustomKeyBoard.value
             ) {
-                CustomKeyBoard(
-                    onClear = { TextFieldValueUtils.clear(amountFieldValue) },
+                CustomKeyBoard(onClear = { TextFieldValueUtils.clear(amountFieldValue) },
                     onBack = { TextFieldValueUtils.deleteAt(amountFieldValue) },
                     onInput = { TextFieldValueUtils.add(amountFieldValue, it) },
                     onConfirm = {
@@ -170,6 +175,9 @@ fun AddTransactionScreen(
                 )
             }
         }
+    }
+    if (enableCategoryScreen) {
+        SelectCategoryScreen()
     }
 }
 
@@ -302,16 +310,17 @@ private fun MoreDetailsTransaction() {
         ) {
             Checkbox(checked = isCheckedBox.value, onCheckedChange = { isCheckedBox.value = it })
             Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(5.dp)
+                modifier = Modifier.fillMaxWidth(), verticalArrangement = Arrangement.spacedBy(5.dp)
             ) {
                 Text(
                     text = stringResource(id = R.string.excluded_report),
-                    style = MaterialTheme.typography.body1, color = Color.Black
+                    style = MaterialTheme.typography.body1,
+                    color = Color.Black
                 )
                 Text(
                     text = stringResource(id = R.string.exclude_report_detail),
-                    style = MaterialTheme.typography.body2, color = Color.Black.copy(alpha = 0.7f)
+                    style = MaterialTheme.typography.body2,
+                    color = Color.Black.copy(alpha = 0.7f)
                 )
             }
         }
@@ -327,7 +336,6 @@ private fun ToolbarAddTransaction(
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            //    .align(Alignment.TopCenter)
             .wrapContentHeight()
             .background(Color.White)
     ) {
@@ -351,7 +359,9 @@ private fun ToolbarAddTransaction(
 
 @Composable
 private fun BodyAddTransaction(
-    amount: MutableState<TextFieldValue>, onAmountClick: () -> Unit
+    amount: MutableState<TextFieldValue>,
+    onAmountClick: () -> Unit,
+    onSelectCategoryClick: () -> Unit
 ) {
     val interactionSource = remember { MutableInteractionSource() }.also {
         val isPressed by it.collectIsPressedAsState()
@@ -398,7 +408,9 @@ private fun BodyAddTransaction(
                 Text(text = stringResource(id = R.string.select_category),
                     style = MaterialTheme.typography.h6,
                     color = Color.Black.copy(alpha = 0.7f),
-                    modifier = Modifier.clickable { })
+                    modifier = Modifier.clickable {
+                        onSelectCategoryClick()
+                    })
             }
             Row(
                 horizontalArrangement = Arrangement.spacedBy(20.dp),

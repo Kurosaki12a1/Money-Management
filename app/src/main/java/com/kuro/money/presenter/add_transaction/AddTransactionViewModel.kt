@@ -8,11 +8,18 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 
 class AddTransactionViewModel : ViewModel() {
+    private val _enableCategoryScreen = MutableStateFlow(false)
+    val enableCategoryScreen = _enableCategoryScreen.asStateFlow()
+
     private val _amount = MutableStateFlow(0.0)
     val amount = _amount.asStateFlow()
 
     fun setAmount(amount: Double) {
         _amount.value = amount
+    }
+
+    fun setEnableCategoryScreen(value: Boolean) {
+        _enableCategoryScreen.value = value
     }
 
 }
