@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -36,16 +37,21 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kuro.money.R
+import com.kuro.money.data.model.CategoryEntity
+import com.kuro.money.data.utils.Resource
+import com.kuro.money.extension.detectHorizontalWithDelay
 import com.kuro.money.presenter.add_transaction.AddTransactionViewModel
 import com.kuro.money.presenter.select_category.feature.DebtScreen
 import com.kuro.money.presenter.select_category.feature.ExpenseScreen
 import com.kuro.money.presenter.select_category.feature.IncomeScreen
 import com.kuro.money.presenter.utils.CrossSlide
 import com.kuro.money.ui.theme.Gray
+import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun SelectCategoryScreen(
-    addTransactionViewModel: AddTransactionViewModel = viewModel()
+    addTransactionViewModel: AddTransactionViewModel = viewModel(),
+    selectCategoryViewModel: SelectCategoryViewModel = viewModel()
 ) {
 
     BackHandler(enabled = addTransactionViewModel.enableCategoryScreen.collectAsState().value) {
@@ -54,6 +60,19 @@ fun SelectCategoryScreen(
 
     val selectedTabIndexed = remember { mutableStateOf(0) }
     val prevSelectedTabIndex = remember { mutableStateOf(0) }
+    val listCategories = remember { mutableStateListOf<CategoryEntity>() }
+    val listSpecialCategories = listOf(
+        "Debt", "Debt Collection", "Loan", "Repayment"
+    )
+
+    LaunchedEffect(selectCategoryViewModel.getCategoryResponse.collectAsState().value) {
+        selectCategoryViewModel.getCategoryResponse.collectLatest {
+            if (it is Resource.Success) {
+                listCategories.clear()
+                listCategories.addAll(it.value)
+            }
+        }
+    }
 
     Surface(
         modifier = Modifier
@@ -63,20 +82,37 @@ fun SelectCategoryScreen(
         Column {
             ToolbarSelectCategory()
             TabSelectionCategory(selectedTabIndexed.value) {
-                if (prevSelectedTabIndex.value != selectedTabIndexed.value){
+                if (prevSelectedTabIndex.value != selectedTabIndexed.value) {
                     prevSelectedTabIndex.value = selectedTabIndexed.value
                 }
                 selectedTabIndexed.value = it
             }
             CrossSlide(
+                modifier = Modifier.detectHorizontalWithDelay(onSwipeLeft = {
+                    if (selectedTabIndexed.value < 2) {
+                        prevSelectedTabIndex.value = selectedTabIndexed.value
+                        selectedTabIndexed.value += 1
+                    }
+                }, onSwipeRight = {
+                    if (selectedTabIndexed.value > 0) {
+                        prevSelectedTabIndex.value = selectedTabIndexed.value
+                        selectedTabIndexed.value -= 1
+                    }
+                }),
                 currentState = prevSelectedTabIndex.value,
                 targetState = selectedTabIndexed.value,
                 orderedContent = listOf(0, 1, 2)
             ) {
                 when (it) {
-                    0 -> ExpenseScreen()
-                    1 -> IncomeScreen()
-                    2 -> DebtScreen()
+                    0 -> ExpenseScreen(listCategories.filter {
+                        it.type == "expense" && !listSpecialCategories.contains(it.name)
+                    })
+
+                    1 -> IncomeScreen(listCategories.filter {
+                        it.type == "income" && !listSpecialCategories.contains(it.name)
+                    })
+
+                    2 -> DebtScreen(listCategories.filter { listSpecialCategories.contains(it.name) })
                 }
             }
         }

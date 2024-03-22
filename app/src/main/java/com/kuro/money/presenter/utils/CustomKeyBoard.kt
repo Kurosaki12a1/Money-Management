@@ -343,10 +343,8 @@ fun evaluateExpression(expression: String): Double {
         rhino.optimizationLevel = -1
         val scope = rhino.initSafeStandardObjects()
         val value = rhino.evaluateString(scope, expression, "JavaScript", 1, null) as Double
-        println("value: $value")
         value
     } catch (e: Exception) {
-        println("Exception: ${e.message}")
         e.printStackTrace()
         Double.NaN
     } finally {
