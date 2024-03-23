@@ -18,3 +18,8 @@ data class SubCategory(
     @SerializedName("type") val type: String?,
     @SerializedName("metadata") val metadata: String?,
 )
+
+data class SelectedCategory(
+    val name : String,
+    val icon : String
+)

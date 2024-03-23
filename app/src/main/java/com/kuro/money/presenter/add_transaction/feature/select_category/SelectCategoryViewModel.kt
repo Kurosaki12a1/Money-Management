@@ -1,9 +1,10 @@
-package com.kuro.money.presenter.select_category
+package com.kuro.money.presenter.add_transaction.feature.select_category
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kuro.money.data.model.CategoryEntity
 import com.kuro.money.data.utils.Resource
+import com.kuro.money.domain.model.SelectedCategory
 import com.kuro.money.domain.usecase.CategoryUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,6 +20,9 @@ class SelectCategoryViewModel @Inject constructor(
     private val _getCategoryResponse = MutableStateFlow<Resource<List<CategoryEntity>>>(Resource.Default)
     val getCategoryResponse = _getCategoryResponse.asStateFlow()
 
+    private val _selectedCategory = MutableStateFlow(SelectedCategory("",""))
+    val selectedCategory = _selectedCategory.asStateFlow()
+
     init {
         getCategories()
     }
@@ -29,5 +33,9 @@ class SelectCategoryViewModel @Inject constructor(
                 _getCategoryResponse.value = it
             }
         }
+    }
+
+    fun setSelectedCategories(selectedCategory: SelectedCategory) {
+        _selectedCategory.value = selectedCategory
     }
 }

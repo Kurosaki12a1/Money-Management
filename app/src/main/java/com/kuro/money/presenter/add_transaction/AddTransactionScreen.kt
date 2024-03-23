@@ -1,6 +1,9 @@
 package com.kuro.money.presenter.add_transaction
 
+import android.app.DatePickerDialog
+import android.content.Context
 import androidx.activity.compose.BackHandler
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -43,6 +46,7 @@ import androidx.compose.material.icons.filled.QuestionMark
 import androidx.compose.material.icons.filled.Wallet
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -53,6 +57,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalTextInputService
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
@@ -60,16 +65,26 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kuro.money.R
+import com.kuro.money.data.model.AccountEntity
+import com.kuro.money.domain.model.ScreenSelection
+import com.kuro.money.domain.model.SelectedCategory
 import com.kuro.money.extension.noRippleClickable
 import com.kuro.money.presenter.main.MainViewModel
-import com.kuro.money.presenter.select_category.SelectCategoryScreen
+import com.kuro.money.presenter.add_transaction.feature.note.NoteScreen
+import com.kuro.money.presenter.add_transaction.feature.select_category.SelectCategoryScreen
+import com.kuro.money.presenter.add_transaction.feature.wallet.SelectWalletScreen
+import com.kuro.money.presenter.utils.CrossSlide
 import com.kuro.money.presenter.utils.CustomKeyBoard
 import com.kuro.money.presenter.utils.SlideUpContent
 import com.kuro.money.presenter.utils.TextFieldValueUtils
 import com.kuro.money.presenter.utils.evaluateExpression
+import com.kuro.money.presenter.utils.toPainterResource
 import com.kuro.money.ui.theme.Gray
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 @Composable
 fun AddTransactionScreen(
@@ -78,7 +93,7 @@ fun AddTransactionScreen(
 ) {
     val isEnabledCustomKeyBoard = remember { mutableStateOf(false) }
 
-    BackHandler(mainViewModel.shouldOpenAddTransactionScreen.collectAsState().value) {
+    BackHandler(mainViewModel.navigateScreenTo.collectAsState().value == ScreenSelection.ADD_TRANSACTION_SCREEN) {
         if (isEnabledCustomKeyBoard.value) {
             isEnabledCustomKeyBoard.value = false
             return@BackHandler
@@ -86,11 +101,24 @@ fun AddTransactionScreen(
         mainViewModel.setOpenAddTransactionScreen(false)
     }
 
+    LaunchedEffect(mainViewModel.navigateScreenTo.collectAsState().value) {
+        mainViewModel.navigateScreenTo.collectLatest {
+            if (it != ScreenSelection.ADD_TRANSACTION_SCREEN) {
+                addTransactionViewModel.clearData()
+            }
+        }
+    }
+
     val amountFieldValue = remember { mutableStateOf(TextFieldValue()) }
     val shakeEnabled = remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
-    val enableCategoryScreen = addTransactionViewModel.enableCategoryScreen.collectAsState().value
+    val enableChildScreen = addTransactionViewModel.enableChildScreen.collectAsState().value
+    val selectedCategory = addTransactionViewModel.selectedCategory.collectAsState().value
+    val date = remember { mutableStateOf(LocalDate.now()) }
+    val note = addTransactionViewModel.note.collectAsState().value
+    val wallet = addTransactionViewModel.wallet.collectAsState().value
+    val context = LocalContext.current
 
     BoxWithConstraints(
         modifier = Modifier
@@ -121,10 +149,21 @@ fun AddTransactionScreen(
             ) {
                 item {
                     BodyAddTransaction(amountFieldValue,
+                        selectedCategory,
+                        note,
+                        date.value,
+                        wallet,
                         onAmountClick = { isEnabledCustomKeyBoard.value = true },
                         onSelectCategoryClick = {
                             addTransactionViewModel.setEnableCategoryScreen(true)
-                        })
+                        },
+                        onNoteClick = { addTransactionViewModel.setEnableNoteScreen(true) },
+                        onDateClick = {
+                            showDatePicker(context) {
+                                date.value = it
+                            }
+                        },
+                        onWalletClick = { addTransactionViewModel.setEnableWalletScreen(true) })
                 }
                 item {
                     MoreDetailsTransaction()
@@ -176,9 +215,40 @@ fun AddTransactionScreen(
             }
         }
     }
-    if (enableCategoryScreen) {
-        SelectCategoryScreen()
+
+    CrossSlide(
+        currentState = ScreenSelection.ADD_TRANSACTION_SCREEN,
+        targetState = enableChildScreen,
+        orderedContent = listOf(
+            ScreenSelection.ADD_TRANSACTION_SCREEN,
+            ScreenSelection.NOTE_SCREEN,
+            ScreenSelection.SELECT_CATEGORY_SCREEN,
+            ScreenSelection.WALLET_SCREEN
+        )
+    ) {
+        when (it) {
+            ScreenSelection.SELECT_CATEGORY_SCREEN -> SelectCategoryScreen()
+            ScreenSelection.NOTE_SCREEN -> NoteScreen()
+            ScreenSelection.WALLET_SCREEN -> SelectWalletScreen()
+            else -> {}
+        }
     }
+}
+
+private fun showDatePicker(
+    context: Context,
+    onDateSelected: (LocalDate) -> Unit,
+) {
+    val localDate = LocalDate.now()
+    val datePickerDialog = DatePickerDialog(
+        context, { _, year, month, dayOfMonth ->
+            // Month start from 0 to 11
+            onDateSelected(LocalDate.of(year, month + 1, dayOfMonth))
+        }, localDate.year,
+        // Month start from 1 to 12
+        localDate.monthValue - 1, localDate.dayOfMonth
+    )
+    datePickerDialog.show()
 }
 
 @Composable
@@ -347,7 +417,9 @@ private fun ToolbarAddTransaction(
             Icon(imageVector = Icons.Filled.Close,
                 contentDescription = "Close",
                 tint = Color.Black,
-                modifier = Modifier.clickable { mainViewModel.setOpenAddTransactionScreen(false) })
+                modifier = Modifier.clickable {
+                    mainViewModel.setOpenAddTransactionScreen(false)
+                })
             Text(
                 text = stringResource(id = R.string.add_transaction),
                 style = MaterialTheme.typography.h6,
@@ -360,23 +432,33 @@ private fun ToolbarAddTransaction(
 @Composable
 private fun BodyAddTransaction(
     amount: MutableState<TextFieldValue>,
+    selectedCategory: SelectedCategory,
+    note: String,
+    date: LocalDate,
+    wallet : AccountEntity?,
     onAmountClick: () -> Unit,
-    onSelectCategoryClick: () -> Unit
+    onSelectCategoryClick: () -> Unit,
+    onNoteClick: () -> Unit,
+    onDateClick: () -> Unit,
+    onWalletClick: () -> Unit
 ) {
     val interactionSource = remember { MutableInteractionSource() }.also {
         val isPressed by it.collectIsPressedAsState()
         if (isPressed) onAmountClick()
     }
-    val textToday = stringResource(id = R.string.today)
-    val textTime = remember { mutableStateOf(textToday) }
-    val textWallet = remember { mutableStateOf("Cash") }
+    val textTime = if (date == LocalDate.now()) {
+        stringResource(id = R.string.today)
+    } else {
+        DateTimeFormatter.ofPattern("dd/MM/yyyy").format(date)
+    }
+
     Surface(
         modifier = Modifier.fillMaxWidth(), color = Color.White
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 20.dp),
+                .padding(horizontal = 20.dp, vertical = 10.dp),
             verticalArrangement = Arrangement.spacedBy(30.dp)
         ) {
             CompositionLocalProvider(LocalTextInputService provides null) {
@@ -390,29 +472,46 @@ private fun BodyAddTransaction(
                 )
             }
             Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onSelectCategoryClick() },
                 horizontalArrangement = Arrangement.spacedBy(20.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Box(
-                    modifier = Modifier
-                        .background(Gray, CircleShape)
-                        .size(36.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.QuestionMark,
-                        contentDescription = "Question",
-                        tint = Color.Black.copy(alpha = 0.3f)
+                if (selectedCategory.name != "" && selectedCategory.icon != "") {
+                    Image(
+                        painter = selectedCategory.icon.toPainterResource(),
+                        contentDescription = selectedCategory.name
+                    )
+                    Text(
+                        text = selectedCategory.name,
+                        style = MaterialTheme.typography.h6,
+                        color = Color.Black.copy(alpha = 0.7f)
+                    )
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .background(Gray, CircleShape)
+                            .size(36.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.QuestionMark,
+                            contentDescription = "Question",
+                            tint = Color.Black.copy(alpha = 0.3f)
+                        )
+                    }
+                    Text(
+                        text = stringResource(id = R.string.select_category),
+                        style = MaterialTheme.typography.h6,
+                        color = Color.Black.copy(alpha = 0.7f)
                     )
                 }
-                Text(text = stringResource(id = R.string.select_category),
-                    style = MaterialTheme.typography.h6,
-                    color = Color.Black.copy(alpha = 0.7f),
-                    modifier = Modifier.clickable {
-                        onSelectCategoryClick()
-                    })
             }
             Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onNoteClick() },
                 horizontalArrangement = Arrangement.spacedBy(20.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -422,12 +521,16 @@ private fun BodyAddTransaction(
                     tint = Color.Black,
                     modifier = Modifier.size(30.dp)
                 )
-                Text(text = stringResource(id = R.string.write_note),
+                Text(
+                    text = note.ifEmpty { stringResource(id = R.string.write_note) },
                     style = MaterialTheme.typography.body1,
-                    color = Color.Black.copy(alpha = 0.7f),
-                    modifier = Modifier.clickable { })
+                    color = Color.Black.copy(alpha = 0.7f)
+                )
             }
             Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onDateClick() },
                 horizontalArrangement = Arrangement.spacedBy(20.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -437,25 +540,43 @@ private fun BodyAddTransaction(
                     tint = Color.Black,
                     modifier = Modifier.size(30.dp)
                 )
-                Text(text = textTime.value,
+                Text(
+                    text = textTime,
                     style = MaterialTheme.typography.body1,
-                    color = Color.Black.copy(alpha = 0.7f),
-                    modifier = Modifier.clickable { })
+                    color = Color.Black.copy(alpha = 0.7f)
+                )
             }
             Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onWalletClick() },
                 horizontalArrangement = Arrangement.spacedBy(20.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    imageVector = Icons.Filled.Wallet,
-                    contentDescription = "Wallet",
-                    tint = Color.Black,
-                    modifier = Modifier.size(30.dp)
-                )
-                Text(text = textWallet.value,
-                    style = MaterialTheme.typography.body1,
-                    color = Color.Black.copy(alpha = 0.7f),
-                    modifier = Modifier.clickable { })
+                if (wallet == null) {
+                    Icon(
+                        imageVector = Icons.Filled.Wallet,
+                        contentDescription = "Wallet",
+                        tint = Color.Black,
+                        modifier = Modifier.size(30.dp)
+                    )
+                    Text(
+                        text = stringResource(id = R.string.cash),
+                        style = MaterialTheme.typography.body1,
+                        color = Color.Black.copy(alpha = 0.7f)
+                    )
+                } else {
+                    Image(
+                        painter = wallet.icon.toPainterResource(),
+                        contentDescription = "Wallet",
+                        modifier = Modifier.size(30.dp)
+                    )
+                    Text(
+                        text = wallet.name,
+                        style = MaterialTheme.typography.body1,
+                        color = Color.Black.copy(alpha = 0.7f)
+                    )
+                }
             }
         }
     }

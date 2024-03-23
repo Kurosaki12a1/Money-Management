@@ -22,4 +22,10 @@
     <string name="expense">EXPENSE</string>
     <string name="income">INCOME</string>
     <string name="debt">DEBT/LOAN</string>
+
+    <string name="new_category">NEW CATEGORY</string>
+    <string name="note">Note</string>
+    <string name="select_wallet">Select Wallet</string>
+    <string name="included_in_total">Included in Total</string>
+    <string name="cash">Cash</string>
 </resources>

@@ -1,4 +1,4 @@
-package com.kuro.money.presenter.select_category
+package com.kuro.money.presenter.add_transaction.feature.select_category
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
@@ -39,11 +39,13 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kuro.money.R
 import com.kuro.money.data.model.CategoryEntity
 import com.kuro.money.data.utils.Resource
+import com.kuro.money.domain.model.ScreenSelection
+import com.kuro.money.domain.model.SelectedCategory
 import com.kuro.money.extension.detectHorizontalWithDelay
 import com.kuro.money.presenter.add_transaction.AddTransactionViewModel
-import com.kuro.money.presenter.select_category.feature.DebtScreen
-import com.kuro.money.presenter.select_category.feature.ExpenseScreen
-import com.kuro.money.presenter.select_category.feature.IncomeScreen
+import com.kuro.money.presenter.add_transaction.feature.select_category.feature.DebtScreen
+import com.kuro.money.presenter.add_transaction.feature.select_category.feature.ExpenseScreen
+import com.kuro.money.presenter.add_transaction.feature.select_category.feature.IncomeScreen
 import com.kuro.money.presenter.utils.CrossSlide
 import com.kuro.money.ui.theme.Gray
 import kotlinx.coroutines.flow.collectLatest
@@ -54,7 +56,7 @@ fun SelectCategoryScreen(
     selectCategoryViewModel: SelectCategoryViewModel = viewModel()
 ) {
 
-    BackHandler(enabled = addTransactionViewModel.enableCategoryScreen.collectAsState().value) {
+    BackHandler(enabled = addTransactionViewModel.enableChildScreen.collectAsState().value == ScreenSelection.SELECT_CATEGORY_SCREEN) {
         addTransactionViewModel.setEnableCategoryScreen(false)
     }
 
@@ -64,6 +66,16 @@ fun SelectCategoryScreen(
     val listSpecialCategories = listOf(
         "Debt", "Debt Collection", "Loan", "Repayment"
     )
+
+    LaunchedEffect(selectCategoryViewModel.selectedCategory.collectAsState().value) {
+        selectCategoryViewModel.selectedCategory.collectLatest {
+            if (it.name != "" && it.icon != "") {
+                addTransactionViewModel.setSelectedCategory(it)
+                selectCategoryViewModel.setSelectedCategories(SelectedCategory("", ""))
+                addTransactionViewModel.setEnableCategoryScreen(false)
+            }
+        }
+    }
 
     LaunchedEffect(selectCategoryViewModel.getCategoryResponse.collectAsState().value) {
         selectCategoryViewModel.getCategoryResponse.collectLatest {

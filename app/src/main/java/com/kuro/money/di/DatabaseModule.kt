@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.room.Room
 import com.google.gson.Gson
 import com.kuro.money.data.data_source.local.AppDatabase
+import com.kuro.money.data.data_source.local.dao.AccountsDao
 import com.kuro.money.data.data_source.local.dao.CategoryDao
 import dagger.Module
 import dagger.Provides
@@ -25,12 +26,13 @@ class DatabaseModule {
     @Singleton
     fun provideAppDatabase(application: Application): AppDatabase {
         return Room.databaseBuilder(
-            application,
-            AppDatabase::class.java,
-            AppDatabase.DB_NAME
+            application, AppDatabase::class.java, AppDatabase.DB_NAME
         ).allowMainThreadQueries().build()
     }
 
     @Provides
     fun provideCategoryDao(appDatabase: AppDatabase): CategoryDao = appDatabase.categoryDao()
+
+    @Provides
+    fun provideAccountsDao(appDatabase: AppDatabase): AccountsDao = appDatabase.accountsDao()
 }

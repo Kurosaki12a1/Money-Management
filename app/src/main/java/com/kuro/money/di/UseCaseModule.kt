@@ -1,7 +1,9 @@
 package com.kuro.money.di
 
+import com.kuro.money.domain.repository.AccountsRepository
 import com.kuro.money.domain.repository.CategoryRepository
 import com.kuro.money.domain.repository.PreferencesRepository
+import com.kuro.money.domain.usecase.AccountsUseCase
 import com.kuro.money.domain.usecase.CategoryUseCase
 import com.kuro.money.domain.usecase.PreferencesUseCase
 import dagger.Module
@@ -21,4 +23,8 @@ class UseCaseModule {
     @Provides
     @Singleton
     fun providePreferencesUseCase(repo : PreferencesRepository) = PreferencesUseCase(repo)
+
+    @Provides
+    @Singleton
+    fun provideAccountUseCase(repo : AccountsRepository) = AccountsUseCase(repo)
 }

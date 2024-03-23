@@ -3,7 +3,6 @@ package com.kuro.money.presenter.main
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
@@ -40,6 +39,7 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.kuro.money.R
 import com.kuro.money.domain.model.BottomNavItem
+import com.kuro.money.domain.model.ScreenSelection
 import com.kuro.money.domain.model.generateListBottomNavItem
 import com.kuro.money.presenter.add_transaction.AddTransactionScreen
 import com.kuro.money.presenter.utils.SlideUpContent
@@ -50,8 +50,6 @@ import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-
-    private val viewModel: MainViewModel by viewModels()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -67,7 +65,7 @@ private fun MainScreen(
 ) {
     val navController = rememberNavController()
     val homeRoute = stringResource(id = R.string.home)
-    val shouldOpenTransactionScreen = vm.shouldOpenAddTransactionScreen.collectAsState().value
+    val navigateScreen = vm.navigateScreenTo.collectAsState().value
     val currentRoute = remember { mutableStateOf(homeRoute) }
     Scaffold(bottomBar = {
         BottomBar(routeSelected = currentRoute.value) {
@@ -93,7 +91,7 @@ private fun MainScreen(
         content = {
             Navigation(navController = navController, paddingValues = it)
         })
-    SlideUpContent(shouldOpenTransactionScreen) {
+    SlideUpContent(navigateScreen == ScreenSelection.ADD_TRANSACTION_SCREEN) {
         AddTransactionScreen()
     }
 }

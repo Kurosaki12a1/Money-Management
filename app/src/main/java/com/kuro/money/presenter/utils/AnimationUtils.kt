@@ -42,3 +42,4 @@ fun SlideUpContent(isVisible: Boolean, content: @Composable () -> Unit) {
         content()
     }
 }
+
