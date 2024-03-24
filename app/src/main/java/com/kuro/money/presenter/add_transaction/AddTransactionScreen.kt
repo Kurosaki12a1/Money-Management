@@ -24,6 +24,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Checkbox
@@ -69,10 +71,12 @@ import com.kuro.money.data.model.AccountEntity
 import com.kuro.money.domain.model.ScreenSelection
 import com.kuro.money.domain.model.SelectedCategory
 import com.kuro.money.extension.noRippleClickable
-import com.kuro.money.presenter.main.MainViewModel
+import com.kuro.money.extension.randomColor
 import com.kuro.money.presenter.add_transaction.feature.note.NoteScreen
+import com.kuro.money.presenter.add_transaction.feature.people.SelectPeopleScreen
 import com.kuro.money.presenter.add_transaction.feature.select_category.SelectCategoryScreen
 import com.kuro.money.presenter.add_transaction.feature.wallet.SelectWalletScreen
+import com.kuro.money.presenter.main.MainViewModel
 import com.kuro.money.presenter.utils.CrossSlide
 import com.kuro.money.presenter.utils.CustomKeyBoard
 import com.kuro.money.presenter.utils.SlideUpContent
@@ -118,6 +122,7 @@ fun AddTransactionScreen(
     val date = remember { mutableStateOf(LocalDate.now()) }
     val note = addTransactionViewModel.note.collectAsState().value
     val wallet = addTransactionViewModel.wallet.collectAsState().value
+    val peopleSelected = addTransactionViewModel.nameOfPeople.collectAsState().value
     val context = LocalContext.current
 
     BoxWithConstraints(
@@ -166,7 +171,12 @@ fun AddTransactionScreen(
                         onWalletClick = { addTransactionViewModel.setEnableWalletScreen(true) })
                 }
                 item {
-                    MoreDetailsTransaction()
+                    MoreDetailsTransaction(
+                        peopleSelected,
+                        onSelectPeopleClick = {
+                            addTransactionViewModel.setEnableSelectPeopleScreen(true)
+                        }
+                    )
                 }
             }
             Box(
@@ -194,7 +204,8 @@ fun AddTransactionScreen(
             SlideUpContent(
                 isVisible = isEnabledCustomKeyBoard.value
             ) {
-                CustomKeyBoard(onClear = { TextFieldValueUtils.clear(amountFieldValue) },
+                CustomKeyBoard(
+                    onClear = { TextFieldValueUtils.clear(amountFieldValue) },
                     onBack = { TextFieldValueUtils.deleteAt(amountFieldValue) },
                     onInput = { TextFieldValueUtils.add(amountFieldValue, it) },
                     onConfirm = {
@@ -223,13 +234,15 @@ fun AddTransactionScreen(
             ScreenSelection.ADD_TRANSACTION_SCREEN,
             ScreenSelection.NOTE_SCREEN,
             ScreenSelection.SELECT_CATEGORY_SCREEN,
-            ScreenSelection.WALLET_SCREEN
+            ScreenSelection.WALLET_SCREEN,
+            ScreenSelection.WITH_SCREEN
         )
     ) {
         when (it) {
             ScreenSelection.SELECT_CATEGORY_SCREEN -> SelectCategoryScreen()
             ScreenSelection.NOTE_SCREEN -> NoteScreen()
             ScreenSelection.WALLET_SCREEN -> SelectWalletScreen()
+            ScreenSelection.WITH_SCREEN -> SelectPeopleScreen()
             else -> {}
         }
     }
@@ -252,7 +265,10 @@ private fun showDatePicker(
 }
 
 @Composable
-private fun MoreDetailsTransaction() {
+private fun MoreDetailsTransaction(
+    peopleSelected: String?,
+    onSelectPeopleClick: () -> Unit
+) {
     /**
      * Add people
      */
@@ -265,13 +281,51 @@ private fun MoreDetailsTransaction() {
             horizontalArrangement = Arrangement.spacedBy(30.dp),
             modifier = Modifier
                 .padding(20.dp)
-                .clickable { }) {
+                .clickable { onSelectPeopleClick() }) {
             Icon(
                 imageVector = Icons.Default.People,
                 contentDescription = "People",
                 modifier = Modifier.size(30.dp)
             )
-            Text(text = stringResource(id = R.string.with))
+            if (peopleSelected == null) {
+                Text(text = stringResource(id = R.string.with))
+            } else {
+                val listPeople = peopleSelected.split(",")
+                val listRandomColor = listPeople.map { randomColor() }
+                LazyRow(
+                    horizontalArrangement = Arrangement.spacedBy(5.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    itemsIndexed(listPeople) { index, item ->
+                        Row(
+                            modifier = Modifier
+                                .background(Gray, RoundedCornerShape(16.dp))
+                                .padding(end = 10.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .background(listRandomColor[index], CircleShape)
+                                    .size(30.dp)
+                            ) {
+                                Text(
+                                    text = item[0].toString().uppercase(),
+                                    color = Color.White,
+                                    style = MaterialTheme.typography.body1,
+                                    textAlign = TextAlign.Center,
+                                    modifier = Modifier.align(Alignment.Center)
+                                )
+                            }
+                            Text(
+                                text = item, color = Color.Black,
+                                style = MaterialTheme.typography.body1,
+                                textAlign = TextAlign.Center
+                            )
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -435,7 +489,7 @@ private fun BodyAddTransaction(
     selectedCategory: SelectedCategory,
     note: String,
     date: LocalDate,
-    wallet : AccountEntity?,
+    wallet: AccountEntity?,
     onAmountClick: () -> Unit,
     onSelectCategoryClick: () -> Unit,
     onNoteClick: () -> Unit,

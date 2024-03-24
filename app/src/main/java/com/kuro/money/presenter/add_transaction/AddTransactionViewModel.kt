@@ -17,6 +17,9 @@ class AddTransactionViewModel : ViewModel() {
     private val _wallet = MutableStateFlow<AccountEntity?>(null)
     val wallet = _wallet.asStateFlow()
 
+    private val _nameOfPeople = MutableStateFlow<String?>(null)
+    val nameOfPeople = _nameOfPeople.asStateFlow()
+
     private val _note = MutableStateFlow("")
     val note = _note.asStateFlow()
 
@@ -58,6 +61,10 @@ class AddTransactionViewModel : ViewModel() {
         _note.value = note
     }
 
+    fun setNamePeople(name : String) {
+        _nameOfPeople.value = name
+    }
+
     fun setWallet(entity: AccountEntity) {
         _wallet.value = entity
     }
@@ -65,6 +72,14 @@ class AddTransactionViewModel : ViewModel() {
     fun setEnableNoteScreen(value: Boolean) {
         if (value) {
             _enableChildScreen.value = ScreenSelection.NOTE_SCREEN
+        } else {
+            _enableChildScreen.value = ScreenSelection.ADD_TRANSACTION_SCREEN
+        }
+    }
+
+    fun setEnableSelectPeopleScreen(value: Boolean) {
+        if (value) {
+            _enableChildScreen.value = ScreenSelection.WITH_SCREEN
         } else {
             _enableChildScreen.value = ScreenSelection.ADD_TRANSACTION_SCREEN
         }

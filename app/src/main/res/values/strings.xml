@@ -28,4 +28,5 @@
     <string name="select_wallet">Select Wallet</string>
     <string name="included_in_total">Included in Total</string>
     <string name="cash">Cash</string>
+    <string name="done">Done</string>
 </resources>

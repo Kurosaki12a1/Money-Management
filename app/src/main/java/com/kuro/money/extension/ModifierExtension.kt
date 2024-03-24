@@ -7,10 +7,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.Dp
 import kotlin.math.abs
+import kotlin.random.Random
 
 
 fun Modifier.noRippleClickable(onClick: () -> Unit): Modifier = composed {
@@ -42,4 +44,11 @@ fun Modifier.detectHorizontalWithDelay(
 fun Dp.toPx(): Float {
     val density = LocalDensity.current.density
     return value * density
+}
+
+fun randomColor(): Color {
+    val red = Random.nextInt(256)
+    val green = Random.nextInt(256)
+    val blue = Random.nextInt(256)
+    return Color(red, green, blue)
 }

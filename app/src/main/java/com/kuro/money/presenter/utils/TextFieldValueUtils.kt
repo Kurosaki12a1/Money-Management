@@ -37,7 +37,7 @@ object TextFieldValueUtils {
         } else textField.value.text + str
         textField.value = TextFieldValue(
             text = newText,
-            selection = TextRange(currentSelection + 1)
+            selection = TextRange(currentSelection + str.length)
         )
     }
 
