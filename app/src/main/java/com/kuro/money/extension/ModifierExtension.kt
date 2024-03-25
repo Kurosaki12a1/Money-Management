@@ -15,11 +15,11 @@ import kotlin.math.abs
 import kotlin.random.Random
 
 
-fun Modifier.noRippleClickable(onClick: () -> Unit): Modifier = composed {
-    this.clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) {
+@Composable
+fun Modifier.noRippleClickable(onClick: () -> Unit): Modifier {
+    return this.clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) {
         onClick()
     }
-    return@composed this
 }
 
 @Composable

@@ -2,6 +2,7 @@ package com.kuro.money.presenter.add_transaction
 
 import android.app.DatePickerDialog
 import android.content.Context
+import android.text.format.DateUtils
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -68,10 +69,12 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kuro.money.R
 import com.kuro.money.data.model.AccountEntity
+import com.kuro.money.data.model.EventEntity
 import com.kuro.money.domain.model.ScreenSelection
 import com.kuro.money.domain.model.SelectedCategory
 import com.kuro.money.extension.noRippleClickable
 import com.kuro.money.extension.randomColor
+import com.kuro.money.presenter.add_transaction.feature.event.SelectEventScreen
 import com.kuro.money.presenter.add_transaction.feature.note.NoteScreen
 import com.kuro.money.presenter.add_transaction.feature.people.SelectPeopleScreen
 import com.kuro.money.presenter.add_transaction.feature.select_category.SelectCategoryScreen
@@ -82,6 +85,7 @@ import com.kuro.money.presenter.utils.CustomKeyBoard
 import com.kuro.money.presenter.utils.SlideUpContent
 import com.kuro.money.presenter.utils.TextFieldValueUtils
 import com.kuro.money.presenter.utils.evaluateExpression
+import com.kuro.money.presenter.utils.string
 import com.kuro.money.presenter.utils.toPainterResource
 import com.kuro.money.ui.theme.Gray
 import kotlinx.coroutines.delay
@@ -119,10 +123,12 @@ fun AddTransactionScreen(
 
     val enableChildScreen = addTransactionViewModel.enableChildScreen.collectAsState().value
     val selectedCategory = addTransactionViewModel.selectedCategory.collectAsState().value
-    val date = remember { mutableStateOf(LocalDate.now()) }
+    val dateTransaction = remember { mutableStateOf(LocalDate.now()) }
+    val dateRemind = remember { mutableStateOf<LocalDate?>(null) }
     val note = addTransactionViewModel.note.collectAsState().value
     val wallet = addTransactionViewModel.wallet.collectAsState().value
     val peopleSelected = addTransactionViewModel.nameOfPeople.collectAsState().value
+    val eventSelected = addTransactionViewModel.eventSelected.collectAsState().value
     val context = LocalContext.current
 
     BoxWithConstraints(
@@ -156,7 +162,7 @@ fun AddTransactionScreen(
                     BodyAddTransaction(amountFieldValue,
                         selectedCategory,
                         note,
-                        date.value,
+                        dateTransaction.value,
                         wallet,
                         onAmountClick = { isEnabledCustomKeyBoard.value = true },
                         onSelectCategoryClick = {
@@ -165,7 +171,7 @@ fun AddTransactionScreen(
                         onNoteClick = { addTransactionViewModel.setEnableNoteScreen(true) },
                         onDateClick = {
                             showDatePicker(context) {
-                                date.value = it
+                                dateTransaction.value = it
                             }
                         },
                         onWalletClick = { addTransactionViewModel.setEnableWalletScreen(true) })
@@ -173,8 +179,18 @@ fun AddTransactionScreen(
                 item {
                     MoreDetailsTransaction(
                         peopleSelected,
+                        eventSelected,
+                        dateRemind.value,
                         onSelectPeopleClick = {
                             addTransactionViewModel.setEnableSelectPeopleScreen(true)
+                        },
+                        onSelectEventClick = {
+                            addTransactionViewModel.setEnableEventScreen(true)
+                        },
+                        onAlarmClick = {
+                            showDatePicker(context, true) {
+                                dateRemind.value = it
+                            }
                         }
                     )
                 }
@@ -235,21 +251,24 @@ fun AddTransactionScreen(
             ScreenSelection.NOTE_SCREEN,
             ScreenSelection.SELECT_CATEGORY_SCREEN,
             ScreenSelection.WALLET_SCREEN,
-            ScreenSelection.WITH_SCREEN
+            ScreenSelection.WITH_SCREEN,
+            ScreenSelection.EVENT_SCREEN
         )
     ) {
         when (it) {
             ScreenSelection.SELECT_CATEGORY_SCREEN -> SelectCategoryScreen()
             ScreenSelection.NOTE_SCREEN -> NoteScreen()
-            ScreenSelection.WALLET_SCREEN -> SelectWalletScreen()
+            ScreenSelection.WALLET_SCREEN -> SelectWalletScreen(addTransactionViewModel)
             ScreenSelection.WITH_SCREEN -> SelectPeopleScreen()
+            ScreenSelection.EVENT_SCREEN -> SelectEventScreen()
             else -> {}
         }
     }
 }
 
-private fun showDatePicker(
+fun showDatePicker(
     context: Context,
+    shouldEnableMinDate : Boolean = false,
     onDateSelected: (LocalDate) -> Unit,
 ) {
     val localDate = LocalDate.now()
@@ -261,13 +280,18 @@ private fun showDatePicker(
         // Month start from 1 to 12
         localDate.monthValue - 1, localDate.dayOfMonth
     )
+    if (shouldEnableMinDate) datePickerDialog.datePicker.minDate = System.currentTimeMillis()
     datePickerDialog.show()
 }
 
 @Composable
 private fun MoreDetailsTransaction(
     peopleSelected: String?,
-    onSelectPeopleClick: () -> Unit
+    eventSelected: EventEntity?,
+    dateRemind: LocalDate?,
+    onSelectPeopleClick: () -> Unit,
+    onSelectEventClick: () -> Unit,
+    onAlarmClick: () -> Unit
 ) {
     /**
      * Add people
@@ -280,6 +304,7 @@ private fun MoreDetailsTransaction(
         Row(verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(30.dp),
             modifier = Modifier
+                .fillMaxWidth()
                 .padding(20.dp)
                 .clickable { onSelectPeopleClick() }) {
             Icon(
@@ -346,20 +371,39 @@ private fun MoreDetailsTransaction(
             verticalArrangement = Arrangement.spacedBy(30.dp)
         ) {
             Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onSelectEventClick() },
                 horizontalArrangement = Arrangement.spacedBy(20.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(
-                    imageVector = Icons.Filled.Event,
-                    contentDescription = "Event",
-                    tint = Color.Black,
-                )
-                Text(text = stringResource(id = R.string.select_event),
-                    style = MaterialTheme.typography.body1,
-                    color = Color.Black.copy(alpha = 0.7f),
-                    modifier = Modifier.clickable { })
+                if (eventSelected == null) {
+                    Icon(
+                        imageVector = Icons.Filled.Event,
+                        contentDescription = "Event",
+                        tint = Color.Black,
+                    )
+                    Text(
+                        text = stringResource(id = R.string.select_event),
+                        style = MaterialTheme.typography.body1,
+                        color = Color.Black.copy(alpha = 0.7f),
+                    )
+                } else {
+                    Image(
+                        painter = eventSelected.icon.toPainterResource(),
+                        contentDescription = "Event",
+                    )
+                    Text(
+                        text = eventSelected.name,
+                        style = MaterialTheme.typography.body1,
+                        color = Color.Black.copy(alpha = 0.7f),
+                    )
+                }
             }
             Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clickable { onAlarmClick() },
                 horizontalArrangement = Arrangement.spacedBy(20.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -368,10 +412,20 @@ private fun MoreDetailsTransaction(
                     contentDescription = "Alarm",
                     tint = Color.Black,
                 )
-                Text(text = stringResource(id = R.string.no_remind),
-                    style = MaterialTheme.typography.body1,
-                    color = Color.Black.copy(alpha = 0.7f),
-                    modifier = Modifier.clickable { })
+                if (dateRemind == null) {
+                    Text(
+                        text = stringResource(id = R.string.no_remind),
+                        style = MaterialTheme.typography.body1,
+                        color = Color.Black.copy(alpha = 0.7f),
+                    )
+                } else {
+                    Text(
+                        text = dateRemind.string(),
+                        style = MaterialTheme.typography.body1,
+                        color = Color.Black.copy(alpha = 0.7f),
+                    )
+                }
+
             }
         }
     }

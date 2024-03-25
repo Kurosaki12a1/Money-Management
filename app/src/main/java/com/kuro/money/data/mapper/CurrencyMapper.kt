@@ -7,5 +7,6 @@ fun Currency.toCurrencyEntity() = CurrencyEntity(
     id = id ?: 0L,
     code = code ?: "",
     name = name ?: "",
-    symbol = symbol ?: ""
+    symbol = symbol ?: "",
+    icon = "ic_currency_" + code?.lowercase()
 )

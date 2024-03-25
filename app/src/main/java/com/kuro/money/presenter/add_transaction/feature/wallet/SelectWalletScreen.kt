@@ -38,6 +38,7 @@ import com.kuro.money.data.model.AccountEntity
 import com.kuro.money.data.utils.Resource
 import com.kuro.money.domain.model.ScreenSelection
 import com.kuro.money.presenter.add_transaction.AddTransactionViewModel
+import com.kuro.money.presenter.add_transaction.feature.event.feature.add_event.AddEventScreenViewModel
 import com.kuro.money.presenter.utils.toPainterResource
 import com.kuro.money.ui.theme.Gray
 import kotlinx.coroutines.flow.collectLatest
@@ -113,7 +114,7 @@ fun SelectWalletScreen(
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 items(listWallet) {
-                    WalletItem(item = it, isSelected = it == selectedWallet.value ) {
+                    WalletItem(item = it, isSelected = it == selectedWallet.value) {
                         addTransactionViewModel.setWallet(it)
                         addTransactionViewModel.setEnableWalletScreen(false)
                     }
@@ -122,6 +123,88 @@ fun SelectWalletScreen(
         }
     }
 }
+
+@Composable
+fun SelectWalletScreen(
+    addEventScreenViewModel: AddEventScreenViewModel = viewModel(),
+    selectWalletViewModel: SelectWalletViewModel = viewModel()
+) {
+    BackHandler(enabled = addEventScreenViewModel.enableChildScreen.collectAsState().value == ScreenSelection.WALLET_SCREEN) {
+        addEventScreenViewModel.setOpenWalletScreen(false)
+    }
+
+    val listWallet = remember { mutableStateListOf<AccountEntity>() }
+
+    val walletValue = addEventScreenViewModel.wallet.collectAsState().value
+    val selectedWallet = remember { mutableStateOf(walletValue) }
+
+    LaunchedEffect(selectWalletViewModel.getAccountUseCase.collectAsState().value) {
+        selectWalletViewModel.getAccountUseCase.collectLatest {
+            if (it is Resource.Success) {
+                listWallet.clear()
+                listWallet.addAll(it.value)
+            }
+        }
+    }
+
+    Surface(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(20.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = "Back",
+                    modifier = Modifier.clickable {
+                        addEventScreenViewModel.setOpenWalletScreen(false)
+                    })
+                Text(
+                    text = stringResource(id = R.string.select_wallet),
+                    color = Color.Black,
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.h6
+                )
+            }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Gray)
+                    .padding(10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(id = R.string.included_in_total),
+                    style = MaterialTheme.typography.body1,
+                    color = Color.Black.copy(alpha = 0.7f)
+                )
+            }
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                items(listWallet) {
+                    WalletItem(item = it, isSelected = it == selectedWallet.value) {item ->
+                        addEventScreenViewModel.setWallet(item)
+                        addEventScreenViewModel.setOpenWalletScreen(false)
+                    }
+                }
+            }
+        }
+    }
+}
+
 
 @Composable
 private fun WalletItem(

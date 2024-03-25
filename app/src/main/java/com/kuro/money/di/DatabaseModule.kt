@@ -6,6 +6,8 @@ import com.google.gson.Gson
 import com.kuro.money.data.data_source.local.AppDatabase
 import com.kuro.money.data.data_source.local.dao.AccountsDao
 import com.kuro.money.data.data_source.local.dao.CategoryDao
+import com.kuro.money.data.data_source.local.dao.CurrencyDao
+import com.kuro.money.data.data_source.local.dao.EventDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -35,4 +37,10 @@ class DatabaseModule {
 
     @Provides
     fun provideAccountsDao(appDatabase: AppDatabase): AccountsDao = appDatabase.accountsDao()
+
+    @Provides
+    fun provideCurrencyDao(appDatabase: AppDatabase) : CurrencyDao = appDatabase.currencyDao()
+
+    @Provides
+    fun provideEventDao(appDatabase : AppDatabase) : EventDao = appDatabase.eventDao()
 }

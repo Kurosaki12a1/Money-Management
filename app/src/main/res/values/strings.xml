@@ -29,4 +29,12 @@
     <string name="included_in_total">Included in Total</string>
     <string name="cash">Cash</string>
     <string name="done">Done</string>
+
+    <string name="running">RUNNING</string>
+    <string name="finished">FINISHED</string>
+    <string name="add_event">Add event</string>
+    <string name="ending_date">Ending date</string>
+    <string name="currency">Currency</string>
+    <string name="currency_hint">Type a currency\'s name</string>
+    <string name="select_icon">Select Icon</string>
 </resources>

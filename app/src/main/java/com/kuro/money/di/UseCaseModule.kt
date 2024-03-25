@@ -2,9 +2,13 @@ package com.kuro.money.di
 
 import com.kuro.money.domain.repository.AccountsRepository
 import com.kuro.money.domain.repository.CategoryRepository
+import com.kuro.money.domain.repository.CurrencyRepository
+import com.kuro.money.domain.repository.IconRepository
 import com.kuro.money.domain.repository.PreferencesRepository
 import com.kuro.money.domain.usecase.AccountsUseCase
 import com.kuro.money.domain.usecase.CategoryUseCase
+import com.kuro.money.domain.usecase.CurrenciesUseCase
+import com.kuro.money.domain.usecase.GetIconUseCase
 import com.kuro.money.domain.usecase.PreferencesUseCase
 import dagger.Module
 import dagger.Provides
@@ -22,9 +26,17 @@ class UseCaseModule {
 
     @Provides
     @Singleton
-    fun providePreferencesUseCase(repo : PreferencesRepository) = PreferencesUseCase(repo)
+    fun providePreferencesUseCase(repo: PreferencesRepository) = PreferencesUseCase(repo)
 
     @Provides
     @Singleton
-    fun provideAccountUseCase(repo : AccountsRepository) = AccountsUseCase(repo)
+    fun provideAccountUseCase(repo: AccountsRepository) = AccountsUseCase(repo)
+
+    @Provides
+    @Singleton
+    fun provideGetIconUseCase(repo: IconRepository) = GetIconUseCase(repo)
+
+    @Provides
+    @Singleton
+    fun provideCurrencyUseCase(repo : CurrencyRepository) = CurrenciesUseCase(repo)
 }

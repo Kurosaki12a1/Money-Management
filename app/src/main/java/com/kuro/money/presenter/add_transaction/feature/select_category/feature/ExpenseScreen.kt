@@ -59,7 +59,6 @@ fun ExpenseScreen(
     }.toCollection(ArrayList()))
 
     val selectedCategory = addTransactionViewModel.selectedCategory.collectAsState().value
-    println(selectedCategory)
     Surface(
         modifier = Modifier
             .fillMaxSize()

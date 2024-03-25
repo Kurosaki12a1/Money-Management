@@ -9,7 +9,8 @@ import com.kuro.money.R
 
 @SuppressLint("DiscouragedApi")
 @Composable
-fun String.toPainterResource(): Painter {
+fun String?.toPainterResource(): Painter {
+    if (this == null) return painterResource(id = R.mipmap.ic_launcher)
     val context = LocalContext.current
     val resId = context.resources.getIdentifier(this, "drawable", context.packageName)
     return if (resId != 0) painterResource(id = resId)

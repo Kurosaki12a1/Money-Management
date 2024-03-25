@@ -2,6 +2,7 @@ package com.kuro.money.presenter.add_transaction
 
 import androidx.lifecycle.ViewModel
 import com.kuro.money.data.model.AccountEntity
+import com.kuro.money.data.model.EventEntity
 import com.kuro.money.domain.model.ScreenSelection
 import com.kuro.money.domain.model.SelectedCategory
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -20,6 +21,9 @@ class AddTransactionViewModel : ViewModel() {
     private val _nameOfPeople = MutableStateFlow<String?>(null)
     val nameOfPeople = _nameOfPeople.asStateFlow()
 
+    private val _eventSelected = MutableStateFlow<EventEntity?>(null)
+    val eventSelected = _eventSelected.asStateFlow()
+
     private val _note = MutableStateFlow("")
     val note = _note.asStateFlow()
 
@@ -35,6 +39,8 @@ class AddTransactionViewModel : ViewModel() {
         _note.value = ""
         _selectedCategory.value = SelectedCategory("", "")
         _wallet.value = null
+        _eventSelected.value = null
+        _nameOfPeople.value = null
     }
 
     fun setEnableCategoryScreen(value: Boolean) {
@@ -45,12 +51,24 @@ class AddTransactionViewModel : ViewModel() {
         }
     }
 
-    fun setEnableWalletScreen(value : Boolean) {
+    fun setEnableEventScreen(value: Boolean) {
+        if (value) {
+            _enableChildScreen.value = ScreenSelection.EVENT_SCREEN
+        } else {
+            _enableChildScreen.value = ScreenSelection.ADD_TRANSACTION_SCREEN
+        }
+    }
+
+    fun setEnableWalletScreen(value: Boolean) {
         if (value) {
             _enableChildScreen.value = ScreenSelection.WALLET_SCREEN
         } else {
             _enableChildScreen.value = ScreenSelection.ADD_TRANSACTION_SCREEN
         }
+    }
+
+    fun setEventSelected(value: EventEntity) {
+        _eventSelected.value = value
     }
 
     fun setSelectedCategory(value: SelectedCategory) {
@@ -61,7 +79,7 @@ class AddTransactionViewModel : ViewModel() {
         _note.value = note
     }
 
-    fun setNamePeople(name : String) {
+    fun setNamePeople(name: String) {
         _nameOfPeople.value = name
     }
 
