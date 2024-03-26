@@ -8,6 +8,7 @@ import com.kuro.money.data.data_source.local.dao.AccountsDao
 import com.kuro.money.data.data_source.local.dao.CategoryDao
 import com.kuro.money.data.data_source.local.dao.CurrencyDao
 import com.kuro.money.data.data_source.local.dao.EventDao
+import com.kuro.money.data.data_source.local.dao.ExchangeRatesDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -43,4 +44,7 @@ class DatabaseModule {
 
     @Provides
     fun provideEventDao(appDatabase : AppDatabase) : EventDao = appDatabase.eventDao()
+
+    @Provides
+    fun provideExchangeRatesDao(appDatabase: AppDatabase) : ExchangeRatesDao = appDatabase.exchangeRatesDao()
 }

@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.androidApplication)
     alias(libs.plugins.jetbrainsKotlinAndroid)
@@ -23,13 +25,26 @@ android {
         }
     }
 
+    val localProperties = Properties()
+    val localPropertiesFile = rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+        localPropertiesFile.inputStream().use { localProperties.load(it) }
+    }
+
+    val apikey: String by localProperties
+    val apiKeyValue = localProperties.getProperty("API_KEY_EXCHANGE_RATES") ?: ""
+
     buildTypes {
+        debug {
+            buildConfigField("String", "API_KEY", "\"$apiKeyValue\"")
+        }
         release {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+            buildConfigField("String", "API_KEY", "\"$apiKeyValue\"")
         }
     }
     compileOptions {
@@ -43,6 +58,7 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
     composeOptions {
         kotlinCompilerExtensionVersion = "1.5.10"

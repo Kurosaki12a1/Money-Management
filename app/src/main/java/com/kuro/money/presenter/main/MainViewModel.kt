@@ -2,11 +2,13 @@ package com.kuro.money.presenter.main
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kuro.money.data.mapper.toExchangeRateEntity
 import com.kuro.money.data.utils.Resource
 import com.kuro.money.domain.model.ScreenSelection
 import com.kuro.money.domain.usecase.AccountsUseCase
 import com.kuro.money.domain.usecase.CategoryUseCase
 import com.kuro.money.domain.usecase.CurrenciesUseCase
+import com.kuro.money.domain.usecase.ExchangeRatesUseCase
 import com.kuro.money.domain.usecase.PreferencesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -27,18 +29,35 @@ class MainViewModel @Inject constructor(
     private val categoryUseCase: CategoryUseCase,
     private val accountUseCase: AccountsUseCase,
     private val currenciesUseCase: CurrenciesUseCase,
-    private val preferencesUseCase: PreferencesUseCase
+    private val preferencesUseCase: PreferencesUseCase,
+    private val exchangeRatesUseCase: ExchangeRatesUseCase
 ) : ViewModel() {
     private val _navigateScreenTo = MutableStateFlow(ScreenSelection.MAIN_SCREEN)
     val navigateScreenTo = _navigateScreenTo.asStateFlow()
 
     init {
         getAndInsertCategoriesFromJson()
+        getAndInsertExchangeRatesFromInternet()
     }
 
     fun setOpenAddTransactionScreen(value: Boolean) {
         _navigateScreenTo.value =
             if (value) ScreenSelection.ADD_TRANSACTION_SCREEN else ScreenSelection.MAIN_SCREEN
+    }
+
+    private fun getAndInsertExchangeRatesFromInternet() {
+        viewModelScope.launch {
+            exchangeRatesUseCase.getExchangeRatesResponse("USD").flatMapLatest {
+                when (it) {
+                    is Resource.Success -> {
+                        exchangeRatesUseCase(it.value.toExchangeRateEntity())
+                    }
+                    else -> flowOf(it)
+                }
+            }.collectLatest {
+                println(it)
+            }
+        }
     }
 
     private fun getAndInsertCategoriesFromJson() {

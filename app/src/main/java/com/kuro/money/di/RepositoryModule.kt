@@ -3,16 +3,19 @@ package com.kuro.money.di
 import android.content.Context
 import com.kuro.money.data.data_source.local.AppDatabase
 import com.kuro.money.data.data_source.local.preferences.AppPreferences
+import com.kuro.money.data.data_source.remote.ExchangeRatesAPI
 import com.kuro.money.data.repository.AccountsRepositoryImpl
 import com.kuro.money.data.repository.CategoryRepositoryImpl
 import com.kuro.money.data.repository.CurrencyRepositoryImpl
 import com.kuro.money.data.repository.EventRepositoryImpl
+import com.kuro.money.data.repository.ExchangeRatesRepositoryImpl
 import com.kuro.money.data.repository.IconRepositoryImpl
 import com.kuro.money.data.repository.PreferencesRepositoryImpl
 import com.kuro.money.domain.repository.AccountsRepository
 import com.kuro.money.domain.repository.CategoryRepository
 import com.kuro.money.domain.repository.CurrencyRepository
 import com.kuro.money.domain.repository.EventRepository
+import com.kuro.money.domain.repository.ExchangeRatesRepository
 import com.kuro.money.domain.repository.IconRepository
 import com.kuro.money.domain.repository.PreferencesRepository
 import dagger.Module
@@ -53,4 +56,11 @@ class RepositoryModule {
     @Provides
     fun provideCurrencyRepository(context: Context, appDatabase: AppDatabase): CurrencyRepository =
         CurrencyRepositoryImpl(context, appDatabase)
+
+    @Singleton
+    @Provides
+    fun provideExchangeRateRepository(
+        appDatabase: AppDatabase,
+        exchangeRatesAPI: ExchangeRatesAPI
+    ): ExchangeRatesRepository = ExchangeRatesRepositoryImpl(appDatabase, exchangeRatesAPI)
 }
