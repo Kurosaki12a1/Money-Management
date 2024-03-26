@@ -1,9 +1,13 @@
 package com.kuro.money.presenter.add_transaction
 
+import android.Manifest
 import android.app.DatePickerDialog
 import android.content.Context
-import android.text.format.DateUtils
+import android.graphics.Bitmap
+import android.net.Uri
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -38,6 +42,7 @@ import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Alarm
+import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.EditCalendar
 import androidx.compose.material.icons.filled.Event
@@ -60,6 +65,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalTextInputService
 import androidx.compose.ui.res.stringResource
@@ -67,9 +73,13 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.kuro.money.R
 import com.kuro.money.data.model.AccountEntity
 import com.kuro.money.data.model.EventEntity
+import com.kuro.money.data.utils.FileUtils
+import com.kuro.money.data.utils.Resource
 import com.kuro.money.domain.model.ScreenSelection
 import com.kuro.money.domain.model.SelectedCategory
 import com.kuro.money.extension.noRippleClickable
@@ -88,9 +98,11 @@ import com.kuro.money.presenter.utils.evaluateExpression
 import com.kuro.money.presenter.utils.string
 import com.kuro.money.presenter.utils.toPainterResource
 import com.kuro.money.ui.theme.Gray
+import com.kuro.money.ui.theme.Green
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import java.text.DecimalFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -106,6 +118,7 @@ fun AddTransactionScreen(
             isEnabledCustomKeyBoard.value = false
             return@BackHandler
         }
+        addTransactionViewModel.clearData()
         mainViewModel.setOpenAddTransactionScreen(false)
     }
 
@@ -123,13 +136,34 @@ fun AddTransactionScreen(
 
     val enableChildScreen = addTransactionViewModel.enableChildScreen.collectAsState().value
     val selectedCategory = addTransactionViewModel.selectedCategory.collectAsState().value
-    val dateTransaction = remember { mutableStateOf(LocalDate.now()) }
-    val dateRemind = remember { mutableStateOf<LocalDate?>(null) }
+    val amount = addTransactionViewModel.amount.collectAsState().value
     val note = addTransactionViewModel.note.collectAsState().value
     val wallet = addTransactionViewModel.wallet.collectAsState().value
     val peopleSelected = addTransactionViewModel.nameOfPeople.collectAsState().value
     val eventSelected = addTransactionViewModel.eventSelected.collectAsState().value
+    val imageSelectedFromGallery = addTransactionViewModel.uriSelected.collectAsState().value
+    val imageFromCamera = remember { mutableStateOf<Bitmap?>(null) }
+
+    val dateTransaction = remember { mutableStateOf<LocalDate?>(null) }
+    val dateRemind = remember { mutableStateOf<LocalDate?>(null) }
+
     val context = LocalContext.current
+    val shouldSubmitTransaction = remember { mutableStateOf(false) }
+
+    LaunchedEffect(amount, selectedCategory, dateTransaction, wallet) {
+        shouldSubmitTransaction.value = !(amount == null
+                || wallet == null
+                || selectedCategory == SelectedCategory("", "")
+                || dateTransaction.value == null)
+    }
+
+    LaunchedEffect(addTransactionViewModel.insertTransaction.collectAsState().value) {
+        addTransactionViewModel.insertTransaction.collectLatest {
+            if (it is Resource.Success) {
+                mainViewModel.setOpenAddTransactionScreen(false)
+            }
+        }
+    }
 
     BoxWithConstraints(
         modifier = Modifier
@@ -181,6 +215,7 @@ fun AddTransactionScreen(
                         peopleSelected,
                         eventSelected,
                         dateRemind.value,
+                        imageSelectedFromGallery,
                         onSelectPeopleClick = {
                             addTransactionViewModel.setEnableSelectPeopleScreen(true)
                         },
@@ -191,6 +226,12 @@ fun AddTransactionScreen(
                             showDatePicker(context, true) {
                                 dateRemind.value = it
                             }
+                        },
+                        onImagePicked = {
+                            addTransactionViewModel.setUriSelected(it)
+                        },
+                        onCameraPicked = {
+                            imageFromCamera.value = it
                         }
                     )
                 }
@@ -201,7 +242,27 @@ fun AddTransactionScreen(
                     .align(Alignment.CenterHorizontally)
                     .padding(10.dp)
                     .size(40.dp)
-                    .background(Color.White.copy(0.5f), RoundedCornerShape(16.dp)),
+                    .background(
+                        if (!shouldSubmitTransaction.value) Color.White.copy(0.5f) else Green,
+                        RoundedCornerShape(16.dp)
+                    )
+                    .noRippleClickable {
+                        if (imageFromCamera.value != null) {
+                            addTransactionViewModel.setUriSelected(
+                                FileUtils.getUriForFile(
+                                    context, FileUtils.saveBitmapToFile(
+                                        context, imageFromCamera.value!!
+                                    )
+                                )
+                            )
+                        }
+                        if (shouldSubmitTransaction.value) {
+                            addTransactionViewModel.submitData(
+                                dateTransaction.value!!,
+                                dateRemind.value
+                            )
+                        }
+                    },
             ) {
                 Text(
                     modifier = Modifier.align(Alignment.Center),
@@ -233,7 +294,9 @@ fun AddTransactionScreen(
                                 shakeEnabled.value = false
                             }
                         } else {
-                            TextFieldValueUtils.set(amountFieldValue, value.toString())
+                            val decimalFormat = DecimalFormat("#,###.##").format(value)
+                            TextFieldValueUtils.set(amountFieldValue, decimalFormat)
+                            addTransactionViewModel.setAmount(value)
                         }
                     },
                     // Wrong expression start shaking
@@ -268,7 +331,7 @@ fun AddTransactionScreen(
 
 fun showDatePicker(
     context: Context,
-    shouldEnableMinDate : Boolean = false,
+    shouldEnableMinDate: Boolean = false,
     onDateSelected: (LocalDate) -> Unit,
 ) {
     val localDate = LocalDate.now()
@@ -289,9 +352,12 @@ private fun MoreDetailsTransaction(
     peopleSelected: String?,
     eventSelected: EventEntity?,
     dateRemind: LocalDate?,
+    uriSelected: Uri?,
     onSelectPeopleClick: () -> Unit,
     onSelectEventClick: () -> Unit,
-    onAlarmClick: () -> Unit
+    onAlarmClick: () -> Unit,
+    onImagePicked: (Uri?) -> Unit,
+    onCameraPicked: (Bitmap?) -> Unit
 ) {
     /**
      * Add people
@@ -435,38 +501,109 @@ private fun MoreDetailsTransaction(
     /**
      * Add picture and camera
      */
+    val bitmapCamera = remember { mutableStateOf<Bitmap?>(null) }
+    val launcherChooseImage =
+        rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) {
+            onImagePicked(it)
+        }
+    val launcherChooseCamera =
+        rememberLauncherForActivityResult(contract = ActivityResultContracts.TakePicturePreview()) {
+            onCameraPicked(it)
+            bitmapCamera.value = it
+        }
+    val launcherRequestPermission =
+        rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestPermission()) {
+            if (it) {
+                launcherChooseImage.launch("image/*")
+            }
+        }
+    val launcherRequestCameraPermission =
+        rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestPermission()) {
+            if (it) {
+                launcherChooseCamera.launch(null)
+            }
+        }
     BoxWithConstraints(
         modifier = Modifier
             .fillMaxWidth()
-            .wrapContentHeight()
             .background(Color.White)
             .padding(10.dp)
     ) {
-        Icon(
-            modifier = Modifier
-                .width(this.maxWidth * 0.5f)
-                .align(Alignment.CenterStart)
-                .noRippleClickable { },
-            imageVector = Icons.Default.Image,
-            tint = Color.Black,
-            contentDescription = "Image"
-        )
-        Divider(
-            modifier = Modifier
-                .width(1.dp)
-                .height(50.dp)
-                .background(Gray)
-                .align(Alignment.Center)
-        )
-        Icon(
-            modifier = Modifier
-                .width(this.maxWidth * 0.5f)
-                .align(Alignment.CenterEnd)
-                .noRippleClickable { },
-            imageVector = Icons.Default.PhotoCamera,
-            tint = Color.Black,
-            contentDescription = "Camera"
-        )
+        if (uriSelected == null && bitmapCamera.value == null) {
+            Icon(
+                modifier = Modifier
+                    .width(this.maxWidth * 0.5f)
+                    .align(Alignment.CenterStart)
+                    .noRippleClickable { launcherRequestPermission.launch(Manifest.permission.READ_EXTERNAL_STORAGE) },
+                imageVector = Icons.Default.Image,
+                tint = Color.Black,
+                contentDescription = "Image"
+            )
+            Divider(
+                modifier = Modifier
+                    .width(1.dp)
+                    .height(50.dp)
+                    .background(Gray)
+                    .align(Alignment.Center)
+            )
+            Icon(
+                modifier = Modifier
+                    .width(this.maxWidth * 0.5f)
+                    .align(Alignment.CenterEnd)
+                    .noRippleClickable { launcherRequestCameraPermission.launch(Manifest.permission.CAMERA) },
+                imageVector = Icons.Default.PhotoCamera,
+                tint = Color.Black,
+                contentDescription = "Camera"
+            )
+        } else if (uriSelected != null) {
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(uriSelected)
+                    .build(),
+                contentDescription = "Photo",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.Center),
+                contentScale = ContentScale.Crop
+            )
+            Box(
+                modifier = Modifier
+                    .size(30.dp)
+                    .align(Alignment.TopEnd)
+                    .background(Gray, CircleShape)
+                    .noRippleClickable { onImagePicked(null) }
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Clear,
+                    contentDescription = "Clear",
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            }
+        } else {
+            AsyncImage(
+                model = ImageRequest.Builder(LocalContext.current)
+                    .data(bitmapCamera.value)
+                    .build(),
+                contentDescription = "Photo",
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.Center),
+                contentScale = ContentScale.Crop
+            )
+            Box(
+                modifier = Modifier
+                    .size(30.dp)
+                    .align(Alignment.TopEnd)
+                    .background(Gray, CircleShape)
+                    .noRippleClickable { onCameraPicked(null) }
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Clear,
+                    contentDescription = "Clear",
+                    modifier = Modifier.align(Alignment.Center)
+                )
+            }
+        }
     }
 
     /**
@@ -542,7 +679,7 @@ private fun BodyAddTransaction(
     amount: MutableState<TextFieldValue>,
     selectedCategory: SelectedCategory,
     note: String,
-    date: LocalDate,
+    date: LocalDate?,
     wallet: AccountEntity?,
     onAmountClick: () -> Unit,
     onSelectCategoryClick: () -> Unit,
@@ -554,10 +691,11 @@ private fun BodyAddTransaction(
         val isPressed by it.collectIsPressedAsState()
         if (isPressed) onAmountClick()
     }
-    val textTime = if (date == LocalDate.now()) {
-        stringResource(id = R.string.today)
+    val textTime = if (date == null) {
+        stringResource(id = R.string.select_date)
     } else {
-        DateTimeFormatter.ofPattern("dd/MM/yyyy").format(date)
+        if (date == LocalDate.now()) stringResource(id = R.string.today)
+        else DateTimeFormatter.ofPattern("dd/MM/yyyy").format(date)
     }
 
     Surface(

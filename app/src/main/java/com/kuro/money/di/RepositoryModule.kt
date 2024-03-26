@@ -11,6 +11,7 @@ import com.kuro.money.data.repository.EventRepositoryImpl
 import com.kuro.money.data.repository.ExchangeRatesRepositoryImpl
 import com.kuro.money.data.repository.IconRepositoryImpl
 import com.kuro.money.data.repository.PreferencesRepositoryImpl
+import com.kuro.money.data.repository.TransactionRepositoryImpl
 import com.kuro.money.domain.repository.AccountsRepository
 import com.kuro.money.domain.repository.CategoryRepository
 import com.kuro.money.domain.repository.CurrencyRepository
@@ -18,6 +19,7 @@ import com.kuro.money.domain.repository.EventRepository
 import com.kuro.money.domain.repository.ExchangeRatesRepository
 import com.kuro.money.domain.repository.IconRepository
 import com.kuro.money.domain.repository.PreferencesRepository
+import com.kuro.money.domain.repository.TransactionRepository
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -63,4 +65,10 @@ class RepositoryModule {
         appDatabase: AppDatabase,
         exchangeRatesAPI: ExchangeRatesAPI
     ): ExchangeRatesRepository = ExchangeRatesRepositoryImpl(appDatabase, exchangeRatesAPI)
+
+    @Singleton
+    @Provides
+    fun provideTransactionRepository(
+        appDatabase: AppDatabase
+    ) : TransactionRepository = TransactionRepositoryImpl(appDatabase)
 }

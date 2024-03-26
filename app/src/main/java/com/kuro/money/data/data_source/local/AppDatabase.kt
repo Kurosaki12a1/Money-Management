@@ -7,14 +7,23 @@ import com.kuro.money.data.data_source.local.dao.CategoryDao
 import com.kuro.money.data.data_source.local.dao.CurrencyDao
 import com.kuro.money.data.data_source.local.dao.EventDao
 import com.kuro.money.data.data_source.local.dao.ExchangeRatesDao
+import com.kuro.money.data.data_source.local.dao.TransactionDao
 import com.kuro.money.data.model.AccountEntity
 import com.kuro.money.data.model.CategoryEntity
 import com.kuro.money.data.model.CurrencyEntity
 import com.kuro.money.data.model.EventEntity
 import com.kuro.money.data.model.ExchangeRateEntity
+import com.kuro.money.data.model.TransactionEntity
 
 @Database(
-    entities = [CategoryEntity::class, AccountEntity::class, EventEntity::class, CurrencyEntity::class, ExchangeRateEntity::class],
+    entities = [
+        CategoryEntity::class,
+        AccountEntity::class,
+        EventEntity::class,
+        CurrencyEntity::class,
+        ExchangeRateEntity::class,
+        TransactionEntity::class
+    ],
     version = 1,
     exportSchema = false
 )
@@ -33,4 +42,5 @@ abstract class AppDatabase : RoomDatabase() {
 
     abstract fun exchangeRatesDao(): ExchangeRatesDao
 
+    abstract fun transactionDao() : TransactionDao
 }

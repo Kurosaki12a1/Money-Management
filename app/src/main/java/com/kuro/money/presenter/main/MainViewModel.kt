@@ -3,6 +3,7 @@ package com.kuro.money.presenter.main
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kuro.money.data.mapper.toExchangeRateEntity
+import com.kuro.money.data.model.TransactionEntity
 import com.kuro.money.data.utils.Resource
 import com.kuro.money.domain.model.ScreenSelection
 import com.kuro.money.domain.usecase.AccountsUseCase
@@ -10,6 +11,7 @@ import com.kuro.money.domain.usecase.CategoryUseCase
 import com.kuro.money.domain.usecase.CurrenciesUseCase
 import com.kuro.money.domain.usecase.ExchangeRatesUseCase
 import com.kuro.money.domain.usecase.PreferencesUseCase
+import com.kuro.money.domain.usecase.TransactionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -30,14 +32,27 @@ class MainViewModel @Inject constructor(
     private val accountUseCase: AccountsUseCase,
     private val currenciesUseCase: CurrenciesUseCase,
     private val preferencesUseCase: PreferencesUseCase,
-    private val exchangeRatesUseCase: ExchangeRatesUseCase
+    private val exchangeRatesUseCase: ExchangeRatesUseCase,
+    private val transactionUseCase: TransactionUseCase
 ) : ViewModel() {
     private val _navigateScreenTo = MutableStateFlow(ScreenSelection.MAIN_SCREEN)
     val navigateScreenTo = _navigateScreenTo.asStateFlow()
 
+    private val _getListTransaction = MutableStateFlow<Resource<List<TransactionEntity>?>>(Resource.Default)
+    val getListTransaction = _getListTransaction.asStateFlow()
+
     init {
         getAndInsertCategoriesFromJson()
         getAndInsertExchangeRatesFromInternet()
+        getListTransaction()
+    }
+
+    fun getListTransaction() {
+        viewModelScope.launch {
+            transactionUseCase().collectLatest {
+                _getListTransaction.value = it
+            }
+        }
     }
 
     fun setOpenAddTransactionScreen(value: Boolean) {
@@ -55,7 +70,6 @@ class MainViewModel @Inject constructor(
                     else -> flowOf(it)
                 }
             }.collectLatest {
-                println(it)
             }
         }
     }
