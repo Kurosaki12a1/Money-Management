@@ -22,23 +22,27 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.kuro.money.R
 import com.kuro.money.domain.model.ScreenSelection
 import com.kuro.money.extension.noRippleClickable
+import com.kuro.money.presenter.account.feature.wallets.WalletViewModel
 import com.kuro.money.presenter.add_transaction.feature.event.feature.add_event.AddEventScreenViewModel
 import com.kuro.money.presenter.utils.toPainterResource
 import com.kuro.money.ui.theme.Gray
 
 @Composable
 fun SelectIconScreen(
-    addEventScreenViewModel: AddEventScreenViewModel = viewModel(),
-    selectIconScreenViewModel: SelectIconScreenViewModel = viewModel()
+    addEventScreenViewModel: AddEventScreenViewModel = hiltViewModel(),
+    selectIconScreenViewModel: SelectIconScreenViewModel = hiltViewModel()
 ) {
     BackHandler(enabled = addEventScreenViewModel.enableChildScreen.collectAsState().value == ScreenSelection.SELECT_ICON_SCREEN) {
         addEventScreenViewModel.setOpenSelectIconScreen(false)
@@ -53,7 +57,9 @@ fun SelectIconScreen(
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             Row(
-                modifier = Modifier.fillMaxWidth().padding(20.dp),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp),
                 horizontalArrangement = Arrangement.spacedBy(20.dp)
             ) {
                 Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back",
@@ -82,10 +88,80 @@ fun SelectIconScreen(
                     Row(modifier = Modifier.fillMaxWidth()) {
                         item.forEach {
                             Image(
-                                modifier = Modifier.weight(1f).noRippleClickable {
-                                    addEventScreenViewModel.setIconSelected(it)
-                                    addEventScreenViewModel.setOpenSelectIconScreen(false)
-                                },
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .noRippleClickable {
+                                        addEventScreenViewModel.setIconSelected(it)
+                                        addEventScreenViewModel.setOpenSelectIconScreen(false)
+                                    },
+                                painter = it.toPainterResource(),
+                                contentDescription = it
+                            )
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun SelectIconScreen(
+    navController: NavController,
+    walletViewModel: WalletViewModel = hiltViewModel(),
+    selectIconScreenViewModel: SelectIconScreenViewModel = hiltViewModel()
+) {
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    BackHandler(enabled = navBackStackEntry?.destination?.route == ScreenSelection.SELECT_ICON_SCREEN.route) {
+        navController.popBackStack()
+    }
+
+    val listIcons = selectIconScreenViewModel.getListIcon.collectAsState().value
+
+    Surface(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
+    ) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp),
+                horizontalArrangement = Arrangement.spacedBy(20.dp)
+            ) {
+                Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back",
+                    modifier = Modifier.noRippleClickable {
+                        navController.navigate(ScreenSelection.SELECT_ICON_SCREEN.route)
+                    })
+                Text(
+                    text = stringResource(id = R.string.select_icon),
+                    color = Color.Black,
+                    style = MaterialTheme.typography.h6
+                )
+            }
+            Divider(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(1.dp)
+                    .background(Gray)
+            )
+            LazyColumn(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.SpaceAround,
+                contentPadding = PaddingValues(20.dp)
+            ) {
+                items(listIcons.chunked(5)) { item ->
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        item.forEach {
+                            Image(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .noRippleClickable {
+                                        walletViewModel.setIcon(it)
+                                        navController.navigate(ScreenSelection.SELECT_ICON_SCREEN.route)
+                                    },
                                 painter = it.toPainterResource(),
                                 contentDescription = it
                             )

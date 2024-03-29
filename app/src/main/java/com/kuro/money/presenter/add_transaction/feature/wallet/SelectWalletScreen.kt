@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -32,7 +33,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.kuro.money.R
 import com.kuro.money.data.model.AccountEntity
 import com.kuro.money.data.utils.Resource
@@ -45,11 +49,13 @@ import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun SelectWalletScreen(
-    addTransactionViewModel: AddTransactionViewModel = viewModel(),
-    selectWalletViewModel: SelectWalletViewModel = viewModel()
+    navController: NavController,
+    addTransactionViewModel: AddTransactionViewModel = hiltViewModel(),
+    selectWalletViewModel: SelectWalletViewModel = hiltViewModel()
 ) {
-    BackHandler(enabled = addTransactionViewModel.enableChildScreen.collectAsState().value == ScreenSelection.WALLET_SCREEN) {
-        addTransactionViewModel.setEnableWalletScreen(false)
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    BackHandler(enabled = navBackStackEntry?.destination?.route == ScreenSelection.WALLET_SCREEN.route) {
+        navController.popBackStack()
     }
 
     val listWallet = remember { mutableStateListOf<AccountEntity>() }
@@ -85,7 +91,7 @@ fun SelectWalletScreen(
                     imageVector = Icons.Default.ArrowBack,
                     contentDescription = "Back",
                     modifier = Modifier.clickable {
-                        addTransactionViewModel.setEnableWalletScreen(false)
+                        navController.popBackStack()
                     })
                 Text(
                     text = stringResource(id = R.string.select_wallet),
@@ -116,7 +122,7 @@ fun SelectWalletScreen(
                 items(listWallet) {
                     WalletItem(item = it, isSelected = it == selectedWallet.value) {
                         addTransactionViewModel.setWallet(it)
-                        addTransactionViewModel.setEnableWalletScreen(false)
+                        navController.popBackStack()
                     }
                 }
             }
@@ -126,8 +132,8 @@ fun SelectWalletScreen(
 
 @Composable
 fun SelectWalletScreen(
-    addEventScreenViewModel: AddEventScreenViewModel = viewModel(),
-    selectWalletViewModel: SelectWalletViewModel = viewModel()
+    addEventScreenViewModel: AddEventScreenViewModel = hiltViewModel(),
+    selectWalletViewModel: SelectWalletViewModel = hiltViewModel()
 ) {
     BackHandler(enabled = addEventScreenViewModel.enableChildScreen.collectAsState().value == ScreenSelection.WALLET_SCREEN) {
         addEventScreenViewModel.setOpenWalletScreen(false)
@@ -229,7 +235,7 @@ private fun WalletItem(
                 color = Color.Black
             )
             Text(
-                text = item.balance.toString(),
+                text = "${item.balance} ${item.currencyEntity.symbol}" ,
                 style = MaterialTheme.typography.body2,
                 color = Color.Black.copy(alpha = 0.3f)
             )

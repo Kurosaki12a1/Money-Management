@@ -23,6 +23,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -37,7 +38,8 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.kuro.money.R
 import com.kuro.money.domain.model.ScreenSelection
 import com.kuro.money.presenter.add_transaction.AddTransactionViewModel
@@ -46,11 +48,12 @@ import com.kuro.money.ui.theme.Green
 
 @Composable
 fun SelectPeopleScreen(
-    addTransactionViewModel: AddTransactionViewModel = viewModel()
+    navController: NavController,
+    addTransactionViewModel: AddTransactionViewModel
 ) {
-
-    BackHandler(addTransactionViewModel.enableChildScreen.collectAsState().value == ScreenSelection.WITH_SCREEN) {
-        addTransactionViewModel.setEnableSelectPeopleScreen(false)
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    BackHandler(navBackStackEntry?.destination?.route == ScreenSelection.WITH_SCREEN.route) {
+        navController.popBackStack()
     }
 
     val focusRequester = remember { FocusRequester() }
@@ -86,7 +89,7 @@ fun SelectPeopleScreen(
             ) {
                 Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back",
                     modifier = Modifier.clickable {
-                        addTransactionViewModel.setEnableSelectPeopleScreen(false)
+                        navController.popBackStack()
                     })
                 Text(
                     text = stringResource(id = R.string.with),
@@ -102,7 +105,7 @@ fun SelectPeopleScreen(
                     textAlign = TextAlign.Center,
                     modifier = Modifier.clickable {
                         name.value.let { addTransactionViewModel.setNamePeople(it.text) }
-                        addTransactionViewModel.setEnableSelectPeopleScreen(false)
+                        navController.popBackStack()
                     }
                 )
             }

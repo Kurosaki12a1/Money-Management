@@ -36,6 +36,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kuro.money.R
 import com.kuro.money.data.model.CategoryEntity
@@ -49,8 +50,8 @@ import com.kuro.money.ui.theme.Green
 @Composable
 fun ExpenseScreen(
     listCategory: List<CategoryEntity>,
-    vm: SelectCategoryViewModel = viewModel(),
-    addTransactionViewModel: AddTransactionViewModel = viewModel(),
+    vm: SelectCategoryViewModel = hiltViewModel(),
+    addTransactionViewModel: AddTransactionViewModel = hiltViewModel(),
 ) {
     val newListCategory = mutableListOf<CategoryEntity>()
     val sortedNameList = listCategory.sortedBy { it.name }

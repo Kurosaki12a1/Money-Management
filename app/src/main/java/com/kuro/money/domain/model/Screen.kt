@@ -1,14 +1,30 @@
 package com.kuro.money.domain.model
 
-enum class ScreenSelection {
-    MAIN_SCREEN,
-    ADD_TRANSACTION_SCREEN,
-    SELECT_CATEGORY_SCREEN,
-    NOTE_SCREEN,
-    WALLET_SCREEN,
-    WITH_SCREEN,
-    EVENT_SCREEN,
-    ADD_EVENT_SCREEN,
-    SELECT_CURRENCY_SCREEN,
-    SELECT_ICON_SCREEN
+enum class ScreenSelection(val route: String) {
+    HOME_SCREEN("home"),
+    TRANSACTION_SCREEN("transaction"),
+    BUDGETS_SCREEN("budgets"),
+    ACCOUNT_SCREEN("account"),
+    MY_WALLET_SCREEN("my_wallet"),
+    ADD_WALLET_SCREEN("add_wallet"),
+    MY_CATEGORY_SCREEN("my_category"),
+    MY_EVENT_SCREEN("my_event"),
+    MY_RECURRING_TRANSACTIONS("my_recurring_transactions"),
+    MY_BILLS("my_bills"),
+    MY_DEBTS("my_debts"),
+    MY_TOOLS("my_tools"),
+    MY_TRAVEL_MODE("my_travel_mode"),
+    MY_SETTINGS("my_setting"),
+    MY_ABOUT("my_about"),
+    SUB_GRAPH_TRANSACTION("sub_graph_transaction"),
+    SUB_GRAPH_ACCOUNT("sub_graph_account"),
+    ADD_TRANSACTION_SCREEN("add_transaction"),
+    SELECT_CATEGORY_SCREEN("select_category"),
+    NOTE_SCREEN("note"),
+    WALLET_SCREEN("wallet"),
+    WITH_SCREEN("with"),
+    EVENT_SCREEN("event"),
+    ADD_EVENT_SCREEN("add_event"),
+    SELECT_CURRENCY_SCREEN("select_currency"),
+    SELECT_ICON_SCREEN("select_icon")
 }

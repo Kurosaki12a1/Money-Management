@@ -3,18 +3,48 @@
     "name": "Cash",
     "icon": "icon",
     "uuid": "242BA2EC5DA44BB79DE94EB64DB59CFE",
-    "balance": 0
+    "balance": 0,
+    "currency": {
+      "c": "VND",
+      "s": "₫",
+      "n": "Việt Nam Đồng",
+      "t": 1,
+      "i": 4,
+      "r": "0",
+      "dm": ",",
+      "gs": " "
+    }
   },
   {
     "name": "Credit Card",
     "icon": "icon_94",
     "uuid": "4F19B32A60664468B44608659BD366E8",
-    "balance": 0
+    "balance": 0,
+    "currency": {
+      "c": "USD",
+      "s": "$",
+      "n": "United States Dollar",
+      "t": 0,
+      "i": 1,
+      "r": "2",
+      "dm": ".",
+      "gs": ","
+    }
   },
   {
     "name": "Goal",
     "icon": "icon",
     "uuid": "E8FD4E4612F94A379672F5D9066A5CF7",
-    "balance": 0
+    "balance": 0,
+    "currency": {
+      "c": "VND",
+      "s": "₫",
+      "n": "Việt Nam Đồng",
+      "t": 1,
+      "i": 4,
+      "r": "0",
+      "dm": ",",
+      "gs": " "
+    }
   }
 ]

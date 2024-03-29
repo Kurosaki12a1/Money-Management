@@ -25,6 +25,8 @@ import com.kuro.customimagevector.Delete
 import com.kuro.money.ui.theme.Gray
 import com.kuro.money.ui.theme.Teal200
 import org.mozilla.javascript.Context
+import java.text.NumberFormat
+import java.util.Locale
 
 @Composable
 fun CustomKeyBoard(

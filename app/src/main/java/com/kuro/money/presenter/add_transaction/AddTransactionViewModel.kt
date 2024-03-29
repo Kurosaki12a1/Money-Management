@@ -7,7 +7,6 @@ import com.kuro.money.data.model.AccountEntity
 import com.kuro.money.data.model.EventEntity
 import com.kuro.money.data.model.TransactionEntity
 import com.kuro.money.data.utils.Resource
-import com.kuro.money.domain.model.ScreenSelection
 import com.kuro.money.domain.model.SelectedCategory
 import com.kuro.money.domain.usecase.TransactionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -22,9 +21,6 @@ import javax.inject.Inject
 class AddTransactionViewModel @Inject constructor(
     private val transactionUseCase: TransactionUseCase
 ) : ViewModel() {
-    private val _enableChildScreen = MutableStateFlow(ScreenSelection.ADD_TRANSACTION_SCREEN)
-    val enableChildScreen = _enableChildScreen.asStateFlow()
-
     private val _selectedCategory = MutableStateFlow(SelectedCategory("", ""))
     val selectedCategory = _selectedCategory.asStateFlow()
 
@@ -49,7 +45,7 @@ class AddTransactionViewModel @Inject constructor(
     private val _insertTransaction = MutableStateFlow<Resource<Long>>(Resource.Default)
     val insertTransaction = _insertTransaction.asStateFlow()
 
-    fun setAmount(amount: Double) {
+    fun setAmount(amount: Double?) {
         _amount.value = amount
     }
 
@@ -74,44 +70,11 @@ class AddTransactionViewModel @Inject constructor(
             )
             transactionUseCase(transactionEntity).collectLatest {
                 _insertTransaction.value = it
+                println(it)
             }
         }
     }
 
-    fun clearData() {
-        _amount.value = null
-        _note.value = ""
-        _selectedCategory.value = SelectedCategory("", "")
-        _wallet.value = null
-        _eventSelected.value = null
-        _nameOfPeople.value = null
-        _uriSelected.value = null
-        _insertTransaction.value = Resource.Default
-    }
-
-    fun setEnableCategoryScreen(value: Boolean) {
-        if (value) {
-            _enableChildScreen.value = ScreenSelection.SELECT_CATEGORY_SCREEN
-        } else {
-            _enableChildScreen.value = ScreenSelection.ADD_TRANSACTION_SCREEN
-        }
-    }
-
-    fun setEnableEventScreen(value: Boolean) {
-        if (value) {
-            _enableChildScreen.value = ScreenSelection.EVENT_SCREEN
-        } else {
-            _enableChildScreen.value = ScreenSelection.ADD_TRANSACTION_SCREEN
-        }
-    }
-
-    fun setEnableWalletScreen(value: Boolean) {
-        if (value) {
-            _enableChildScreen.value = ScreenSelection.WALLET_SCREEN
-        } else {
-            _enableChildScreen.value = ScreenSelection.ADD_TRANSACTION_SCREEN
-        }
-    }
 
     fun setEventSelected(value: EventEntity) {
         _eventSelected.value = value
@@ -133,20 +96,5 @@ class AddTransactionViewModel @Inject constructor(
         _wallet.value = entity
     }
 
-    fun setEnableNoteScreen(value: Boolean) {
-        if (value) {
-            _enableChildScreen.value = ScreenSelection.NOTE_SCREEN
-        } else {
-            _enableChildScreen.value = ScreenSelection.ADD_TRANSACTION_SCREEN
-        }
-    }
-
-    fun setEnableSelectPeopleScreen(value: Boolean) {
-        if (value) {
-            _enableChildScreen.value = ScreenSelection.WITH_SCREEN
-        } else {
-            _enableChildScreen.value = ScreenSelection.ADD_TRANSACTION_SCREEN
-        }
-    }
 
 }

@@ -27,6 +27,7 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,7 +36,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.kuro.money.R
 import com.kuro.money.data.model.CategoryEntity
 import com.kuro.money.data.utils.Resource
@@ -52,12 +56,14 @@ import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun SelectCategoryScreen(
-    addTransactionViewModel: AddTransactionViewModel = viewModel(),
-    selectCategoryViewModel: SelectCategoryViewModel = viewModel()
+    navController: NavController,
+    addTransactionViewModel: AddTransactionViewModel,
+    selectCategoryViewModel: SelectCategoryViewModel = hiltViewModel()
 ) {
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
 
-    BackHandler(enabled = addTransactionViewModel.enableChildScreen.collectAsState().value == ScreenSelection.SELECT_CATEGORY_SCREEN) {
-        addTransactionViewModel.setEnableCategoryScreen(false)
+    BackHandler(enabled = navBackStackEntry?.destination?.route == ScreenSelection.SELECT_CATEGORY_SCREEN.route) {
+        navController.popBackStack()
     }
 
     val selectedTabIndexed = remember { mutableStateOf(0) }
@@ -72,7 +78,7 @@ fun SelectCategoryScreen(
             if (it.name != "" && it.icon != "") {
                 addTransactionViewModel.setSelectedCategory(it)
                 selectCategoryViewModel.setSelectedCategories(SelectedCategory("", ""))
-                addTransactionViewModel.setEnableCategoryScreen(false)
+                navController.popBackStack()
             }
         }
     }
@@ -92,7 +98,7 @@ fun SelectCategoryScreen(
             .background(Color.White)
     ) {
         Column {
-            ToolbarSelectCategory()
+            ToolbarSelectCategory(navController)
             TabSelectionCategory(selectedTabIndexed.value) {
                 if (prevSelectedTabIndex.value != selectedTabIndexed.value) {
                     prevSelectedTabIndex.value = selectedTabIndexed.value
@@ -163,7 +169,7 @@ private fun TabSelectionCategory(selectedTabIndexed: Int, onClick: (Int) -> Unit
 
 @Composable
 private fun ToolbarSelectCategory(
-    addTransactionViewModel: AddTransactionViewModel = viewModel()
+    navController: NavController
 ) {
     Row(
         modifier = Modifier
@@ -176,7 +182,7 @@ private fun ToolbarSelectCategory(
             contentDescription = "Close",
             tint = Color.Black,
             modifier = Modifier.clickable {
-                addTransactionViewModel.setEnableCategoryScreen(false)
+                navController.popBackStack()
             })
         Text(
             text = stringResource(id = R.string.select_category),

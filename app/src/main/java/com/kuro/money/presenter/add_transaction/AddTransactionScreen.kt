@@ -72,7 +72,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.kuro.money.R
@@ -84,13 +85,6 @@ import com.kuro.money.domain.model.ScreenSelection
 import com.kuro.money.domain.model.SelectedCategory
 import com.kuro.money.extension.noRippleClickable
 import com.kuro.money.extension.randomColor
-import com.kuro.money.presenter.add_transaction.feature.event.SelectEventScreen
-import com.kuro.money.presenter.add_transaction.feature.note.NoteScreen
-import com.kuro.money.presenter.add_transaction.feature.people.SelectPeopleScreen
-import com.kuro.money.presenter.add_transaction.feature.select_category.SelectCategoryScreen
-import com.kuro.money.presenter.add_transaction.feature.wallet.SelectWalletScreen
-import com.kuro.money.presenter.main.MainViewModel
-import com.kuro.money.presenter.utils.CrossSlide
 import com.kuro.money.presenter.utils.CustomKeyBoard
 import com.kuro.money.presenter.utils.SlideUpContent
 import com.kuro.money.presenter.utils.TextFieldValueUtils
@@ -102,39 +96,29 @@ import com.kuro.money.ui.theme.Green
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import java.text.DecimalFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 @Composable
 fun AddTransactionScreen(
-    mainViewModel: MainViewModel = viewModel(),
-    addTransactionViewModel: AddTransactionViewModel = viewModel()
+    navController: NavController,
+    addTransactionViewModel: AddTransactionViewModel
 ) {
     val isEnabledCustomKeyBoard = remember { mutableStateOf(false) }
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
 
-    BackHandler(mainViewModel.navigateScreenTo.collectAsState().value == ScreenSelection.ADD_TRANSACTION_SCREEN) {
+    BackHandler(enabled = navBackStackEntry?.destination?.route == stringResource(id = R.string.add_transaction)) {
         if (isEnabledCustomKeyBoard.value) {
             isEnabledCustomKeyBoard.value = false
             return@BackHandler
         }
-        addTransactionViewModel.clearData()
-        mainViewModel.setOpenAddTransactionScreen(false)
-    }
-
-    LaunchedEffect(mainViewModel.navigateScreenTo.collectAsState().value) {
-        mainViewModel.navigateScreenTo.collectLatest {
-            if (it != ScreenSelection.ADD_TRANSACTION_SCREEN) {
-                addTransactionViewModel.clearData()
-            }
-        }
+        navController.popBackStack()
     }
 
     val amountFieldValue = remember { mutableStateOf(TextFieldValue()) }
     val shakeEnabled = remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
 
-    val enableChildScreen = addTransactionViewModel.enableChildScreen.collectAsState().value
     val selectedCategory = addTransactionViewModel.selectedCategory.collectAsState().value
     val amount = addTransactionViewModel.amount.collectAsState().value
     val note = addTransactionViewModel.note.collectAsState().value
@@ -160,7 +144,7 @@ fun AddTransactionScreen(
     LaunchedEffect(addTransactionViewModel.insertTransaction.collectAsState().value) {
         addTransactionViewModel.insertTransaction.collectLatest {
             if (it is Resource.Success) {
-                mainViewModel.setOpenAddTransactionScreen(false)
+                navController.popBackStack()
             }
         }
     }
@@ -184,7 +168,7 @@ fun AddTransactionScreen(
                 .align(Alignment.TopCenter),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            ToolbarAddTransaction(mainViewModel)
+            ToolbarAddTransaction(navController)
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -200,15 +184,17 @@ fun AddTransactionScreen(
                         wallet,
                         onAmountClick = { isEnabledCustomKeyBoard.value = true },
                         onSelectCategoryClick = {
-                            addTransactionViewModel.setEnableCategoryScreen(true)
+                            navController.navigate(ScreenSelection.SELECT_CATEGORY_SCREEN.route)
                         },
-                        onNoteClick = { addTransactionViewModel.setEnableNoteScreen(true) },
+                        onNoteClick = {
+                            navController.navigate(ScreenSelection.NOTE_SCREEN.route)
+                        },
                         onDateClick = {
                             showDatePicker(context) {
                                 dateTransaction.value = it
                             }
                         },
-                        onWalletClick = { addTransactionViewModel.setEnableWalletScreen(true) })
+                        onWalletClick = { navController.navigate(ScreenSelection.WALLET_SCREEN.route) })
                 }
                 item {
                     MoreDetailsTransaction(
@@ -217,10 +203,10 @@ fun AddTransactionScreen(
                         dateRemind.value,
                         imageSelectedFromGallery,
                         onSelectPeopleClick = {
-                            addTransactionViewModel.setEnableSelectPeopleScreen(true)
+                            navController.navigate(ScreenSelection.WITH_SCREEN.route)
                         },
                         onSelectEventClick = {
-                            addTransactionViewModel.setEnableEventScreen(true)
+                            navController.navigate(ScreenSelection.EVENT_SCREEN.route)
                         },
                         onAlarmClick = {
                             showDatePicker(context, true) {
@@ -282,9 +268,28 @@ fun AddTransactionScreen(
                 isVisible = isEnabledCustomKeyBoard.value
             ) {
                 CustomKeyBoard(
-                    onClear = { TextFieldValueUtils.clear(amountFieldValue) },
-                    onBack = { TextFieldValueUtils.deleteAt(amountFieldValue) },
-                    onInput = { TextFieldValueUtils.add(amountFieldValue, it) },
+                    onClear = {
+                        TextFieldValueUtils.clear(amountFieldValue)
+                        addTransactionViewModel.setAmount(null)
+                    },
+                    onBack = {
+                        TextFieldValueUtils.deleteAt(amountFieldValue)
+                        val value = evaluateExpression(amountFieldValue.value.text)
+                        if (!value.isNaN()) {
+                            addTransactionViewModel.setAmount(value)
+                        } else {
+                            addTransactionViewModel.setAmount(null)
+                        }
+                    },
+                    onInput = {
+                        TextFieldValueUtils.add(amountFieldValue, it)
+                        val value = evaluateExpression(amountFieldValue.value.text)
+                        if (!value.isNaN()) {
+                            addTransactionViewModel.setAmount(value)
+                        } else {
+                            addTransactionViewModel.setAmount(null)
+                        }
+                    },
                     onConfirm = {
                         val value = evaluateExpression(amountFieldValue.value.text)
                         if (value.isNaN()) {
@@ -294,8 +299,7 @@ fun AddTransactionScreen(
                                 shakeEnabled.value = false
                             }
                         } else {
-                            val decimalFormat = DecimalFormat("#,###.##").format(value)
-                            TextFieldValueUtils.set(amountFieldValue, decimalFormat)
+                            TextFieldValueUtils.set(amountFieldValue, value.toString())
                             addTransactionViewModel.setAmount(value)
                         }
                     },
@@ -303,28 +307,6 @@ fun AddTransactionScreen(
                     shakeEnabled = shakeEnabled.value
                 )
             }
-        }
-    }
-
-    CrossSlide(
-        currentState = ScreenSelection.ADD_TRANSACTION_SCREEN,
-        targetState = enableChildScreen,
-        orderedContent = listOf(
-            ScreenSelection.ADD_TRANSACTION_SCREEN,
-            ScreenSelection.NOTE_SCREEN,
-            ScreenSelection.SELECT_CATEGORY_SCREEN,
-            ScreenSelection.WALLET_SCREEN,
-            ScreenSelection.WITH_SCREEN,
-            ScreenSelection.EVENT_SCREEN
-        )
-    ) {
-        when (it) {
-            ScreenSelection.SELECT_CATEGORY_SCREEN -> SelectCategoryScreen()
-            ScreenSelection.NOTE_SCREEN -> NoteScreen()
-            ScreenSelection.WALLET_SCREEN -> SelectWalletScreen(addTransactionViewModel)
-            ScreenSelection.WITH_SCREEN -> SelectPeopleScreen()
-            ScreenSelection.EVENT_SCREEN -> SelectEventScreen()
-            else -> {}
         }
     }
 }
@@ -646,7 +628,7 @@ private fun MoreDetailsTransaction(
 
 @Composable
 private fun ToolbarAddTransaction(
-    mainViewModel: MainViewModel
+    navController: NavController
 ) {
     Surface(
         modifier = Modifier
@@ -662,9 +644,7 @@ private fun ToolbarAddTransaction(
             Icon(imageVector = Icons.Filled.Close,
                 contentDescription = "Close",
                 tint = Color.Black,
-                modifier = Modifier.clickable {
-                    mainViewModel.setOpenAddTransactionScreen(false)
-                })
+                modifier = Modifier.clickable { navController.popBackStack() })
             Text(
                 text = stringResource(id = R.string.add_transaction),
                 style = MaterialTheme.typography.h6,

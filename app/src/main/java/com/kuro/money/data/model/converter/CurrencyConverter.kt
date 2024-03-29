@@ -7,9 +7,8 @@ import com.kuro.money.data.model.CurrencyEntity
 
 class CurrencyConverter {
     private val gson = Gson()
-
     @TypeConverter
-    fun fromListCurrency(options: CurrencyEntity?): String {
+    fun fromCurrency(options: CurrencyEntity?): String {
         if (options == null) {
             return ""
         }
@@ -18,7 +17,7 @@ class CurrencyConverter {
     }
 
     @TypeConverter
-    fun toListCurrency(optionsString: String?): CurrencyEntity? {
+    fun toCurrency(optionsString: String?): CurrencyEntity? {
         if (optionsString.isNullOrEmpty()) {
             return null
         }

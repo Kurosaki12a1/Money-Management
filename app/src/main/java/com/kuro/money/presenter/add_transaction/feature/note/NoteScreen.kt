@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -34,7 +35,10 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.kuro.money.R
 import com.kuro.money.domain.model.ScreenSelection
 import com.kuro.money.presenter.add_transaction.AddTransactionViewModel
@@ -42,11 +46,13 @@ import com.kuro.money.ui.theme.Gray
 
 @Composable
 fun NoteScreen(
-    addTransactionViewModel: AddTransactionViewModel = viewModel()
+    navController: NavController,
+    addTransactionViewModel: AddTransactionViewModel
 ) {
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
 
-    BackHandler(enabled = addTransactionViewModel.enableChildScreen.collectAsState().value == ScreenSelection.NOTE_SCREEN) {
-        addTransactionViewModel.setEnableNoteScreen(false)
+    BackHandler(enabled = navBackStackEntry?.destination?.route == ScreenSelection.NOTE_SCREEN.route) {
+        navController.popBackStack()
     }
 
     val noteValue = addTransactionViewModel.note.collectAsState().value
@@ -75,7 +81,7 @@ fun NoteScreen(
                 Icon(imageVector = Icons.Default.ArrowBack,
                     contentDescription = "Back",
                     modifier = Modifier.clickable {
-                        addTransactionViewModel.setEnableNoteScreen(false)
+                        navController.popBackStack()
                     })
                 Text(
                     text = stringResource(id = R.string.note),
@@ -90,7 +96,7 @@ fun NoteScreen(
                     textAlign = TextAlign.Center,
                     modifier = Modifier.clickable {
                         addTransactionViewModel.setNote(note.value)
-                        addTransactionViewModel.setEnableNoteScreen(false)
+                        navController.popBackStack()
                     })
             }
             Divider(

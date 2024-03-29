@@ -40,6 +40,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kuro.money.R
 import com.kuro.money.data.model.EventEntity
@@ -59,8 +60,8 @@ import java.time.LocalDate
 
 @Composable
 fun AddEventScreen(
-    selectEventViewModel: SelectEventViewModel = viewModel(),
-    addEventScreenViewModel: AddEventScreenViewModel = viewModel()
+    selectEventViewModel: SelectEventViewModel = hiltViewModel(),
+    addEventScreenViewModel: AddEventScreenViewModel = hiltViewModel()
 ) {
     BackHandler(enabled = selectEventViewModel.enableAddEventScreen.collectAsState().value) {
         selectEventViewModel.setEnableAddEventScreen(false)
@@ -317,9 +318,9 @@ fun AddEventScreen(
         )
     ) {
         when (it) {
-            ScreenSelection.SELECT_CURRENCY_SCREEN -> SelectCurrencyScreen()
+            ScreenSelection.SELECT_CURRENCY_SCREEN -> SelectCurrencyScreen(addEventScreenViewModel)
             ScreenSelection.WALLET_SCREEN -> SelectWalletScreen(addEventScreenViewModel)
-            ScreenSelection.SELECT_ICON_SCREEN -> SelectIconScreen()
+            ScreenSelection.SELECT_ICON_SCREEN -> SelectIconScreen(addEventScreenViewModel)
             else -> {}
         }
     }

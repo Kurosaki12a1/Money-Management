@@ -102,6 +102,7 @@ dependencies {
 
     // Hilt
     implementation(libs.hilt.android)
+    implementation(libs.hilt.compose)
     ksp(libs.hilt.android.compiler)
     ksp(libs.kotlinx.metadata.jvm)
 

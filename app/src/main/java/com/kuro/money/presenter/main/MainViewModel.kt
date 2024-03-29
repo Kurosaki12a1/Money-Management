@@ -5,7 +5,6 @@ import androidx.lifecycle.viewModelScope
 import com.kuro.money.data.mapper.toExchangeRateEntity
 import com.kuro.money.data.model.TransactionEntity
 import com.kuro.money.data.utils.Resource
-import com.kuro.money.domain.model.ScreenSelection
 import com.kuro.money.domain.usecase.AccountsUseCase
 import com.kuro.money.domain.usecase.CategoryUseCase
 import com.kuro.money.domain.usecase.CurrenciesUseCase
@@ -35,10 +34,9 @@ class MainViewModel @Inject constructor(
     private val exchangeRatesUseCase: ExchangeRatesUseCase,
     private val transactionUseCase: TransactionUseCase
 ) : ViewModel() {
-    private val _navigateScreenTo = MutableStateFlow(ScreenSelection.MAIN_SCREEN)
-    val navigateScreenTo = _navigateScreenTo.asStateFlow()
 
-    private val _getListTransaction = MutableStateFlow<Resource<List<TransactionEntity>?>>(Resource.Default)
+    private val _getListTransaction =
+        MutableStateFlow<Resource<List<TransactionEntity>?>>(Resource.Default)
     val getListTransaction = _getListTransaction.asStateFlow()
 
     init {
@@ -47,17 +45,13 @@ class MainViewModel @Inject constructor(
         getListTransaction()
     }
 
-    fun getListTransaction() {
+    private fun getListTransaction() {
         viewModelScope.launch {
             transactionUseCase().collectLatest {
                 _getListTransaction.value = it
+                println(it)
             }
         }
-    }
-
-    fun setOpenAddTransactionScreen(value: Boolean) {
-        _navigateScreenTo.value =
-            if (value) ScreenSelection.ADD_TRANSACTION_SCREEN else ScreenSelection.MAIN_SCREEN
     }
 
     private fun getAndInsertExchangeRatesFromInternet() {
@@ -67,6 +61,7 @@ class MainViewModel @Inject constructor(
                     is Resource.Success -> {
                         exchangeRatesUseCase(it.value.toExchangeRateEntity())
                     }
+
                     else -> flowOf(it)
                 }
             }.collectLatest {

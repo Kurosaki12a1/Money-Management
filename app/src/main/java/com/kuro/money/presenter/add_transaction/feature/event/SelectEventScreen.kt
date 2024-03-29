@@ -32,6 +32,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -40,7 +41,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.kuro.money.R
 import com.kuro.money.data.model.EventEntity
 import com.kuro.money.data.utils.Resource
@@ -57,11 +60,12 @@ import java.time.LocalDate
 
 @Composable
 fun SelectEventScreen(
-    addTransactionViewModel: AddTransactionViewModel = viewModel(),
-    selectEventViewModel: SelectEventViewModel = viewModel()
+    navController: NavController,
+    selectEventViewModel: SelectEventViewModel = hiltViewModel()
 ) {
-    BackHandler(enabled = addTransactionViewModel.enableChildScreen.collectAsState().value == ScreenSelection.EVENT_SCREEN) {
-        addTransactionViewModel.setEnableEventScreen(false)
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    BackHandler(enabled = navBackStackEntry?.destination?.route == ScreenSelection.EVENT_SCREEN.route) {
+        navController.popBackStack()
     }
 
     val listEvent = remember { mutableListOf<EventEntity>() }
@@ -88,7 +92,7 @@ fun SelectEventScreen(
                     .fillMaxSize()
                     .align(Alignment.TopCenter)
             ) {
-                ToolbarSelectEventScreen()
+                ToolbarSelectEventScreen(navController)
                 TabSelectionEvent(selectedTabIndexed.value) {
                     selectedTabIndexed.value = it
                 }
@@ -111,11 +115,15 @@ fun SelectEventScreen(
                 ) {
                     when (it) {
                         0 -> {
-                            ListEventScreen(listEvent.filter { it.endDate.isAfter(LocalDate.now()) })
+                            ListEventScreen(
+                                navController,
+                                listEvent.filter { item -> item.endDate.isAfter(LocalDate.now()) })
                         }
 
                         else -> {
-                            ListEventScreen(listEvent.filter { it.endDate.isBefore(LocalDate.now()) })
+                            ListEventScreen(
+                                navController,
+                                listEvent.filter { item -> item.endDate.isBefore(LocalDate.now()) })
                         }
                     }
                 }
@@ -144,24 +152,24 @@ fun SelectEventScreen(
     ) {
         when (it) {
             true -> AddEventScreen()
-            else -> {
-                selectEventViewModel.getAllEvents()
-                // DoNothing
-            }
+            else -> { selectEventViewModel.getAllEvents() }
         }
     }
 }
 
 @Composable
 private fun ListEventScreen(
+    navController: NavController,
     event: List<EventEntity>,
-    addTransactionViewModel: AddTransactionViewModel = viewModel()
+    addTransactionViewModel: AddTransactionViewModel = hiltViewModel()
 ) {
     //TODO show the blank event screen
     if (event.isEmpty()) return
     val selectedEvent = addTransactionViewModel.eventSelected.collectAsState().value
     LazyColumn(
-        modifier = Modifier.fillMaxWidth().padding(10.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(10.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         items(event) {
@@ -171,7 +179,7 @@ private fun ListEventScreen(
                     .padding(horizontal = 10.dp)
                     .clickable {
                         addTransactionViewModel.setEventSelected(it)
-                        addTransactionViewModel.setEnableEventScreen(false)
+                        navController.popBackStack()
                     },
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(15.dp)
@@ -204,7 +212,7 @@ private fun ListEventScreen(
 
 @Composable
 private fun ToolbarSelectEventScreen(
-    addTransactionViewModel: AddTransactionViewModel = viewModel()
+    navController: NavController
 ) {
     Row(
         modifier = Modifier
@@ -214,7 +222,7 @@ private fun ToolbarSelectEventScreen(
         horizontalArrangement = Arrangement.spacedBy(20.dp)
     ) {
         Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back",
-            modifier = Modifier.clickable { addTransactionViewModel.setEnableEventScreen(false) })
+            modifier = Modifier.clickable { navController.popBackStack() })
 
         Text(
             text = stringResource(id = R.string.select_event),
