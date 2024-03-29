@@ -70,7 +70,6 @@ class AddTransactionViewModel @Inject constructor(
             )
             transactionUseCase(transactionEntity).collectLatest {
                 _insertTransaction.value = it
-                println(it)
             }
         }
     }

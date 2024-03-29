@@ -49,7 +49,6 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             transactionUseCase().collectLatest {
                 _getListTransaction.value = it
-                println(it)
             }
         }
     }

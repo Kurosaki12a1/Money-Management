@@ -28,7 +28,9 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.QuestionMark
 import androidx.compose.material.icons.filled.Wallet
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -41,34 +43,38 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.navigation.NavController
+import androidx.navigation.compose.currentBackStackEntryAsState
 import com.kuro.money.R
 import com.kuro.money.data.model.EventEntity
-import com.kuro.money.domain.model.ScreenSelection
+import com.kuro.money.data.utils.Resource
+import com.kuro.money.domain.model.SelectionUI
+import com.kuro.money.domain.model.screenRoute
 import com.kuro.money.extension.noRippleClickable
-import com.kuro.money.presenter.add_transaction.feature.event.SelectEventViewModel
-import com.kuro.money.presenter.add_transaction.feature.event.feature.select_currency.SelectCurrencyScreen
-import com.kuro.money.presenter.add_transaction.feature.event.feature.select_icon.SelectIconScreen
-import com.kuro.money.presenter.add_transaction.feature.wallet.SelectWalletScreen
 import com.kuro.money.presenter.add_transaction.showDatePicker
-import com.kuro.money.presenter.utils.CrossSlide
 import com.kuro.money.presenter.utils.SlideUpContent
 import com.kuro.money.presenter.utils.string
 import com.kuro.money.presenter.utils.toPainterResource
 import com.kuro.money.ui.theme.Gray
+import kotlinx.coroutines.flow.collectLatest
 import java.time.LocalDate
 
 @Composable
 fun AddEventScreen(
-    selectEventViewModel: SelectEventViewModel = hiltViewModel(),
-    addEventScreenViewModel: AddEventScreenViewModel = hiltViewModel()
+    navController: NavController,
+    addEventScreenViewModel: AddEventScreenViewModel
 ) {
-    BackHandler(enabled = selectEventViewModel.enableAddEventScreen.collectAsState().value) {
-        selectEventViewModel.setEnableAddEventScreen(false)
-        addEventScreenViewModel.clearData()
+
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    BackHandler(
+        enabled = navBackStackEntry?.destination?.route == screenRoute(
+            SelectionUI.ADD_TRANSACTION.route,
+            SelectionUI.ADD_EVENT.route
+        )
+    ) {
+        navController.popBackStack()
     }
 
-    val enableChildScreen = addEventScreenViewModel.enableChildScreen.collectAsState().value
     val iconSelected = addEventScreenViewModel.iconSelected.collectAsState().value
     val walletSelected = addEventScreenViewModel.wallet.collectAsState().value
     val currencySelected = addEventScreenViewModel.currencySelected.collectAsState().value
@@ -76,6 +82,14 @@ fun AddEventScreen(
     val name = remember { mutableStateOf("") }
     val endingDate = remember { mutableStateOf<LocalDate?>(null) }
     val context = LocalContext.current
+
+    LaunchedEffect(addEventScreenViewModel.insertEvent.collectAsState().value) {
+        addEventScreenViewModel.insertEvent.collectLatest {
+            if (it is Resource.Success) {
+                navController.popBackStack()
+            }
+        }
+    }
 
     Surface(
         modifier = Modifier
@@ -94,7 +108,7 @@ fun AddEventScreen(
                     imageVector = Icons.Default.Close,
                     contentDescription = "Close",
                     modifier = Modifier.clickable {
-                        selectEventViewModel.setEnableAddEventScreen(false)
+                        navController.popBackStack()
                     })
                 Text(
                     text = stringResource(id = R.string.add_event),
@@ -125,7 +139,6 @@ fun AddEventScreen(
                                     wallet = walletSelected
                                 )
                             )
-                            selectEventViewModel.setEnableAddEventScreen(false)
                         }
                     }
                 )
@@ -153,7 +166,12 @@ fun AddEventScreen(
                             Box(
                                 modifier = Modifier
                                     .noRippleClickable {
-                                        addEventScreenViewModel.setOpenSelectIconScreen(true)
+                                        navController.navigate(
+                                            screenRoute(
+                                                SelectionUI.ADD_TRANSACTION.route,
+                                                SelectionUI.SELECT_ICON.route
+                                            )
+                                        )
                                     }
                                     .background(Gray, CircleShape)
                                     .size(30.dp),
@@ -168,7 +186,12 @@ fun AddEventScreen(
                         } else {
                             Image(
                                 modifier = Modifier.noRippleClickable {
-                                    addEventScreenViewModel.setOpenSelectIconScreen(true)
+                                    navController.navigate(
+                                        screenRoute(
+                                            SelectionUI.ADD_TRANSACTION.route,
+                                            SelectionUI.SELECT_ICON.route
+                                        )
+                                    )
                                 },
                                 painter = iconSelected.toPainterResource(),
                                 contentDescription = iconSelected
@@ -232,7 +255,12 @@ fun AddEventScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .noRippleClickable {
-                                addEventScreenViewModel.setOpenCurrencyScreen(true)
+                                navController.navigate(
+                                    screenRoute(
+                                        SelectionUI.ADD_TRANSACTION.route,
+                                        SelectionUI.SELECT_CURRENCY.route
+                                    )
+                                )
                             },
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(20.dp)
@@ -274,7 +302,12 @@ fun AddEventScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .noRippleClickable {
-                                addEventScreenViewModel.setOpenWalletScreen(true)
+                                navController.navigate(
+                                    screenRoute(
+                                        SelectionUI.EVENT.route,
+                                        SelectionUI.WALLET.route
+                                    )
+                                )
                             },
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(20.dp)
@@ -304,24 +337,6 @@ fun AddEventScreen(
                     }
                 }
             }
-        }
-    }
-
-    CrossSlide(
-        currentState = ScreenSelection.ADD_EVENT_SCREEN,
-        targetState = enableChildScreen,
-        orderedContent = listOf(
-            ScreenSelection.ADD_EVENT_SCREEN,
-            ScreenSelection.WALLET_SCREEN,
-            ScreenSelection.SELECT_CURRENCY_SCREEN,
-            ScreenSelection.SELECT_ICON_SCREEN,
-        )
-    ) {
-        when (it) {
-            ScreenSelection.SELECT_CURRENCY_SCREEN -> SelectCurrencyScreen(addEventScreenViewModel)
-            ScreenSelection.WALLET_SCREEN -> SelectWalletScreen(addEventScreenViewModel)
-            ScreenSelection.SELECT_ICON_SCREEN -> SelectIconScreen(addEventScreenViewModel)
-            else -> {}
         }
     }
 }

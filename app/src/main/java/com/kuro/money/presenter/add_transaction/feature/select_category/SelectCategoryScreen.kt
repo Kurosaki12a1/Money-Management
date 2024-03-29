@@ -37,14 +37,14 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.kuro.money.R
 import com.kuro.money.data.model.CategoryEntity
 import com.kuro.money.data.utils.Resource
-import com.kuro.money.domain.model.ScreenSelection
 import com.kuro.money.domain.model.SelectedCategory
+import com.kuro.money.domain.model.SelectionUI
+import com.kuro.money.domain.model.screenRoute
 import com.kuro.money.extension.detectHorizontalWithDelay
 import com.kuro.money.presenter.add_transaction.AddTransactionViewModel
 import com.kuro.money.presenter.add_transaction.feature.select_category.feature.DebtScreen
@@ -62,7 +62,12 @@ fun SelectCategoryScreen(
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
 
-    BackHandler(enabled = navBackStackEntry?.destination?.route == ScreenSelection.SELECT_CATEGORY_SCREEN.route) {
+    BackHandler(
+        enabled = navBackStackEntry?.destination?.route == screenRoute(
+            SelectionUI.ADD_TRANSACTION.route,
+            SelectionUI.SELECT_CATEGORY.route
+        )
+    ) {
         navController.popBackStack()
     }
 

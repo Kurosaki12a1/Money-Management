@@ -21,7 +21,6 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,7 +34,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -43,16 +41,20 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.navigation
 import com.kuro.money.domain.model.BottomNavItem
-import com.kuro.money.domain.model.ScreenSelection
+import com.kuro.money.domain.model.SelectionUI
 import com.kuro.money.domain.model.generateListBottomNavItem
+import com.kuro.money.domain.model.screenRoute
 import com.kuro.money.presenter.account.AccountScreen
-import com.kuro.money.presenter.account.AccountViewModel
 import com.kuro.money.presenter.account.feature.about.AboutScreen
 import com.kuro.money.presenter.account.feature.wallets.AddWalletScreen
+import com.kuro.money.presenter.account.feature.wallets.AddWalletViewModel
 import com.kuro.money.presenter.account.feature.wallets.WalletScreen
+import com.kuro.money.presenter.account.feature.wallets.WalletViewModel
 import com.kuro.money.presenter.add_transaction.AddTransactionScreen
 import com.kuro.money.presenter.add_transaction.AddTransactionViewModel
 import com.kuro.money.presenter.add_transaction.feature.event.SelectEventScreen
+import com.kuro.money.presenter.add_transaction.feature.event.feature.add_event.AddEventScreen
+import com.kuro.money.presenter.add_transaction.feature.event.feature.add_event.AddEventScreenViewModel
 import com.kuro.money.presenter.add_transaction.feature.event.feature.select_currency.SelectCurrencyScreen
 import com.kuro.money.presenter.add_transaction.feature.event.feature.select_icon.SelectIconScreen
 import com.kuro.money.presenter.add_transaction.feature.note.NoteScreen
@@ -80,14 +82,14 @@ private fun MainScreen() {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val navRouteDestination = navBackStackEntry?.destination?.route
-    val currentRoute = remember { mutableStateOf(ScreenSelection.HOME_SCREEN.route) }
+    val currentRoute = remember { mutableStateOf(SelectionUI.HOME.route) }
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
-            if (navRouteDestination == ScreenSelection.HOME_SCREEN.route
-                || navRouteDestination == ScreenSelection.TRANSACTION_SCREEN.route
-                || navRouteDestination == ScreenSelection.BUDGETS_SCREEN.route
-                || navRouteDestination == ScreenSelection.ACCOUNT_SCREEN.route
+            if (navRouteDestination == SelectionUI.HOME.route
+                || navRouteDestination == SelectionUI.TRANSACTION.route
+                || navRouteDestination == SelectionUI.BUDGETS.route
+                || navRouteDestination == SelectionUI.ACCOUNT.route
             ) {
                 BottomBar(routeSelected = currentRoute.value) {
                     currentRoute.value = it
@@ -98,10 +100,10 @@ private fun MainScreen() {
             }
         },
         floatingActionButton = {
-            if (navRouteDestination == ScreenSelection.HOME_SCREEN.route
-                || navRouteDestination == ScreenSelection.TRANSACTION_SCREEN.route
-                || navRouteDestination == ScreenSelection.BUDGETS_SCREEN.route
-                || navRouteDestination == ScreenSelection.ACCOUNT_SCREEN.route
+            if (navRouteDestination == SelectionUI.HOME.route
+                || navRouteDestination == SelectionUI.TRANSACTION.route
+                || navRouteDestination == SelectionUI.BUDGETS.route
+                || navRouteDestination == SelectionUI.ACCOUNT.route
             ) {
                 MainFloatingButton {
                     currentRoute.value = it
@@ -122,104 +124,191 @@ private fun MainScreen() {
 private fun Navigation(
     navController: NavHostController,
     paddingValues: PaddingValues,
-    mainViewModel: MainViewModel = viewModel()
 ) {
     val slideUpAnimation = slideVerticalAnimation()
     val slideHorizontalAnimation = slideHorizontalAnimation()
     NavHost(
-        navController = navController, startDestination = ScreenSelection.HOME_SCREEN.route
+        navController = navController, startDestination = SelectionUI.HOME.route
     ) {
-        composable(ScreenSelection.HOME_SCREEN.route) {}
-        composable(ScreenSelection.TRANSACTION_SCREEN.route) {}
+        composable(SelectionUI.HOME.route) {}
+        composable(SelectionUI.TRANSACTION.route) {}
         navigation(
-            startDestination = ScreenSelection.ADD_TRANSACTION_SCREEN.route,
-            route = ScreenSelection.SUB_GRAPH_TRANSACTION.route
+            startDestination = SelectionUI.ADD_TRANSACTION.route,
+            route = SelectionUI.SUB_GRAPH_TRANSACTION.route
         ) {
+            val parentRoute = SelectionUI.ADD_TRANSACTION.route
             composable(
-                ScreenSelection.ADD_TRANSACTION_SCREEN.route,
+                parentRoute,
                 enterTransition = { slideUpAnimation.enterTransition },
                 exitTransition = { slideUpAnimation.exitTransition },
                 popEnterTransition = { slideHorizontalAnimation.popEnterTransition },
                 popExitTransition = { slideHorizontalAnimation.popExitTransition }) {
                 val parentEntry = remember(it) {
-                    navController.getBackStackEntry(ScreenSelection.SUB_GRAPH_TRANSACTION.route)
+                    navController.getBackStackEntry(SelectionUI.SUB_GRAPH_TRANSACTION.route)
                 }
                 val transactionViewModel = hiltViewModel<AddTransactionViewModel>(parentEntry)
                 AddTransactionScreen(navController, transactionViewModel)
             }
-            composable(ScreenSelection.NOTE_SCREEN.route,
+            composable(
+                route = screenRoute(parentRoute, SelectionUI.NOTE.route),
                 enterTransition = { slideHorizontalAnimation.enterTransition },
                 exitTransition = { slideHorizontalAnimation.exitTransition },
                 popExitTransition = { slideHorizontalAnimation.popExitTransition },
                 popEnterTransition = { slideHorizontalAnimation.popEnterTransition }) {
                 val parentEntry = remember(it) {
-                    navController.getBackStackEntry(ScreenSelection.SUB_GRAPH_TRANSACTION.route)
+                    navController.getBackStackEntry(SelectionUI.SUB_GRAPH_TRANSACTION.route)
                 }
                 val transactionViewModel = hiltViewModel<AddTransactionViewModel>(parentEntry)
                 NoteScreen(navController, transactionViewModel)
             }
-            composable(ScreenSelection.SELECT_CATEGORY_SCREEN.route,
+            composable(
+                route = screenRoute(parentRoute, SelectionUI.SELECT_CATEGORY.route),
                 enterTransition = { slideHorizontalAnimation.enterTransition },
                 exitTransition = { slideHorizontalAnimation.exitTransition },
                 popExitTransition = { slideHorizontalAnimation.popExitTransition },
                 popEnterTransition = { slideHorizontalAnimation.popEnterTransition }) {
                 val parentEntry = remember(it) {
-                    navController.getBackStackEntry(ScreenSelection.SUB_GRAPH_TRANSACTION.route)
+                    navController.getBackStackEntry(SelectionUI.SUB_GRAPH_TRANSACTION.route)
                 }
                 val transactionViewModel = hiltViewModel<AddTransactionViewModel>(parentEntry)
                 SelectCategoryScreen(navController, transactionViewModel)
             }
-            composable(ScreenSelection.WALLET_SCREEN.route,
+            composable(
+                route = screenRoute(parentRoute, SelectionUI.WALLET.route),
                 enterTransition = { slideHorizontalAnimation.enterTransition },
                 exitTransition = { slideHorizontalAnimation.exitTransition },
                 popExitTransition = { slideHorizontalAnimation.popExitTransition },
                 popEnterTransition = { slideHorizontalAnimation.popEnterTransition }) {
                 val parentEntry = remember(it) {
-                    navController.getBackStackEntry(ScreenSelection.SUB_GRAPH_TRANSACTION.route)
+                    navController.getBackStackEntry(SelectionUI.SUB_GRAPH_TRANSACTION.route)
                 }
                 val transactionViewModel = hiltViewModel<AddTransactionViewModel>(parentEntry)
                 SelectWalletScreen(navController, transactionViewModel)
             }
-            composable(ScreenSelection.WITH_SCREEN.route,
+            composable(
+                route = screenRoute(SelectionUI.EVENT.route, SelectionUI.WALLET.route),
                 enterTransition = { slideHorizontalAnimation.enterTransition },
                 exitTransition = { slideHorizontalAnimation.exitTransition },
                 popExitTransition = { slideHorizontalAnimation.popExitTransition },
                 popEnterTransition = { slideHorizontalAnimation.popEnterTransition }) {
                 val parentEntry = remember(it) {
-                    navController.getBackStackEntry(ScreenSelection.SUB_GRAPH_TRANSACTION.route)
+                    navController.getBackStackEntry(SelectionUI.SUB_GRAPH_TRANSACTION.route)
+                }
+                val addEventScreenViewModel = hiltViewModel<AddEventScreenViewModel>(parentEntry)
+                SelectWalletScreen(navController, addEventScreenViewModel)
+            }
+            composable(
+                route = screenRoute(parentRoute, SelectionUI.WITH.route),
+                enterTransition = { slideHorizontalAnimation.enterTransition },
+                exitTransition = { slideHorizontalAnimation.exitTransition },
+                popExitTransition = { slideHorizontalAnimation.popExitTransition },
+                popEnterTransition = { slideHorizontalAnimation.popEnterTransition }) {
+                val parentEntry = remember(it) {
+                    navController.getBackStackEntry(SelectionUI.SUB_GRAPH_TRANSACTION.route)
                 }
                 val transactionViewModel = hiltViewModel<AddTransactionViewModel>(parentEntry)
                 SelectPeopleScreen(navController, transactionViewModel)
             }
-            composable(ScreenSelection.EVENT_SCREEN.route,
+            composable(
+                screenRoute(parentRoute, SelectionUI.EVENT.route),
                 enterTransition = { slideHorizontalAnimation.enterTransition },
                 exitTransition = { slideHorizontalAnimation.exitTransition },
                 popExitTransition = { slideHorizontalAnimation.popExitTransition },
                 popEnterTransition = { slideHorizontalAnimation.popEnterTransition }) {
                 SelectEventScreen(navController)
             }
+            composable(
+                screenRoute(parentRoute, SelectionUI.ADD_EVENT.route),
+                enterTransition = { slideHorizontalAnimation.enterTransition },
+                exitTransition = { slideHorizontalAnimation.exitTransition },
+                popExitTransition = { slideHorizontalAnimation.popExitTransition },
+                popEnterTransition = { slideHorizontalAnimation.popEnterTransition }) {
+                val parentEntry = remember(it) {
+                    navController.getBackStackEntry(SelectionUI.SUB_GRAPH_TRANSACTION.route)
+                }
+                val addEventScreenViewModel = hiltViewModel<AddEventScreenViewModel>(parentEntry)
+                AddEventScreen(navController, addEventScreenViewModel)
+            }
+            composable(
+                screenRoute(parentRoute, SelectionUI.SELECT_CURRENCY.route),
+                enterTransition = { slideHorizontalAnimation.enterTransition },
+                exitTransition = { slideHorizontalAnimation.exitTransition },
+                popExitTransition = { slideHorizontalAnimation.popExitTransition },
+                popEnterTransition = { slideHorizontalAnimation.popEnterTransition }) {
+                val parentEntry = remember(it) {
+                    navController.getBackStackEntry(SelectionUI.SUB_GRAPH_TRANSACTION.route)
+                }
+                val addEventScreenViewModel = hiltViewModel<AddEventScreenViewModel>(parentEntry)
+                SelectCurrencyScreen(navController, addEventScreenViewModel)
+            }
+            composable(
+                screenRoute(parentRoute, SelectionUI.SELECT_ICON.route),
+                enterTransition = { slideHorizontalAnimation.enterTransition },
+                exitTransition = { slideHorizontalAnimation.exitTransition },
+                popExitTransition = { slideHorizontalAnimation.popExitTransition },
+                popEnterTransition = { slideHorizontalAnimation.popEnterTransition }) {
+                val parentEntry = remember(it) {
+                    navController.getBackStackEntry(SelectionUI.SUB_GRAPH_TRANSACTION.route)
+                }
+                val addEventScreenViewModel = hiltViewModel<AddEventScreenViewModel>(parentEntry)
+                SelectIconScreen(navController, addEventScreenViewModel)
+            }
         }
-        composable(ScreenSelection.BUDGETS_SCREEN.route) {}
+        composable(SelectionUI.BUDGETS.route) {}
         navigation(
-            startDestination = ScreenSelection.ACCOUNT_SCREEN.route,
-            route = ScreenSelection.SUB_GRAPH_ACCOUNT.route
+            startDestination = SelectionUI.ACCOUNT.route,
+            route = SelectionUI.SUB_GRAPH_ACCOUNT.route
         ) {
-            composable(ScreenSelection.ACCOUNT_SCREEN.route) {
+            val parentRoute = SelectionUI.ACCOUNT.route
+            composable(parentRoute) {
                 AccountScreen(navController)
             }
-            composable(ScreenSelection.SELECT_CURRENCY_SCREEN.route){
-                SelectCurrencyScreen(navController)
+            composable(
+                screenRoute(parentRoute, SelectionUI.SELECT_CURRENCY.route)
+            ) {
+                val parentEntry = remember(it) {
+                    navController.getBackStackEntry(
+                        screenRoute(
+                            parentRoute,
+                            SelectionUI.ADD_WALLET.route
+                        )
+                    )
+                }
+                val viewModel = hiltViewModel<AddWalletViewModel>(parentEntry)
+                SelectCurrencyScreen(navController, viewModel)
             }
-            composable(ScreenSelection.SELECT_ICON_SCREEN.route) {
-                SelectIconScreen(navController)
+            composable(screenRoute(parentRoute, SelectionUI.SELECT_ICON.route)) {
+                val parentEntry = remember(it) {
+                    navController.getBackStackEntry(
+                        screenRoute(
+                            parentRoute,
+                            SelectionUI.ADD_WALLET.route
+                        )
+                    )
+                }
+                val viewModel = hiltViewModel<AddWalletViewModel>(parentEntry)
+                SelectIconScreen(navController, viewModel)
             }
-            composable(ScreenSelection.ADD_WALLET_SCREEN.route) {
-                AddWalletScreen(navController)
+            composable(screenRoute(parentRoute, SelectionUI.ADD_WALLET.route)) {
+                val parentEntry = remember(it) {
+                    navController.getBackStackEntry(
+                        screenRoute(
+                            parentRoute,
+                            SelectionUI.ADD_WALLET.route
+                        )
+                    )
+                }
+                val viewModel = hiltViewModel<AddWalletViewModel>(parentEntry)
+                AddWalletScreen(navController, viewModel)
             }
-            composable(ScreenSelection.MY_WALLET_SCREEN.route) {
-                WalletScreen(navController)
+            composable(screenRoute(parentRoute, SelectionUI.MY_WALLET.route)) {
+                val parentEntry = remember(it) {
+                    navController.getBackStackEntry(SelectionUI.SUB_GRAPH_ACCOUNT.route)
+                }
+                val walletViewModel = hiltViewModel<WalletViewModel>(parentEntry)
+                WalletScreen(navController, walletViewModel)
             }
-            composable(ScreenSelection.MY_ABOUT.route) {
+            composable(screenRoute(parentRoute, SelectionUI.MY_ABOUT.route)) {
                 AboutScreen(navController)
             }
         }
@@ -231,7 +320,7 @@ private fun MainFloatingButton(
     onClick: (String) -> Unit
 ) {
     FloatingActionButton(
-        onClick = { onClick(ScreenSelection.SUB_GRAPH_TRANSACTION.route) },
+        onClick = { onClick(SelectionUI.SUB_GRAPH_TRANSACTION.route) },
         backgroundColor = Teal200
     ) {
         Icon(

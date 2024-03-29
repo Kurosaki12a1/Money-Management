@@ -35,12 +35,11 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.kuro.money.R
-import com.kuro.money.domain.model.ScreenSelection
+import com.kuro.money.domain.model.SelectionUI
+import com.kuro.money.domain.model.screenRoute
 import com.kuro.money.presenter.add_transaction.AddTransactionViewModel
 import com.kuro.money.ui.theme.Gray
 
@@ -51,7 +50,10 @@ fun NoteScreen(
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
 
-    BackHandler(enabled = navBackStackEntry?.destination?.route == ScreenSelection.NOTE_SCREEN.route) {
+    BackHandler(enabled = navBackStackEntry?.destination?.route == screenRoute(
+        SelectionUI.ADD_TRANSACTION.route,
+        SelectionUI.NOTE.route
+    )) {
         navController.popBackStack()
     }
 

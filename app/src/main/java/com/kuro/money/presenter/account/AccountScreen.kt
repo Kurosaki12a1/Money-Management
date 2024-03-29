@@ -32,8 +32,9 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.kuro.money.R
 import com.kuro.money.domain.model.AccountMenu
-import com.kuro.money.domain.model.ScreenSelection
+import com.kuro.money.domain.model.SelectionUI
 import com.kuro.money.domain.model.generateListAccountMenu
+import com.kuro.money.domain.model.screenRoute
 import com.kuro.money.extension.noRippleClickable
 import com.kuro.money.ui.theme.Gray
 
@@ -74,16 +75,12 @@ fun AccountScreen(
                 itemsIndexed(listMenuAccount, key = { _, item -> item.text }) { _, item ->
                     Column {
                         ItemAccountMenu(item) {
-                            when (it) {
-                                ScreenSelection.MY_WALLET_SCREEN -> navController.navigate(
-                                    ScreenSelection.MY_WALLET_SCREEN.route
+                            navController.navigate(
+                                screenRoute(
+                                    SelectionUI.ACCOUNT.route,
+                                    it
                                 )
-
-                                ScreenSelection.MY_ABOUT -> navController.navigate(
-                                    ScreenSelection.MY_ABOUT.route
-                                )
-                                else -> {}
-                            }
+                            )
                         }
                         Divider(
                             modifier = Modifier
@@ -101,7 +98,7 @@ fun AccountScreen(
 @Composable
 private fun ItemAccountMenu(
     item: AccountMenu,
-    onClick: (ScreenSelection) -> Unit
+    onClick: (String) -> Unit
 ) {
     Row(
         modifier = Modifier

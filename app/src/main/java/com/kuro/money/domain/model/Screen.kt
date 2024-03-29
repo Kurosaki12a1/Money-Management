@@ -1,14 +1,14 @@
 package com.kuro.money.domain.model
 
-enum class ScreenSelection(val route: String) {
-    HOME_SCREEN("home"),
-    TRANSACTION_SCREEN("transaction"),
-    BUDGETS_SCREEN("budgets"),
-    ACCOUNT_SCREEN("account"),
-    MY_WALLET_SCREEN("my_wallet"),
-    ADD_WALLET_SCREEN("add_wallet"),
-    MY_CATEGORY_SCREEN("my_category"),
-    MY_EVENT_SCREEN("my_event"),
+enum class SelectionUI(val route: String) {
+    HOME("home"),
+    TRANSACTION("transaction"),
+    BUDGETS("budgets"),
+    ACCOUNT("account"),
+    MY_WALLET("my_wallet"),
+    ADD_WALLET("add_wallet"),
+    MY_CATEGORY("my_category"),
+    MY_EVENT("my_event"),
     MY_RECURRING_TRANSACTIONS("my_recurring_transactions"),
     MY_BILLS("my_bills"),
     MY_DEBTS("my_debts"),
@@ -18,13 +18,16 @@ enum class ScreenSelection(val route: String) {
     MY_ABOUT("my_about"),
     SUB_GRAPH_TRANSACTION("sub_graph_transaction"),
     SUB_GRAPH_ACCOUNT("sub_graph_account"),
-    ADD_TRANSACTION_SCREEN("add_transaction"),
-    SELECT_CATEGORY_SCREEN("select_category"),
-    NOTE_SCREEN("note"),
-    WALLET_SCREEN("wallet"),
-    WITH_SCREEN("with"),
-    EVENT_SCREEN("event"),
-    ADD_EVENT_SCREEN("add_event"),
-    SELECT_CURRENCY_SCREEN("select_currency"),
-    SELECT_ICON_SCREEN("select_icon")
+    ADD_TRANSACTION("add_transaction"),
+    SELECT_CATEGORY("select_category"),
+    NOTE("note"),
+    WALLET("wallet"),
+    WALLET_FROM_EVENT("wallet_from_event"),
+    WITH("with"),
+    EVENT("event"),
+    ADD_EVENT("add_event"),
+    SELECT_CURRENCY("select_currency"),
+    SELECT_ICON("select_icon")
 }
+
+fun screenRoute(parentRoute: String, childRoute : String) = "$parentRoute/$childRoute"

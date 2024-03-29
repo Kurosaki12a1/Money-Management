@@ -27,7 +27,8 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.kuro.money.R
-import com.kuro.money.domain.model.ScreenSelection
+import com.kuro.money.domain.model.SelectionUI
+import com.kuro.money.domain.model.screenRoute
 import com.kuro.money.extension.noRippleClickable
 
 @Composable
@@ -35,7 +36,12 @@ fun AboutScreen(
     navController: NavController
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    BackHandler(navBackStackEntry?.destination?.route == ScreenSelection.MY_ABOUT.route) {
+    BackHandler(
+        navBackStackEntry?.destination?.route == screenRoute(
+            SelectionUI.ACCOUNT.route,
+            SelectionUI.MY_ABOUT.route
+        )
+    ) {
         navController.popBackStack()
     }
 

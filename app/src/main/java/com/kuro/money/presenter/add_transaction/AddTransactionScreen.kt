@@ -81,8 +81,9 @@ import com.kuro.money.data.model.AccountEntity
 import com.kuro.money.data.model.EventEntity
 import com.kuro.money.data.utils.FileUtils
 import com.kuro.money.data.utils.Resource
-import com.kuro.money.domain.model.ScreenSelection
 import com.kuro.money.domain.model.SelectedCategory
+import com.kuro.money.domain.model.SelectionUI
+import com.kuro.money.domain.model.screenRoute
 import com.kuro.money.extension.noRippleClickable
 import com.kuro.money.extension.randomColor
 import com.kuro.money.presenter.utils.CustomKeyBoard
@@ -184,17 +185,34 @@ fun AddTransactionScreen(
                         wallet,
                         onAmountClick = { isEnabledCustomKeyBoard.value = true },
                         onSelectCategoryClick = {
-                            navController.navigate(ScreenSelection.SELECT_CATEGORY_SCREEN.route)
+                            navController.navigate(
+                                screenRoute(
+                                    SelectionUI.ADD_TRANSACTION.route,
+                                    SelectionUI.SELECT_CATEGORY.route
+                                )
+                            )
                         },
                         onNoteClick = {
-                            navController.navigate(ScreenSelection.NOTE_SCREEN.route)
+                            navController.navigate(
+                                screenRoute(
+                                    SelectionUI.ADD_TRANSACTION.route,
+                                    SelectionUI.NOTE.route
+                                )
+                            )
                         },
                         onDateClick = {
                             showDatePicker(context) {
                                 dateTransaction.value = it
                             }
                         },
-                        onWalletClick = { navController.navigate(ScreenSelection.WALLET_SCREEN.route) })
+                        onWalletClick = {
+                            navController.navigate(
+                                screenRoute(
+                                    SelectionUI.ADD_TRANSACTION.route,
+                                    SelectionUI.WALLET.route
+                                )
+                            )
+                        })
                 }
                 item {
                     MoreDetailsTransaction(
@@ -203,10 +221,20 @@ fun AddTransactionScreen(
                         dateRemind.value,
                         imageSelectedFromGallery,
                         onSelectPeopleClick = {
-                            navController.navigate(ScreenSelection.WITH_SCREEN.route)
+                            navController.navigate(
+                                screenRoute(
+                                    SelectionUI.ADD_TRANSACTION.route,
+                                    SelectionUI.WITH.route
+                                )
+                            )
                         },
                         onSelectEventClick = {
-                            navController.navigate(ScreenSelection.EVENT_SCREEN.route)
+                            navController.navigate(
+                                screenRoute(
+                                    SelectionUI.ADD_TRANSACTION.route,
+                                    SelectionUI.EVENT.route
+                                )
+                            )
                         },
                         onAlarmClick = {
                             showDatePicker(context, true) {

@@ -19,9 +19,6 @@ class SelectEventViewModel @Inject constructor(
     private val _getAllEvents = MutableStateFlow<Resource<List<EventEntity>?>>(Resource.Default)
     val getAllEvents = _getAllEvents.asStateFlow()
 
-    private val _enableAddEventScreen = MutableStateFlow(false)
-    val enableAddEventScreen = _enableAddEventScreen.asStateFlow()
-
     init {
         getAllEvents()
     }
@@ -32,9 +29,5 @@ class SelectEventViewModel @Inject constructor(
                 _getAllEvents.value = it
             }
         }
-    }
-
-    fun setEnableAddEventScreen(value: Boolean) {
-        _enableAddEventScreen.value = value
     }
 }

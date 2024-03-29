@@ -6,7 +6,6 @@ import com.kuro.money.data.model.AccountEntity
 import com.kuro.money.data.model.CurrencyEntity
 import com.kuro.money.data.model.EventEntity
 import com.kuro.money.data.utils.Resource
-import com.kuro.money.domain.model.ScreenSelection
 import com.kuro.money.domain.usecase.EventUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,9 +18,6 @@ import javax.inject.Inject
 class AddEventScreenViewModel @Inject constructor(
     private val eventUseCase: EventUseCase
 ) : ViewModel() {
-
-    private val _enableChildScreen = MutableStateFlow(ScreenSelection.ADD_EVENT_SCREEN)
-    val enableChildScreen = _enableChildScreen.asStateFlow()
 
     private val _insertEvent = MutableStateFlow<Resource<Long>>(Resource.Default)
     val insertEvent = _insertEvent.asStateFlow()
@@ -43,12 +39,6 @@ class AddEventScreenViewModel @Inject constructor(
         }
     }
 
-    fun clearData() {
-        _iconSelected.value = null
-        _currencySelected.value = null
-        _wallet.value = null
-    }
-
     fun setCurrencySelected(value: CurrencyEntity) {
         _currencySelected.value = value
     }
@@ -61,20 +51,4 @@ class AddEventScreenViewModel @Inject constructor(
         _wallet.value = entity
     }
 
-    fun setOpenWalletScreen(value: Boolean) {
-        if (value) _enableChildScreen.value = ScreenSelection.WALLET_SCREEN
-        else _enableChildScreen.value = ScreenSelection.ADD_EVENT_SCREEN
-    }
-
-    fun setOpenSelectIconScreen(value: Boolean) {
-        if (value) {
-            _enableChildScreen.value = ScreenSelection.SELECT_ICON_SCREEN
-        } else _enableChildScreen.value = ScreenSelection.ADD_EVENT_SCREEN
-    }
-
-    fun setOpenCurrencyScreen(value: Boolean) {
-        if (value) {
-            _enableChildScreen.value = ScreenSelection.SELECT_CURRENCY_SCREEN
-        } else _enableChildScreen.value = ScreenSelection.ADD_EVENT_SCREEN
-    }
 }

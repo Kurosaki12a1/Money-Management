@@ -32,20 +32,28 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.kuro.money.R
-import com.kuro.money.domain.model.ScreenSelection
+import com.kuro.money.domain.model.SelectionUI
+import com.kuro.money.domain.model.screenRoute
 import com.kuro.money.extension.noRippleClickable
-import com.kuro.money.presenter.account.feature.wallets.WalletViewModel
+import com.kuro.money.presenter.account.feature.wallets.AddWalletViewModel
 import com.kuro.money.presenter.add_transaction.feature.event.feature.add_event.AddEventScreenViewModel
 import com.kuro.money.presenter.utils.toPainterResource
 import com.kuro.money.ui.theme.Gray
 
 @Composable
 fun SelectIconScreen(
-    addEventScreenViewModel: AddEventScreenViewModel = hiltViewModel(),
+    navController: NavController,
+    addEventScreenViewModel: AddEventScreenViewModel,
     selectIconScreenViewModel: SelectIconScreenViewModel = hiltViewModel()
 ) {
-    BackHandler(enabled = addEventScreenViewModel.enableChildScreen.collectAsState().value == ScreenSelection.SELECT_ICON_SCREEN) {
-        addEventScreenViewModel.setOpenSelectIconScreen(false)
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    BackHandler(
+        enabled = navBackStackEntry?.destination?.route == screenRoute(
+            SelectionUI.ADD_TRANSACTION.route,
+            SelectionUI.SELECT_ICON.route
+        )
+    ) {
+        navController.popBackStack()
     }
 
     val listIcons = selectIconScreenViewModel.getListIcon.collectAsState().value
@@ -64,7 +72,7 @@ fun SelectIconScreen(
             ) {
                 Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back",
                     modifier = Modifier.noRippleClickable {
-                        addEventScreenViewModel.setOpenSelectIconScreen(false)
+                        navController.popBackStack()
                     })
                 Text(
                     text = stringResource(id = R.string.select_icon),
@@ -92,7 +100,7 @@ fun SelectIconScreen(
                                     .weight(1f)
                                     .noRippleClickable {
                                         addEventScreenViewModel.setIconSelected(it)
-                                        addEventScreenViewModel.setOpenSelectIconScreen(false)
+                                        navController.popBackStack()
                                     },
                                 painter = it.toPainterResource(),
                                 contentDescription = it
@@ -108,11 +116,16 @@ fun SelectIconScreen(
 @Composable
 fun SelectIconScreen(
     navController: NavController,
-    walletViewModel: WalletViewModel = hiltViewModel(),
+    addWalletViewModel: AddWalletViewModel,
     selectIconScreenViewModel: SelectIconScreenViewModel = hiltViewModel()
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    BackHandler(enabled = navBackStackEntry?.destination?.route == ScreenSelection.SELECT_ICON_SCREEN.route) {
+    BackHandler(
+        enabled = navBackStackEntry?.destination?.route == screenRoute(
+            SelectionUI.ACCOUNT.route,
+            SelectionUI.SELECT_ICON.route
+        )
+    ) {
         navController.popBackStack()
     }
 
@@ -132,7 +145,7 @@ fun SelectIconScreen(
             ) {
                 Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back",
                     modifier = Modifier.noRippleClickable {
-                        navController.navigate(ScreenSelection.SELECT_ICON_SCREEN.route)
+                        navController.popBackStack()
                     })
                 Text(
                     text = stringResource(id = R.string.select_icon),
@@ -159,8 +172,8 @@ fun SelectIconScreen(
                                 modifier = Modifier
                                     .weight(1f)
                                     .noRippleClickable {
-                                        walletViewModel.setIcon(it)
-                                        navController.navigate(ScreenSelection.SELECT_ICON_SCREEN.route)
+                                        addWalletViewModel.setIcon(it)
+                                        navController.popBackStack()
                                     },
                                 painter = it.toPainterResource(),
                                 contentDescription = it

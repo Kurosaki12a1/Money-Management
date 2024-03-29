@@ -58,4 +58,5 @@
     <string name="enable_notifications_hint"> Get notified when there are changes to this wallets\'s transacitons.</string>
     <string name="exclude_from_total">Exclude from Total</string>
     <string name="exclude_from_total_hint">Ignore this wallet and its balance in the "Total" mode.</string>
+    <string name="search">Search</string>
 </resources>

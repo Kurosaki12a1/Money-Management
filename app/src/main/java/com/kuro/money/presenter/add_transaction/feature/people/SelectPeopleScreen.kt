@@ -41,7 +41,8 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.kuro.money.R
-import com.kuro.money.domain.model.ScreenSelection
+import com.kuro.money.domain.model.SelectionUI
+import com.kuro.money.domain.model.screenRoute
 import com.kuro.money.presenter.add_transaction.AddTransactionViewModel
 import com.kuro.money.ui.theme.Gray
 import com.kuro.money.ui.theme.Green
@@ -52,7 +53,10 @@ fun SelectPeopleScreen(
     addTransactionViewModel: AddTransactionViewModel
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    BackHandler(navBackStackEntry?.destination?.route == ScreenSelection.WITH_SCREEN.route) {
+    BackHandler(navBackStackEntry?.destination?.route == screenRoute(
+        SelectionUI.ADD_TRANSACTION.route,
+        SelectionUI.WITH.route
+    )) {
         navController.popBackStack()
     }
 

@@ -20,26 +20,26 @@ fun generateListBottomNavItem(context: Context): MutableList<BottomNavItem> {
     return mutableListOf(
         BottomNavItem(
             name = context.getString(R.string.home),
-            route = ScreenSelection.HOME_SCREEN.route,
+            route = SelectionUI.HOME.route,
             icon = Icons.Default.Home
         ),
         BottomNavItem(
             name = context.getString(R.string.transactions),
-            route = ScreenSelection.TRANSACTION_SCREEN.route,
+            route = SelectionUI.TRANSACTION.route,
             icon = Icons.Default.MonetizationOn
         ),
         BottomNavItem(
             name = "",
-            route = ScreenSelection.SUB_GRAPH_TRANSACTION.route,
+            route = SelectionUI.SUB_GRAPH_TRANSACTION.route,
         ),
         BottomNavItem(
             name = context.getString(R.string.budget),
-            route = ScreenSelection.BUDGETS_SCREEN.route,
+            route = SelectionUI.BUDGETS.route,
             icon = Icons.Default.Payments
         ),
         BottomNavItem(
             name = context.getString(R.string.account),
-            route = ScreenSelection.SUB_GRAPH_ACCOUNT.route,
+            route = SelectionUI.SUB_GRAPH_ACCOUNT.route,
             icon = Icons.Default.AccountBox
         )
     )

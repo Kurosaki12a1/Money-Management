@@ -55,8 +55,10 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.kuro.money.R
 import com.kuro.money.data.model.CurrencyEntity
 import com.kuro.money.data.utils.Resource
-import com.kuro.money.domain.model.ScreenSelection
+import com.kuro.money.domain.model.SelectionUI
+import com.kuro.money.domain.model.screenRoute
 import com.kuro.money.extension.noRippleClickable
+import com.kuro.money.presenter.account.feature.wallets.AddWalletViewModel
 import com.kuro.money.presenter.account.feature.wallets.WalletViewModel
 import com.kuro.money.presenter.add_transaction.feature.event.feature.add_event.AddEventScreenViewModel
 import com.kuro.money.presenter.utils.toPainterResource
@@ -68,91 +70,8 @@ import kotlinx.coroutines.flow.debounce
 
 @Composable
 fun SelectCurrencyScreen(
-    addEventScreenViewModel: AddEventScreenViewModel = hiltViewModel(),
-    selectCurrencyViewModel: SelectCurrencyViewModel = hiltViewModel()
-) {
-    val isSearching = remember { mutableStateOf(false) }
-    val listCurrency = remember { mutableStateListOf<CurrencyEntity>() }
-    val fullListCurrency = remember { mutableStateListOf<CurrencyEntity>() }
-
-    BackHandler(addEventScreenViewModel.enableChildScreen.collectAsState().value == ScreenSelection.SELECT_CURRENCY_SCREEN) {
-        if (isSearching.value) {
-            isSearching.value = false
-            listCurrency.clear()
-            listCurrency.addAll(fullListCurrency)
-            return@BackHandler
-        }
-        addEventScreenViewModel.setOpenCurrencyScreen(false)
-    }
-
-    val currentFocus = LocalFocusManager.current
-    val selectedCurrency = addEventScreenViewModel.currencySelected.collectAsState().value
-    val searchTextFlow = remember { MutableStateFlow("") }
-
-    LaunchedEffect(selectCurrencyViewModel.getListCurrencies.collectAsState().value) {
-        selectCurrencyViewModel.getListCurrencies.collectLatest {
-            if (it is Resource.Success) {
-                listCurrency.clear()
-                listCurrency.addAll(it.value)
-
-                fullListCurrency.clear()
-                fullListCurrency.addAll(it.value)
-            }
-        }
-    }
-
-    LaunchedEffect(Unit) {
-        searchTextFlow
-            .debounce(500)
-            .collectLatest { str ->
-                if (isSearching.value) {
-                    listCurrency.clear()
-                    listCurrency.addAll(fullListCurrency.filter {
-                        it.name.lowercase().contains(str.lowercase())
-                    })
-                }
-            }
-    }
-
-    Surface(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.White)
-    ) {
-        Column(modifier = Modifier.fillMaxSize()) {
-            ToolBarCurrencyScreen(
-                isSearching,
-                searchTextFlow,
-                onBack = {
-                    if (isSearching.value) {
-                        isSearching.value = false
-                        listCurrency.clear()
-                        listCurrency.addAll(fullListCurrency)
-                    } else {
-                        addEventScreenViewModel.setOpenCurrencyScreen(false)
-                    }
-                },
-                onSearchDone = { str ->
-                    listCurrency.clear()
-                    listCurrency.addAll(fullListCurrency.filter {
-                        it.name.lowercase().contains(str.lowercase())
-                    })
-                    // Clear keyboard after press search
-                    currentFocus.clearFocus()
-                }
-            )
-            ListCurrencies(listCurrency, selectedCurrency) {
-                addEventScreenViewModel.setCurrencySelected(it)
-                addEventScreenViewModel.setOpenCurrencyScreen(false)
-            }
-        }
-    }
-}
-
-@Composable
-fun SelectCurrencyScreen(
     navController: NavController,
-    walletViewModel: WalletViewModel = hiltViewModel(),
+    addEventScreenViewModel: AddEventScreenViewModel,
     selectCurrencyViewModel: SelectCurrencyViewModel = hiltViewModel()
 ) {
     val isSearching = remember { mutableStateOf(false) }
@@ -160,7 +79,10 @@ fun SelectCurrencyScreen(
     val fullListCurrency = remember { mutableStateListOf<CurrencyEntity>() }
     val navBackStackEntry by navController.currentBackStackEntryAsState()
 
-    BackHandler(navBackStackEntry?.destination?.route == ScreenSelection.SELECT_CURRENCY_SCREEN.route) {
+    BackHandler(navBackStackEntry?.destination?.route == screenRoute(
+        SelectionUI.ADD_TRANSACTION.route,
+        SelectionUI.SELECT_CURRENCY.route
+    )) {
         if (isSearching.value) {
             isSearching.value = false
             listCurrency.clear()
@@ -171,7 +93,7 @@ fun SelectCurrencyScreen(
     }
 
     val currentFocus = LocalFocusManager.current
-    val selectedCurrency = walletViewModel.currencySelected.collectAsState().value
+    val selectedCurrency = addEventScreenViewModel.currencySelected.collectAsState().value
     val searchTextFlow = remember { MutableStateFlow("") }
 
     LaunchedEffect(selectCurrencyViewModel.getListCurrencies.collectAsState().value) {
@@ -227,7 +149,97 @@ fun SelectCurrencyScreen(
                 }
             )
             ListCurrencies(listCurrency, selectedCurrency) {
-                walletViewModel.setCurrency(it)
+                addEventScreenViewModel.setCurrencySelected(it)
+                navController.popBackStack()
+            }
+        }
+    }
+}
+
+@Composable
+fun SelectCurrencyScreen(
+    navController: NavController,
+    addWalletViewModel: AddWalletViewModel,
+    selectCurrencyViewModel: SelectCurrencyViewModel = hiltViewModel()
+) {
+    val isSearching = remember { mutableStateOf(false) }
+    val listCurrency = remember { mutableStateListOf<CurrencyEntity>() }
+    val fullListCurrency = remember { mutableStateListOf<CurrencyEntity>() }
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+
+    BackHandler(
+        navBackStackEntry?.destination?.route == screenRoute(
+            SelectionUI.ACCOUNT.route,
+            SelectionUI.SELECT_CURRENCY.route
+        )
+    ) {
+        if (isSearching.value) {
+            isSearching.value = false
+            listCurrency.clear()
+            listCurrency.addAll(fullListCurrency)
+            return@BackHandler
+        }
+        navController.popBackStack()
+    }
+
+    val currentFocus = LocalFocusManager.current
+    val selectedCurrency = addWalletViewModel.currencySelected.collectAsState().value
+    val searchTextFlow = remember { MutableStateFlow("") }
+
+    LaunchedEffect(selectCurrencyViewModel.getListCurrencies.collectAsState().value) {
+        selectCurrencyViewModel.getListCurrencies.collectLatest {
+            if (it is Resource.Success) {
+                listCurrency.clear()
+                listCurrency.addAll(it.value)
+
+                fullListCurrency.clear()
+                fullListCurrency.addAll(it.value)
+            }
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        searchTextFlow
+            .debounce(500)
+            .collectLatest { str ->
+                if (isSearching.value) {
+                    listCurrency.clear()
+                    listCurrency.addAll(fullListCurrency.filter {
+                        it.name.lowercase().contains(str.lowercase())
+                    })
+                }
+            }
+    }
+
+    Surface(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
+    ) {
+        Column(modifier = Modifier.fillMaxSize()) {
+            ToolBarCurrencyScreen(
+                isSearching,
+                searchTextFlow,
+                onBack = {
+                    if (isSearching.value) {
+                        isSearching.value = false
+                        listCurrency.clear()
+                        listCurrency.addAll(fullListCurrency)
+                    } else {
+                        navController.popBackStack()
+                    }
+                },
+                onSearchDone = { str ->
+                    listCurrency.clear()
+                    listCurrency.addAll(fullListCurrency.filter {
+                        it.name.lowercase().contains(str.lowercase())
+                    })
+                    // Clear keyboard after press search
+                    currentFocus.clearFocus()
+                }
+            )
+            ListCurrencies(listCurrency, selectedCurrency) {
+                addWalletViewModel.setCurrency(it)
                 navController.popBackStack()
             }
         }

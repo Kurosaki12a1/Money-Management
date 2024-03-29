@@ -47,10 +47,10 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import com.kuro.money.R
 import com.kuro.money.data.model.EventEntity
 import com.kuro.money.data.utils.Resource
-import com.kuro.money.domain.model.ScreenSelection
+import com.kuro.money.domain.model.SelectionUI
+import com.kuro.money.domain.model.screenRoute
 import com.kuro.money.extension.detectHorizontalWithDelay
 import com.kuro.money.presenter.add_transaction.AddTransactionViewModel
-import com.kuro.money.presenter.add_transaction.feature.event.feature.add_event.AddEventScreen
 import com.kuro.money.presenter.utils.CrossSlide
 import com.kuro.money.presenter.utils.toPainterResource
 import com.kuro.money.ui.theme.Gray
@@ -64,12 +64,16 @@ fun SelectEventScreen(
     selectEventViewModel: SelectEventViewModel = hiltViewModel()
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    BackHandler(enabled = navBackStackEntry?.destination?.route == ScreenSelection.EVENT_SCREEN.route) {
+    BackHandler(
+        enabled = navBackStackEntry?.destination?.route == screenRoute(
+            SelectionUI.ADD_TRANSACTION.route,
+            SelectionUI.EVENT.route
+        )
+    ) {
         navController.popBackStack()
     }
 
     val listEvent = remember { mutableListOf<EventEntity>() }
-    val shouldOpenAddEventScreen = selectEventViewModel.enableAddEventScreen.collectAsState().value
     val selectedTabIndexed = remember { mutableStateOf(0) }
 
     LaunchedEffect(selectEventViewModel.getAllEvents.collectAsState().value) {
@@ -130,7 +134,14 @@ fun SelectEventScreen(
             }
 
             FloatingActionButton(
-                onClick = { selectEventViewModel.setEnableAddEventScreen(true) },
+                onClick = {
+                    navController.navigate(
+                        screenRoute(
+                            SelectionUI.ADD_TRANSACTION.route,
+                            SelectionUI.ADD_EVENT.route
+                        )
+                    )
+                },
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(20.dp),
@@ -143,16 +154,6 @@ fun SelectEventScreen(
                     modifier = Modifier.size(36.dp)
                 )
             }
-        }
-    }
-    CrossSlide(
-        currentState = false,
-        targetState = shouldOpenAddEventScreen,
-        orderedContent = listOf(false, true)
-    ) {
-        when (it) {
-            true -> AddEventScreen()
-            else -> { selectEventViewModel.getAllEvents() }
         }
     }
 }

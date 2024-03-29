@@ -34,13 +34,13 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.kuro.money.R
 import com.kuro.money.data.model.AccountEntity
 import com.kuro.money.data.utils.Resource
-import com.kuro.money.domain.model.ScreenSelection
+import com.kuro.money.domain.model.SelectionUI
+import com.kuro.money.domain.model.screenRoute
 import com.kuro.money.presenter.add_transaction.AddTransactionViewModel
 import com.kuro.money.presenter.add_transaction.feature.event.feature.add_event.AddEventScreenViewModel
 import com.kuro.money.presenter.utils.toPainterResource
@@ -54,7 +54,12 @@ fun SelectWalletScreen(
     selectWalletViewModel: SelectWalletViewModel = hiltViewModel()
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    BackHandler(enabled = navBackStackEntry?.destination?.route == ScreenSelection.WALLET_SCREEN.route) {
+    BackHandler(
+        enabled = navBackStackEntry?.destination?.route == screenRoute(
+            SelectionUI.ADD_TRANSACTION.route,
+            SelectionUI.WALLET.route
+        )
+    ) {
         navController.popBackStack()
     }
 
@@ -132,11 +137,19 @@ fun SelectWalletScreen(
 
 @Composable
 fun SelectWalletScreen(
-    addEventScreenViewModel: AddEventScreenViewModel = hiltViewModel(),
+    navController: NavController,
+    addEventScreenViewModel: AddEventScreenViewModel,
     selectWalletViewModel: SelectWalletViewModel = hiltViewModel()
 ) {
-    BackHandler(enabled = addEventScreenViewModel.enableChildScreen.collectAsState().value == ScreenSelection.WALLET_SCREEN) {
-        addEventScreenViewModel.setOpenWalletScreen(false)
+    val navBackStackEntry by navController.currentBackStackEntryAsState()
+    BackHandler(
+        enabled = navBackStackEntry?.destination?.route ==
+                screenRoute(
+                    SelectionUI.EVENT.route,
+                    SelectionUI.WALLET.route
+                )
+    ) {
+        navController.popBackStack()
     }
 
     val listWallet = remember { mutableStateListOf<AccountEntity>() }
@@ -172,7 +185,7 @@ fun SelectWalletScreen(
                     imageVector = Icons.Default.ArrowBack,
                     contentDescription = "Back",
                     modifier = Modifier.clickable {
-                        addEventScreenViewModel.setOpenWalletScreen(false)
+                        navController.popBackStack()
                     })
                 Text(
                     text = stringResource(id = R.string.select_wallet),
@@ -201,9 +214,9 @@ fun SelectWalletScreen(
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 items(listWallet) {
-                    WalletItem(item = it, isSelected = it == selectedWallet.value) {item ->
+                    WalletItem(item = it, isSelected = it == selectedWallet.value) { item ->
                         addEventScreenViewModel.setWallet(item)
-                        addEventScreenViewModel.setOpenWalletScreen(false)
+                        navController.popBackStack()
                     }
                 }
             }
@@ -235,7 +248,7 @@ private fun WalletItem(
                 color = Color.Black
             )
             Text(
-                text = "${item.balance} ${item.currencyEntity.symbol}" ,
+                text = "${item.balance} ${item.currencyEntity.symbol}",
                 style = MaterialTheme.typography.body2,
                 color = Color.Black.copy(alpha = 0.3f)
             )

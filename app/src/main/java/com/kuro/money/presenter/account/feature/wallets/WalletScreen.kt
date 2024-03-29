@@ -16,6 +16,7 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.BasicTextField
@@ -51,13 +52,13 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.kuro.money.R
 import com.kuro.money.data.model.AccountEntity
 import com.kuro.money.data.utils.Resource
-import com.kuro.money.domain.model.ScreenSelection
+import com.kuro.money.domain.model.SelectionUI
+import com.kuro.money.domain.model.screenRoute
 import com.kuro.money.extension.noRippleClickable
 import com.kuro.money.presenter.utils.toPainterResource
 import com.kuro.money.ui.theme.Gray
@@ -69,7 +70,7 @@ import kotlinx.coroutines.flow.debounce
 @Composable
 fun WalletScreen(
     navController: NavController,
-    walletViewModel: WalletViewModel = hiltViewModel()
+    walletViewModel: WalletViewModel
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val listWallet = remember { mutableStateListOf<AccountEntity>() }
@@ -77,7 +78,12 @@ fun WalletScreen(
     val isSearching = remember { mutableStateOf(false) }
     val searchTextFlow = remember { MutableStateFlow("") }
 
-    BackHandler(enabled = navBackStackEntry?.destination?.route == ScreenSelection.MY_WALLET_SCREEN.route) {
+    BackHandler(
+        enabled = navBackStackEntry?.destination?.route == screenRoute(
+            SelectionUI.ACCOUNT.route,
+            SelectionUI.MY_WALLET.route
+        )
+    ) {
         if (isSearching.value) {
             isSearching.value = false
             listWallet.clear()
@@ -133,16 +139,24 @@ fun WalletScreen(
                     navController.popBackStack()
                 })
             if (isSearching.value) {
-                BasicTextField(
-                    value = searchTextFlow.collectAsState().value,
-                    onValueChange = { searchTextFlow.value = it },
-                    modifier = Modifier.fillMaxWidth(),
-                    keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                    textStyle = TextStyle(
-                        color = Color.Black,
-                        fontSize = 18.sp
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    if (searchTextFlow.collectAsState().value.isEmpty()) {
+                        Text(
+                            text = stringResource(id = R.string.search),
+                            color = Color.Black.copy(0.5f),
+                            style = MaterialTheme.typography.h6
+                        )
+                    }
+                    BasicTextField(
+                        value = searchTextFlow.collectAsState().value,
+                        onValueChange = { searchTextFlow.value = it },
+                        keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                        textStyle = TextStyle(
+                            color = Color.Black,
+                            fontSize = 18.sp
+                        )
                     )
-                )
+                }
                 Spacer(modifier = Modifier.weight(1f))
                 Icon(
                     imageVector = Icons.Default.Close,
@@ -181,40 +195,48 @@ fun WalletScreen(
                 color = Color.Black.copy(alpha = 0.7f)
             )
         }
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Color.White)
-                .padding(10.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            items(listWallet, key = { it.id }) { item ->
-                WalletItem(item = item) {
+        Box(modifier = Modifier.fillMaxSize()){
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.White)
+                    .padding(10.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                items(listWallet, key = { it.id }) { item ->
+                    WalletItem(item = item) {
 
+                    }
+                }
+            }
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight()
+                    .padding(20.dp)
+                    .align(Alignment.BottomEnd)
+            ) {
+                FloatingActionButton(
+                    modifier = Modifier.align(Alignment.BottomEnd),
+                    backgroundColor = Teal200,
+                    onClick = {
+                        navController.navigate(
+                            screenRoute(
+                                SelectionUI.ACCOUNT.route,
+                                SelectionUI.ADD_WALLET.route
+                            )
+                        )
+                    }) {
+                    Icon(
+                        imageVector = Icons.Default.AddCircle,
+                        contentDescription = "Add",
+                        tint = Color.White,
+                        modifier = Modifier.size(30.dp)
+                    )
                 }
             }
         }
-        Spacer(modifier = Modifier.weight(1f))
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(20.dp)
-                .align(Alignment.End)
-        ) {
-            FloatingActionButton(
-                modifier = Modifier.align(Alignment.BottomEnd),
-                backgroundColor = Teal200,
-                onClick = {
-                    navController.navigate(ScreenSelection.ADD_WALLET_SCREEN.route)
-                }) {
-                Icon(
-                    imageVector = Icons.Default.AddCircle,
-                    contentDescription = "Add",
-                    tint = Color.White,
-                    modifier = Modifier.size(30.dp)
-                )
-            }
-        }
+
     }
 }
 
@@ -253,16 +275,30 @@ private fun WalletItem(
 @Composable
 fun AddWalletScreen(
     navController: NavController,
-    walletViewModel: WalletViewModel = hiltViewModel()
+    addWalletViewModel: AddWalletViewModel
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    BackHandler(navBackStackEntry?.destination?.route == ScreenSelection.ADD_WALLET_SCREEN.route) {
+    BackHandler(
+        navBackStackEntry?.destination?.route == screenRoute(
+            SelectionUI.ACCOUNT.route,
+            SelectionUI.ADD_WALLET.route
+        )
+    ) {
         navController.popBackStack()
     }
 
-    val nameWallet = remember { mutableStateOf("") }
-    val currencySelected = walletViewModel.currencySelected.collectAsState().value
-    val balance = remember { mutableStateOf(0f) }
+    LaunchedEffect(Unit) {
+        addWalletViewModel.insertWallet.collectLatest {
+            if (it is Resource.Success) {
+                navController.popBackStack()
+            }
+        }
+    }
+
+    val nameWallet = addWalletViewModel.name.collectAsState().value
+    val iconSelected = addWalletViewModel.iconSelected.collectAsState().value
+    val currencySelected = addWalletViewModel.currencySelected.collectAsState().value
+    val balance = addWalletViewModel.balance.collectAsState().value
     val isTickEnableNotification = remember { mutableStateOf(false) }
     val isTickExcludeFromTotal = remember { mutableStateOf(false) }
     Column(
@@ -294,7 +330,8 @@ fun AddWalletScreen(
             Spacer(modifier = Modifier.weight(1f))
             Text(
                 text = stringResource(id = R.string.save),
-                style = MaterialTheme.typography.body1
+                style = MaterialTheme.typography.body1,
+                modifier = Modifier.noRippleClickable { addWalletViewModel.submit() }
             )
         }
         Spacer(
@@ -315,12 +352,17 @@ fun AddWalletScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(20.dp)
             ) {
-                Image(painter = painterResource(id = R.drawable.icon), contentDescription = "Icon",
+                Image(painter = iconSelected.toPainterResource(), contentDescription = "Icon",
                     modifier = Modifier.noRippleClickable {
-                        navController.navigate(ScreenSelection.SELECT_ICON_SCREEN.route)
+                        navController.navigate(
+                            screenRoute(
+                                SelectionUI.ACCOUNT.route,
+                                SelectionUI.SELECT_ICON.route
+                            )
+                        )
                     })
                 Box(modifier = Modifier.fillMaxWidth()) {
-                    if (nameWallet.value.isEmpty()) {
+                    if (nameWallet.isEmpty()) {
                         Text(
                             text = stringResource(id = R.string.name),
                             style = MaterialTheme.typography.h6,
@@ -328,8 +370,8 @@ fun AddWalletScreen(
                         )
                     }
                     BasicTextField(
-                        value = nameWallet.value,
-                        onValueChange = { nameWallet.value = it },
+                        value = nameWallet,
+                        onValueChange = { addWalletViewModel.setName(it) },
                         textStyle = TextStyle(
                             color = Color.Black,
                             fontSize = 18.sp
@@ -339,7 +381,16 @@ fun AddWalletScreen(
             }
             /* Currency Selection */
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .noRippleClickable {
+                        navController.navigate(
+                            screenRoute(
+                                SelectionUI.ACCOUNT.route,
+                                SelectionUI.SELECT_CURRENCY.route
+                            )
+                        )
+                    },
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(20.dp)
             ) {
@@ -378,20 +429,28 @@ fun AddWalletScreen(
                     color = Color.Black.copy(alpha = 0.5f),
                     style = MaterialTheme.typography.body1
                 )
-                BasicTextField(
-                    value = "${currencySelected?.symbol ?: ""} ${balance.value}",
-                    onValueChange = { balance.value = it.toFloat() },
-                    keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Number,
-                        imeAction = ImeAction.Done
-                    ),
-                    singleLine = true,
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.fillMaxWidth(),
-                    textStyle = TextStyle(
-                        color = Color.Black.copy(0.5f),
-                        fontSize = 18.sp
+                    horizontalArrangement = Arrangement.spacedBy(5.dp)
+                ) {
+                    Text(text = currencySelected?.symbol ?: "")
+                    BasicTextField(
+                        value = "${balance ?: ""}",
+                        onValueChange = { addWalletViewModel.setBalance(it.toLong()) },
+                        keyboardOptions = KeyboardOptions(
+                            keyboardType = KeyboardType.Number,
+                            imeAction = ImeAction.Done
+                        ),
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                        textStyle = TextStyle(
+                            color = Color.Black.copy(0.5f),
+                            fontSize = 18.sp
+                        )
                     )
-                )
+                }
+
             }
         }
         Spacer(
