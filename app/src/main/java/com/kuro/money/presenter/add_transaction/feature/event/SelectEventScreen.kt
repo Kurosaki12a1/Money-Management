@@ -61,6 +61,7 @@ import java.time.LocalDate
 @Composable
 fun SelectEventScreen(
     navController: NavController,
+    addTransactionViewModel: AddTransactionViewModel,
     selectEventViewModel: SelectEventViewModel = hiltViewModel()
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -73,10 +74,18 @@ fun SelectEventScreen(
         navController.popBackStack()
     }
 
+    if (navBackStackEntry?.destination?.route == screenRoute(
+            SelectionUI.ADD_TRANSACTION.route,
+            SelectionUI.EVENT.route
+        )
+    ) {
+        selectEventViewModel.getAllEvents()
+    }
+
     val listEvent = remember { mutableListOf<EventEntity>() }
     val selectedTabIndexed = remember { mutableStateOf(0) }
 
-    LaunchedEffect(selectEventViewModel.getAllEvents.collectAsState().value) {
+    LaunchedEffect(Unit) {
         selectEventViewModel.getAllEvents.collectLatest {
             if (it is Resource.Success) {
                 listEvent.clear()
@@ -84,6 +93,7 @@ fun SelectEventScreen(
             }
         }
     }
+
 
     Surface(
         modifier = Modifier
@@ -121,13 +131,17 @@ fun SelectEventScreen(
                         0 -> {
                             ListEventScreen(
                                 navController,
-                                listEvent.filter { item -> item.endDate.isAfter(LocalDate.now()) })
+                                listEvent.filter { item -> item.endDate.isAfter(LocalDate.now()) },
+                                addTransactionViewModel
+                            )
                         }
 
                         else -> {
                             ListEventScreen(
                                 navController,
-                                listEvent.filter { item -> item.endDate.isBefore(LocalDate.now()) })
+                                listEvent.filter { item -> item.endDate.isBefore(LocalDate.now()) },
+                                addTransactionViewModel
+                            )
                         }
                     }
                 }
@@ -162,7 +176,7 @@ fun SelectEventScreen(
 private fun ListEventScreen(
     navController: NavController,
     event: List<EventEntity>,
-    addTransactionViewModel: AddTransactionViewModel = hiltViewModel()
+    addTransactionViewModel: AddTransactionViewModel
 ) {
     //TODO show the blank event screen
     if (event.isEmpty()) return

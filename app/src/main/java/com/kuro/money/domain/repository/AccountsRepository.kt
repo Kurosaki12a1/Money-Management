@@ -14,4 +14,8 @@ interface AccountsRepository {
     fun getAllAccounts(): Flow<Resource<List<AccountEntity>>>
 
     fun readFileFromJson(jsonName: String): Flow<Resource<List<AccountEntity>?>>
+
+    fun getAccountById(id : Long) : Flow<Resource<AccountEntity>>
+
+    fun deleteAccountById(id: Long) : Flow<Resource<Int>>
 }

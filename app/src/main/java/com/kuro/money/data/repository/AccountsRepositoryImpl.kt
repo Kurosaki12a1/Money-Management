@@ -78,4 +78,25 @@ class AccountsRepositoryImpl @Inject constructor(
         }
     }.flowOn(dispatcher)
 
+    override fun getAccountById(id: Long): Flow<Resource<AccountEntity>> = flow {
+        emit(Resource.Loading)
+        try {
+            val data = appDatabase.accountsDao().getWalletById(id)
+            emit(Resource.success(data))
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emit(Resource.failure(e, e.message))
+        }
+    }.flowOn(dispatcher)
+
+    override fun deleteAccountById(id: Long): Flow<Resource<Int>> = flow {
+        emit(Resource.Loading)
+        try {
+            val rowDelete = appDatabase.accountsDao().deleteWalletById(id)
+            emit(Resource.success(rowDelete))
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emit(Resource.failure(e, e.message))
+        }
+    }
 }

@@ -40,6 +40,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -63,20 +64,35 @@ import com.kuro.money.extension.noRippleClickable
 import com.kuro.money.presenter.utils.toPainterResource
 import com.kuro.money.ui.theme.Gray
 import com.kuro.money.ui.theme.Teal200
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.launch
+import java.util.concurrent.atomic.AtomicBoolean
 
 @Composable
 fun WalletScreen(
     navController: NavController,
-    walletViewModel: WalletViewModel
+    walletViewModel: WalletViewModel,
+    editWalletViewModel: EditWalletViewModel
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
+
+    if (navBackStackEntry?.destination?.route == screenRoute(
+            SelectionUI.ACCOUNT.route,
+            SelectionUI.MY_WALLET.route
+        )
+    ) {
+        walletViewModel.getWallets()
+    }
+
     val listWallet = remember { mutableStateListOf<AccountEntity>() }
     val fullListWallet = remember { mutableStateListOf<AccountEntity>() }
     val isSearching = remember { mutableStateOf(false) }
     val searchTextFlow = remember { MutableStateFlow("") }
+    val isClickAllowed = remember { AtomicBoolean(true)}
+    val scope = rememberCoroutineScope()
 
     BackHandler(
         enabled = navBackStackEntry?.destination?.route == screenRoute(
@@ -195,7 +211,7 @@ fun WalletScreen(
                 color = Color.Black.copy(alpha = 0.7f)
             )
         }
-        Box(modifier = Modifier.fillMaxSize()){
+        Box(modifier = Modifier.fillMaxSize()) {
             LazyColumn(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -205,7 +221,17 @@ fun WalletScreen(
             ) {
                 items(listWallet, key = { it.id }) { item ->
                     WalletItem(item = item) {
-
+                        if (isClickAllowed.getAndSet(false)) {
+                            editWalletViewModel.getWalletById(it.id)
+                            navController.navigate(screenRoute(
+                                SelectionUI.ACCOUNT.route,
+                                SelectionUI.EDIT_WALLET.route
+                            ))
+                            scope.launch {
+                                delay(200)
+                                isClickAllowed.set(true)
+                            }
+                        }
                     }
                 }
             }

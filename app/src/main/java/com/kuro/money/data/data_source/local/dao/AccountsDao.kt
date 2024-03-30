@@ -10,11 +10,17 @@ import com.kuro.money.data.model.AccountEntity
 @Dao
 interface AccountsDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insertWallet(accounts: AccountEntity) : Long
+    fun insertWallet(accounts: AccountEntity): Long
 
     @Update(onConflict = OnConflictStrategy.REPLACE)
-    fun updateWallet(accounts: AccountEntity) : Int
+    fun updateWallet(accounts: AccountEntity): Int
 
     @Query("SELECT * FROM accounts")
     fun getAllWallets(): List<AccountEntity>
+
+    @Query("SELECT * FROM accounts WHERE id=:id")
+    fun getWalletById(id: Long): AccountEntity
+
+    @Query("DELETE FROM accounts WHERE id=:id")
+    fun deleteWalletById(id: Long) : Int
 }

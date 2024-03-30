@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import java.time.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
@@ -28,15 +29,39 @@ class AddEventScreenViewModel @Inject constructor(
     private val _wallet = MutableStateFlow<AccountEntity?>(null)
     val wallet = _wallet.asStateFlow()
 
+    private val _name = MutableStateFlow("")
+    val name = _name.asStateFlow()
+
+    private val _endingDate = MutableStateFlow<LocalDate>(LocalDate.now())
+    val endingDate = _endingDate.asStateFlow()
+
     private val _currencySelected = MutableStateFlow<CurrencyEntity?>(null)
     val currencySelected = _currencySelected.asStateFlow()
 
-    fun insertEvent(event: EventEntity) {
+    fun insertEvent() {
+        if (name.value.isEmpty() || wallet.value == null || iconSelected.value == null || currencySelected.value == null) return
+        val event = EventEntity(
+            0L,
+            iconSelected.value!!,
+            name.value,
+            startDate = LocalDate.now(),
+            endDate = endingDate.value,
+            currency = currencySelected.value!!,
+            wallet = _wallet.value!!
+        )
         viewModelScope.launch {
             eventUseCase(event).collectLatest {
                 _insertEvent.value = it
             }
         }
+    }
+
+    fun setName(name: String) {
+        _name.value = name
+    }
+
+    fun setEndingDate(date: LocalDate) {
+        _endingDate.value = date
     }
 
     fun setCurrencySelected(value: CurrencyEntity) {

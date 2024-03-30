@@ -50,7 +50,7 @@ import kotlinx.coroutines.flow.collectLatest
 @Composable
 fun SelectWalletScreen(
     navController: NavController,
-    addTransactionViewModel: AddTransactionViewModel = hiltViewModel(),
+    addTransactionViewModel: AddTransactionViewModel,
     selectWalletViewModel: SelectWalletViewModel = hiltViewModel()
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
@@ -68,7 +68,7 @@ fun SelectWalletScreen(
     val walletValue = addTransactionViewModel.wallet.collectAsState().value
     val selectedWallet = remember { mutableStateOf(walletValue) }
 
-    LaunchedEffect(selectWalletViewModel.getAccountUseCase.collectAsState().value) {
+    LaunchedEffect(Unit) {
         selectWalletViewModel.getAccountUseCase.collectLatest {
             if (it is Resource.Success) {
                 listWallet.clear()
@@ -157,7 +157,7 @@ fun SelectWalletScreen(
     val walletValue = addEventScreenViewModel.wallet.collectAsState().value
     val selectedWallet = remember { mutableStateOf(walletValue) }
 
-    LaunchedEffect(selectWalletViewModel.getAccountUseCase.collectAsState().value) {
+    LaunchedEffect(Unit) {
         selectWalletViewModel.getAccountUseCase.collectLatest {
             if (it is Resource.Success) {
                 listWallet.clear()

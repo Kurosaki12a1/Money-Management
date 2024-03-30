@@ -59,4 +59,7 @@
     <string name="exclude_from_total">Exclude from Total</string>
     <string name="exclude_from_total_hint">Ignore this wallet and its balance in the "Total" mode.</string>
     <string name="search">Search</string>
+    <string name="archive">Archive</string>
+    <string name="archive_hint">Freeze this wallet and stop generating bills and recurring transactions.</string>
+    <string name="delete_wallet">DELETE THIS WALLET</string>
 </resources>

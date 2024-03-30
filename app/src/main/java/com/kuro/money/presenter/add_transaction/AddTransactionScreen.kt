@@ -142,7 +142,7 @@ fun AddTransactionScreen(
                 || dateTransaction.value == null)
     }
 
-    LaunchedEffect(addTransactionViewModel.insertTransaction.collectAsState().value) {
+    LaunchedEffect(Unit) {
         addTransactionViewModel.insertTransaction.collectLatest {
             if (it is Resource.Success) {
                 navController.popBackStack()

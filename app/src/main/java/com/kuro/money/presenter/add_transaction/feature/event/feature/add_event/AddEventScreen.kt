@@ -31,8 +31,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -42,11 +40,9 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.kuro.money.R
-import com.kuro.money.data.model.EventEntity
 import com.kuro.money.data.utils.Resource
 import com.kuro.money.domain.model.SelectionUI
 import com.kuro.money.domain.model.screenRoute
@@ -57,7 +53,6 @@ import com.kuro.money.presenter.utils.string
 import com.kuro.money.presenter.utils.toPainterResource
 import com.kuro.money.ui.theme.Gray
 import kotlinx.coroutines.flow.collectLatest
-import java.time.LocalDate
 
 @Composable
 fun AddEventScreen(
@@ -79,11 +74,11 @@ fun AddEventScreen(
     val walletSelected = addEventScreenViewModel.wallet.collectAsState().value
     val currencySelected = addEventScreenViewModel.currencySelected.collectAsState().value
 
-    val name = remember { mutableStateOf("") }
-    val endingDate = remember { mutableStateOf<LocalDate?>(null) }
+    val name = addEventScreenViewModel.name.collectAsState().value
+    val endingDate = addEventScreenViewModel.endingDate.collectAsState().value
     val context = LocalContext.current
 
-    LaunchedEffect(addEventScreenViewModel.insertEvent.collectAsState().value) {
+    LaunchedEffect(Unit) {
         addEventScreenViewModel.insertEvent.collectLatest {
             if (it is Resource.Success) {
                 navController.popBackStack()
@@ -123,23 +118,7 @@ fun AddEventScreen(
                     style = MaterialTheme.typography.body1,
                     textAlign = TextAlign.Center,
                     modifier = Modifier.noRippleClickable {
-                        if (iconSelected != null
-                            && endingDate.value != null
-                            && currencySelected != null
-                            && walletSelected != null
-                        ) {
-                            addEventScreenViewModel.insertEvent(
-                                EventEntity(
-                                    id = 0L,
-                                    icon = iconSelected,
-                                    name = name.value,
-                                    startDate = LocalDate.now(),
-                                    endDate = endingDate.value!!,
-                                    currency = currencySelected,
-                                    wallet = walletSelected
-                                )
-                            )
-                        }
+                        addEventScreenViewModel.insertEvent()
                     }
                 )
             }
@@ -198,7 +177,7 @@ fun AddEventScreen(
                             )
                         }
                         Box(contentAlignment = Alignment.CenterStart) {
-                            if (name.value == "") {
+                            if (name.isEmpty()) {
                                 Text(
                                     text = stringResource(id = R.string.app_name),
                                     color = Color.Black.copy(alpha = 0.5f),
@@ -209,8 +188,8 @@ fun AddEventScreen(
                                 )
                             }
                             BasicTextField(
-                                value = name.value,
-                                onValueChange = { value -> name.value = value },
+                                value = name,
+                                onValueChange = { value -> addEventScreenViewModel.setName(value) },
                                 textStyle = TextStyle(
                                     color = Color.Black.copy(alpha = 0.5f),
                                     fontSize = 18.sp,
@@ -229,7 +208,7 @@ fun AddEventScreen(
                             .fillMaxWidth()
                             .noRippleClickable {
                                 showDatePicker(context) {
-                                    endingDate.value = it
+                                    addEventScreenViewModel.setEndingDate(it)
                                 }
                             },
                         verticalAlignment = Alignment.CenterVertically,
@@ -240,11 +219,7 @@ fun AddEventScreen(
                             contentDescription = "Ending Date"
                         )
                         Text(
-                            text = if (endingDate.value == null) {
-                                stringResource(id = R.string.ending_date)
-                            } else {
-                                endingDate.value?.string() ?: ""
-                            },
+                            text = endingDate.string(),
                             color = Color.Black.copy(alpha = 0.5f),
                             style = MaterialTheme.typography.body1
                         )

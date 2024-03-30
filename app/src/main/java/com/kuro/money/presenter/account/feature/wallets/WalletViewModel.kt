@@ -2,6 +2,7 @@ package com.kuro.money.presenter.account.feature.wallets
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kuro.money.data.model.AccountEntity
 import com.kuro.money.data.model.CurrencyEntity
 import com.kuro.money.data.utils.Resource
@@ -21,14 +22,25 @@ class WalletViewModel @Inject constructor(
     private val _getWallets = MutableStateFlow<Resource<List<AccountEntity>?>>(Resource.Default)
     val getWallets = _getWallets.asStateFlow()
 
-    init {
-        getWallets()
-    }
+    private val _getDetailWallet = MutableStateFlow<Resource<AccountEntity?>>(Resource.Default)
+    val getWalletDetails = _getDetailWallet.asStateFlow()
 
     fun getWallets() {
         viewModelScope.launch {
             walletUseCase().collectLatest {
                 _getWallets.value = it
+            }
+        }
+    }
+
+    fun clearData() {
+        _getDetailWallet.value = Resource.Default
+    }
+
+    fun getWalletById(id : Long) {
+        viewModelScope.launch {
+            walletUseCase(id).collectLatest {
+                _getDetailWallet.value = it
             }
         }
     }

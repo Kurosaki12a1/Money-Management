@@ -48,6 +48,8 @@ import com.kuro.money.presenter.account.AccountScreen
 import com.kuro.money.presenter.account.feature.about.AboutScreen
 import com.kuro.money.presenter.account.feature.wallets.AddWalletScreen
 import com.kuro.money.presenter.account.feature.wallets.AddWalletViewModel
+import com.kuro.money.presenter.account.feature.wallets.EditWalletScreen
+import com.kuro.money.presenter.account.feature.wallets.EditWalletViewModel
 import com.kuro.money.presenter.account.feature.wallets.WalletScreen
 import com.kuro.money.presenter.account.feature.wallets.WalletViewModel
 import com.kuro.money.presenter.add_transaction.AddTransactionScreen
@@ -192,7 +194,9 @@ private fun Navigation(
                 popExitTransition = { slideHorizontalAnimation.popExitTransition },
                 popEnterTransition = { slideHorizontalAnimation.popEnterTransition }) {
                 val parentEntry = remember(it) {
-                    navController.getBackStackEntry(SelectionUI.SUB_GRAPH_TRANSACTION.route)
+                    navController.getBackStackEntry(
+                        screenRoute(parentRoute, SelectionUI.ADD_EVENT.route),
+                    )
                 }
                 val addEventScreenViewModel = hiltViewModel<AddEventScreenViewModel>(parentEntry)
                 SelectWalletScreen(navController, addEventScreenViewModel)
@@ -215,7 +219,11 @@ private fun Navigation(
                 exitTransition = { slideHorizontalAnimation.exitTransition },
                 popExitTransition = { slideHorizontalAnimation.popExitTransition },
                 popEnterTransition = { slideHorizontalAnimation.popEnterTransition }) {
-                SelectEventScreen(navController)
+                val parentEntry = remember(it) {
+                    navController.getBackStackEntry(SelectionUI.SUB_GRAPH_TRANSACTION.route)
+                }
+                val transactionViewModel = hiltViewModel<AddTransactionViewModel>(parentEntry)
+                SelectEventScreen(navController, transactionViewModel)
             }
             composable(
                 screenRoute(parentRoute, SelectionUI.ADD_EVENT.route),
@@ -224,7 +232,9 @@ private fun Navigation(
                 popExitTransition = { slideHorizontalAnimation.popExitTransition },
                 popEnterTransition = { slideHorizontalAnimation.popEnterTransition }) {
                 val parentEntry = remember(it) {
-                    navController.getBackStackEntry(SelectionUI.SUB_GRAPH_TRANSACTION.route)
+                    navController.getBackStackEntry(
+                        screenRoute(parentRoute, SelectionUI.ADD_EVENT.route),
+                    )
                 }
                 val addEventScreenViewModel = hiltViewModel<AddEventScreenViewModel>(parentEntry)
                 AddEventScreen(navController, addEventScreenViewModel)
@@ -236,7 +246,9 @@ private fun Navigation(
                 popExitTransition = { slideHorizontalAnimation.popExitTransition },
                 popEnterTransition = { slideHorizontalAnimation.popEnterTransition }) {
                 val parentEntry = remember(it) {
-                    navController.getBackStackEntry(SelectionUI.SUB_GRAPH_TRANSACTION.route)
+                    navController.getBackStackEntry(
+                        screenRoute(parentRoute, SelectionUI.ADD_EVENT.route),
+                    )
                 }
                 val addEventScreenViewModel = hiltViewModel<AddEventScreenViewModel>(parentEntry)
                 SelectCurrencyScreen(navController, addEventScreenViewModel)
@@ -248,7 +260,9 @@ private fun Navigation(
                 popExitTransition = { slideHorizontalAnimation.popExitTransition },
                 popEnterTransition = { slideHorizontalAnimation.popEnterTransition }) {
                 val parentEntry = remember(it) {
-                    navController.getBackStackEntry(SelectionUI.SUB_GRAPH_TRANSACTION.route)
+                    navController.getBackStackEntry(
+                        screenRoute(parentRoute, SelectionUI.ADD_EVENT.route),
+                    )
                 }
                 val addEventScreenViewModel = hiltViewModel<AddEventScreenViewModel>(parentEntry)
                 SelectIconScreen(navController, addEventScreenViewModel)
@@ -289,6 +303,34 @@ private fun Navigation(
                 val viewModel = hiltViewModel<AddWalletViewModel>(parentEntry)
                 SelectIconScreen(navController, viewModel)
             }
+            composable(screenRoute(parentRoute, SelectionUI.EDIT_WALLET.route)) {
+                val parentEntry = remember(it) {
+                    navController.getBackStackEntry(
+                        screenRoute(parentRoute, SelectionUI.MY_WALLET.route)
+                    )
+                }
+                val viewModel = hiltViewModel<EditWalletViewModel>(parentEntry)
+                EditWalletScreen(navController = navController, viewModel = viewModel )
+            }
+            composable(screenRoute(SelectionUI.EDIT_WALLET.route, SelectionUI.SELECT_ICON.route)) {
+                val parentEntry = remember(it) {
+                    navController.getBackStackEntry(
+                        screenRoute(parentRoute, SelectionUI.MY_WALLET.route)
+                    )
+                }
+                val viewModel = hiltViewModel<EditWalletViewModel>(parentEntry)
+                SelectIconScreen(navController, viewModel)
+            }
+            composable(screenRoute(SelectionUI.EDIT_WALLET.route, SelectionUI.SELECT_CURRENCY.route)
+            ) {
+                val parentEntry = remember(it) {
+                    navController.getBackStackEntry(
+                        screenRoute(parentRoute, SelectionUI.MY_WALLET.route)
+                    )
+                }
+                val viewModel = hiltViewModel<EditWalletViewModel>(parentEntry)
+                SelectCurrencyScreen(navController, viewModel)
+            }
             composable(screenRoute(parentRoute, SelectionUI.ADD_WALLET.route)) {
                 val parentEntry = remember(it) {
                     navController.getBackStackEntry(
@@ -305,8 +347,14 @@ private fun Navigation(
                 val parentEntry = remember(it) {
                     navController.getBackStackEntry(SelectionUI.SUB_GRAPH_ACCOUNT.route)
                 }
+                val childEntry = remember(it) {
+                    navController.getBackStackEntry(
+                        screenRoute(parentRoute, SelectionUI.MY_WALLET.route)
+                    )
+                }
                 val walletViewModel = hiltViewModel<WalletViewModel>(parentEntry)
-                WalletScreen(navController, walletViewModel)
+                val editWalletViewModel = hiltViewModel<EditWalletViewModel>(childEntry)
+                WalletScreen(navController, walletViewModel, editWalletViewModel)
             }
             composable(screenRoute(parentRoute, SelectionUI.MY_ABOUT.route)) {
                 AboutScreen(navController)

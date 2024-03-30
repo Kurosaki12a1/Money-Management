@@ -6,7 +6,6 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.composed
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
@@ -17,7 +16,9 @@ import kotlin.random.Random
 
 @Composable
 fun Modifier.noRippleClickable(onClick: () -> Unit): Modifier {
-    return this.clickable(indication = null, interactionSource = remember { MutableInteractionSource() }) {
+    return this.clickable(
+        indication = null,
+        interactionSource = remember(this) { MutableInteractionSource() }) {
         onClick()
     }
 }

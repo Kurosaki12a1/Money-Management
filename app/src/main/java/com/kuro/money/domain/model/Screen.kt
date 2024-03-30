@@ -27,7 +27,8 @@ enum class SelectionUI(val route: String) {
     EVENT("event"),
     ADD_EVENT("add_event"),
     SELECT_CURRENCY("select_currency"),
-    SELECT_ICON("select_icon")
+    SELECT_ICON("select_icon"),
+    EDIT_WALLET("edit_wallet")
 }
 
 fun screenRoute(parentRoute: String, childRoute : String) = "$parentRoute/$childRoute"

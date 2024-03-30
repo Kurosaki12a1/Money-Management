@@ -19,10 +19,6 @@ class SelectEventViewModel @Inject constructor(
     private val _getAllEvents = MutableStateFlow<Resource<List<EventEntity>?>>(Resource.Default)
     val getAllEvents = _getAllEvents.asStateFlow()
 
-    init {
-        getAllEvents()
-    }
-
     fun getAllEvents() {
         viewModelScope.launch {
             eventUseCase().collectLatest {
