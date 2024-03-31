@@ -47,8 +47,8 @@ import com.kuro.money.ui.theme.Green
 @Composable
 fun IncomeScreen(
     listCategory: List<CategoryEntity>,
+    addTransactionViewModel: AddTransactionViewModel,
     vm: SelectCategoryViewModel = viewModel(),
-    addTransactionViewModel: AddTransactionViewModel = viewModel(),
 ) {
     val newListCategory = mutableListOf<CategoryEntity>()
     val sortedNameList = listCategory.sortedBy { it.name }

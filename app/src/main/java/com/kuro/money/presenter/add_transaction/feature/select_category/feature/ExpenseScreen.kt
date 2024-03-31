@@ -50,8 +50,8 @@ import com.kuro.money.ui.theme.Green
 @Composable
 fun ExpenseScreen(
     listCategory: List<CategoryEntity>,
+    addTransactionViewModel: AddTransactionViewModel,
     vm: SelectCategoryViewModel = hiltViewModel(),
-    addTransactionViewModel: AddTransactionViewModel = hiltViewModel(),
 ) {
     val newListCategory = mutableListOf<CategoryEntity>()
     val sortedNameList = listCategory.sortedBy { it.name }

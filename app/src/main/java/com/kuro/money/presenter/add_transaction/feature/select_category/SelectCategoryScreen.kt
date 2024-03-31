@@ -129,13 +129,16 @@ fun SelectCategoryScreen(
                 when (it) {
                     0 -> ExpenseScreen(listCategories.filter {
                         it.type == "expense" && !listSpecialCategories.contains(it.name)
-                    })
+                    }, addTransactionViewModel)
 
                     1 -> IncomeScreen(listCategories.filter {
                         it.type == "income" && !listSpecialCategories.contains(it.name)
-                    })
+                    }, addTransactionViewModel)
 
-                    2 -> DebtScreen(listCategories.filter { listSpecialCategories.contains(it.name) })
+                    2 -> DebtScreen(
+                        listCategories.filter { listSpecialCategories.contains(it.name) },
+                        addTransactionViewModel
+                    )
                 }
             }
         }
