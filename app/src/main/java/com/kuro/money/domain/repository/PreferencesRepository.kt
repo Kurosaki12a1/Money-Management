@@ -8,7 +8,11 @@ interface PreferencesRepository {
 
     fun isFirstTimeOpenApp(): Flow<Boolean>
 
+    fun getDefaultCurrency() : Flow<String>
+
     fun setOnBoardingDone(value: Boolean): Flow<Boolean>
 
     fun setFirstTimeOpen(value: Boolean): Flow<Boolean>
+
+    fun setDefaultCurrency(value: String) : Flow<String>
 }

@@ -21,6 +21,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.DropdownMenu
 import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
@@ -59,6 +60,7 @@ import com.kuro.money.R
 import com.kuro.money.data.model.AccountEntity
 import com.kuro.money.data.utils.Resource
 import com.kuro.money.domain.model.SelectionUI
+import com.kuro.money.domain.model.WalletOptions
 import com.kuro.money.domain.model.screenRoute
 import com.kuro.money.extension.noRippleClickable
 import com.kuro.money.presenter.utils.toPainterResource
@@ -68,6 +70,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.debounce
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicBoolean
 
@@ -79,19 +82,22 @@ fun WalletScreen(
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
 
-    if (navBackStackEntry?.destination?.route == screenRoute(
-            SelectionUI.ACCOUNT.route,
-            SelectionUI.MY_WALLET.route
-        )
-    ) {
-        walletViewModel.getWallets()
+    LaunchedEffect(navController.currentDestination?.route) {
+        if (navController.currentDestination?.route ==
+            screenRoute(
+                SelectionUI.ACCOUNT.route,
+                SelectionUI.MY_WALLET.route)){
+            walletViewModel.getWallets()
+        }
     }
 
     val listWallet = remember { mutableStateListOf<AccountEntity>() }
     val fullListWallet = remember { mutableStateListOf<AccountEntity>() }
     val isSearching = remember { mutableStateOf(false) }
     val searchTextFlow = remember { MutableStateFlow("") }
-    val isClickAllowed = remember { AtomicBoolean(true)}
+    val isClickAllowed = remember { AtomicBoolean(true) }
+    val shouldShowMoreOption = remember { mutableStateOf(false) }
+    val selectedItem = remember { mutableStateOf(0L) }
     val scope = rememberCoroutineScope()
 
     BackHandler(
@@ -122,8 +128,8 @@ fun WalletScreen(
             }
     }
 
-    LaunchedEffect(walletViewModel.getWallets.collectAsState().value) {
-        walletViewModel.getWallets.collectLatest { data ->
+    LaunchedEffect(Unit) {
+        walletViewModel.getWallets.collect { data ->
             if (data is Resource.Success) {
                 listWallet.clear()
                 fullListWallet.clear()
@@ -131,6 +137,20 @@ fun WalletScreen(
                     listWallet.addAll(it)
                     fullListWallet.addAll(it)
                 }
+            }
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        walletViewModel.deleteWallet.distinctUntilChanged { old, new ->
+            if (old is Resource.Success && new is Resource.Success) {
+                new.value != old.value
+            } else {
+                true
+            }
+        }.collect {
+            if (it is Resource.Success) {
+                walletViewModel.getWallets()
             }
         }
     }
@@ -220,19 +240,54 @@ fun WalletScreen(
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 items(listWallet, key = { it.id }) { item ->
-                    WalletItem(item = item) {
-                        if (isClickAllowed.getAndSet(false)) {
-                            editWalletViewModel.getWalletById(it.id)
-                            navController.navigate(screenRoute(
-                                SelectionUI.ACCOUNT.route,
-                                SelectionUI.EDIT_WALLET.route
-                            ))
-                            scope.launch {
-                                delay(200)
-                                isClickAllowed.set(true)
+                    WalletItem(
+                        item = item,
+                        shouldShowMoreOptions = item.id == selectedItem.value && shouldShowMoreOption.value,
+                        onClickMoreOption = {
+                            shouldShowMoreOption.value = true
+                            selectedItem.value = item.id
+                        },
+                        onDismissRequest = {
+                            shouldShowMoreOption.value = false
+                            selectedItem.value = 0L
+                        },
+                        onClick = {
+                            if (isClickAllowed.getAndSet(false)) {
+                                editWalletViewModel.getWalletById(it.id)
+                                navController.navigate(
+                                    screenRoute(
+                                        SelectionUI.ACCOUNT.route,
+                                        SelectionUI.EDIT_WALLET.route
+                                    )
+                                )
+                                scope.launch {
+                                    delay(200)
+                                    isClickAllowed.set(true)
+                                }
                             }
-                        }
-                    }
+                        },
+                        onSelectMoreOption = { wallet , option ->
+                            when (option) {
+                                WalletOptions.TRANSFER_MONEY -> {
+                                    // TODO
+                                }
+                                WalletOptions.EDIT -> {
+                                    editWalletViewModel.getWalletById(wallet.id)
+                                    navController.navigate(
+                                        screenRoute(
+                                            SelectionUI.ACCOUNT.route,
+                                            SelectionUI.EDIT_WALLET.route
+                                        )
+                                    )
+                                }
+                                WalletOptions.ARCHIVE -> {
+                                    // TODO
+                                }
+                                else -> {
+                                    walletViewModel.deleteWalletById(wallet.id)
+                                }
+                            }
+                        })
                 }
             }
             Box(
@@ -269,7 +324,11 @@ fun WalletScreen(
 @Composable
 private fun WalletItem(
     item: AccountEntity,
-    onClick: (AccountEntity) -> Unit
+    shouldShowMoreOptions: Boolean,
+    onDismissRequest: () -> Unit,
+    onClick: (AccountEntity) -> Unit,
+    onClickMoreOption: () -> Unit,
+    onSelectMoreOption: (AccountEntity, WalletOptions) -> Unit
 ) {
     Row(
         modifier = Modifier
@@ -294,7 +353,18 @@ private fun WalletItem(
             )
         }
         Spacer(modifier = Modifier.weight(1f))
-        Icon(imageVector = Icons.Default.MoreVert, contentDescription = "More")
+        Box {
+            Icon(
+                imageVector = Icons.Default.MoreVert,
+                contentDescription = "More",
+                modifier = Modifier.noRippleClickable { onClickMoreOption() }
+            )
+            MoreOptions(
+                isExpanded = shouldShowMoreOptions,
+                onDismissRequest = { onDismissRequest() }) {
+                onSelectMoreOption(item, it)
+            }
+        }
     }
 }
 
@@ -542,6 +612,40 @@ fun AddWalletScreen(
                     modifier = Modifier.width(20.dp),
                     checked = isTickExcludeFromTotal.value,
                     onCheckedChange = { isTickExcludeFromTotal.value = it })
+            }
+        }
+    }
+}
+
+@Composable
+fun MoreOptions(
+    isExpanded: Boolean,
+    onDismissRequest: () -> Unit,
+    onClick: (WalletOptions) -> Unit
+) {
+    val items = WalletOptions.entries
+    listOf(
+        stringResource(id = R.string.transfer_money),
+        stringResource(id = R.string.edit),
+        stringResource(id = R.string.archive),
+        stringResource(id = R.string.delete)
+    )
+    DropdownMenu(expanded = isExpanded,
+        onDismissRequest = { onDismissRequest() }) {
+        items.forEachIndexed { index, walletOption ->
+            Row(
+                modifier = Modifier
+                    .padding(20.dp)
+                    .noRippleClickable { onClick(walletOption) },
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Icon(imageVector = walletOption.icon, contentDescription = walletOption.value)
+                Text(
+                    text = walletOption.value,
+                    color = Color.Black,
+                    style = MaterialTheme.typography.body2
+                )
             }
         }
     }

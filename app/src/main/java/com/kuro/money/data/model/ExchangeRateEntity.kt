@@ -24,7 +24,7 @@ data class ExchangeRateEntity(
 data class ConversionRates(
     val currencyCode: String, // To currency converter
     val baseCode: String, // Main Currency
-    val rate: Double
+    val rate: Double // = baseCode / currencyCode
 )
 
 data class UpdateTimeInfo(

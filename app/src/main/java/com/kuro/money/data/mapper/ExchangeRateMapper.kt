@@ -7,7 +7,7 @@ import com.kuro.money.domain.model.ExchangeRateResponse
 fun ExchangeRateResponse.toExchangeRateEntity(): ExchangeRateEntity {
     val listConversionRates = mutableListOf<ConversionRates>()
     conversionRates?.forEach { (code, rate) ->
-        val entity = ConversionRates(baseCode ?: "", code, rate)
+        val entity = ConversionRates(code, baseCode ?: "", rate)
         listConversionRates.add(entity)
     }
     return ExchangeRateEntity(

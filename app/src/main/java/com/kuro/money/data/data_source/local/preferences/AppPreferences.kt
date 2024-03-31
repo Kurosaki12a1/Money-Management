@@ -11,6 +11,7 @@ class AppPreferences @Inject constructor(val context: Context) {
 
         private const val ONBOARDING = "onboarding"
         private const val IS_FIRST_TIME = "is_first_time_open_app"
+        private const val DEFAULT_CURRENCY = "default_currency"
 
     }
 
@@ -33,11 +34,18 @@ class AppPreferences @Inject constructor(val context: Context) {
             it.putBoolean(ONBOARDING, value)
         }
 
-    var isFirstTimeOpenApp : Boolean
+    var isFirstTimeOpenApp: Boolean
         get() = appPreferences.getBoolean(IS_FIRST_TIME, true)
         set(value) = appPreferences.edit {
             it.putBoolean(IS_FIRST_TIME, value)
         }
+
+    var defaultCurrency: String
+        get() = appPreferences.getString(DEFAULT_CURRENCY, "VND").toString()
+        set(value) = appPreferences.edit {
+            it.putString(DEFAULT_CURRENCY, value)
+        }
+
 
     fun clearPreferences() {
         appPreferences.edit {

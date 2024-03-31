@@ -3,7 +3,7 @@
     "name": "Cash",
     "icon": "icon",
     "uuid": "242BA2EC5DA44BB79DE94EB64DB59CFE",
-    "balance": 0,
+    "balance": 200000.0,
     "currency": {
       "c": "VND",
       "s": "₫",
@@ -19,7 +19,7 @@
     "name": "Credit Card",
     "icon": "icon_94",
     "uuid": "4F19B32A60664468B44608659BD366E8",
-    "balance": 0,
+    "balance": 1500.0,
     "currency": {
       "c": "USD",
       "s": "$",

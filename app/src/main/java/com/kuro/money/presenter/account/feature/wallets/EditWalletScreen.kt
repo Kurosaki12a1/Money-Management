@@ -63,16 +63,19 @@ fun EditWalletScreen(
         navController.popBackStack()
     }
 
+
     LaunchedEffect(Unit) {
         viewModel.deleteWallet.collectLatest {
-            if (it is Resource.Success){
+            if (it is Resource.Success) {
                 viewModel.clearData()
                 navController.popBackStack()
             }
         }
+    }
 
+    LaunchedEffect(Unit) {
         viewModel.updateWallet.collectLatest {
-            if (it is Resource.Success){
+            if (it is Resource.Success) {
                 viewModel.clearData()
                 navController.popBackStack()
             }
@@ -318,3 +321,4 @@ fun EditWalletScreen(
         }
     }
 }
+

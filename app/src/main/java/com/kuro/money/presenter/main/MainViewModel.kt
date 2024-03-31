@@ -2,6 +2,7 @@ package com.kuro.money.presenter.main
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kuro.money.data.AppCache
 import com.kuro.money.data.mapper.toExchangeRateEntity
 import com.kuro.money.data.model.TransactionEntity
 import com.kuro.money.data.utils.Resource
@@ -43,6 +44,8 @@ class MainViewModel @Inject constructor(
         getAndInsertCategoriesFromJson()
         getAndInsertExchangeRatesFromInternet()
         getListTransaction()
+        getExchangesRatesFromDB()
+        getDefaultCurrency()
     }
 
     private fun getListTransaction() {
@@ -53,17 +56,46 @@ class MainViewModel @Inject constructor(
         }
     }
 
+    private fun getDefaultCurrency() {
+        viewModelScope.launch {
+            preferencesUseCase.getDefaultCurrency().collectLatest {
+                AppCache.updateDefaultCurrency(it)
+            }
+        }
+    }
+
+    fun setDefaultCurrency(value: String) {
+        viewModelScope.launch {
+            preferencesUseCase.setDefaultCurrency(value).collectLatest { }
+            AppCache.updateDefaultCurrency(value)
+        }
+    }
+
     private fun getAndInsertExchangeRatesFromInternet() {
         viewModelScope.launch {
-            exchangeRatesUseCase.getExchangeRatesResponse("USD").flatMapLatest {
-                when (it) {
-                    is Resource.Success -> {
-                        exchangeRatesUseCase(it.value.toExchangeRateEntity())
-                    }
+            exchangeRatesUseCase.getExchangeRatesResponse(AppCache.defaultCurrency.value)
+                .flatMapLatest {
+                    when (it) {
+                        is Resource.Success -> {
+                            exchangeRatesUseCase(it.value.toExchangeRateEntity())
+                        }
 
-                    else -> flowOf(it)
+                        else -> flowOf(it)
+                    }
+                }.collectLatest {}
+        }
+    }
+
+    private fun getExchangesRatesFromDB() {
+        viewModelScope.launch {
+            AppCache.defaultCurrency.collectLatest {currency ->
+                exchangeRatesUseCase(currency).collectLatest {
+                    if (it is Resource.Success) {
+                        if (it.value != null) {
+                            AppCache.updateListRates(currency, it.value.conversionRates)
+                        }
+                    }
                 }
-            }.collectLatest {
             }
         }
     }

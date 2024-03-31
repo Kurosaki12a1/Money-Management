@@ -31,5 +31,14 @@ class PreferencesRepositoryImpl @Inject constructor(
         emit(appPreferences.isOnBoardingDone)
     }.flowOn(dispatcher)
 
+    override fun getDefaultCurrency(): Flow<String> = flow {
+        emit(appPreferences.defaultCurrency)
+    }.flowOn(dispatcher)
+
+    override fun setDefaultCurrency(value : String): Flow<String> = flow {
+        appPreferences.defaultCurrency = value
+        emit(appPreferences.defaultCurrency)
+    }.flowOn(dispatcher)
+
 
 }

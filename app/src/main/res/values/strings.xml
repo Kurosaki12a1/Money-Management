@@ -61,5 +61,8 @@
     <string name="search">Search</string>
     <string name="archive">Archive</string>
     <string name="archive_hint">Freeze this wallet and stop generating bills and recurring transactions.</string>
+    <string name="delete">Delete</string>
     <string name="delete_wallet">DELETE THIS WALLET</string>
+    <string name="transfer_money">Transfer money</string>
+    <string name="edit">Edit</string>
 </resources>

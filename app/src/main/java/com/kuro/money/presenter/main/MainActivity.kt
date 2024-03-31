@@ -3,6 +3,7 @@ package com.kuro.money.presenter.main
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.viewModels
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.RowScope
@@ -63,6 +64,8 @@ import com.kuro.money.presenter.add_transaction.feature.note.NoteScreen
 import com.kuro.money.presenter.add_transaction.feature.people.SelectPeopleScreen
 import com.kuro.money.presenter.add_transaction.feature.select_category.SelectCategoryScreen
 import com.kuro.money.presenter.add_transaction.feature.wallet.SelectWalletScreen
+import com.kuro.money.presenter.home.HomeScreen
+import com.kuro.money.presenter.home.HomeViewModel
 import com.kuro.money.presenter.utils.slideHorizontalAnimation
 import com.kuro.money.presenter.utils.slideVerticalAnimation
 import com.kuro.money.ui.theme.Teal200
@@ -71,9 +74,13 @@ import dagger.hilt.android.AndroidEntryPoint
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
+    // Init
+    private val mainViewModel: MainViewModel by viewModels()
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
+            mainViewModel
             MainScreen()
         }
     }
@@ -132,7 +139,13 @@ private fun Navigation(
     NavHost(
         navController = navController, startDestination = SelectionUI.HOME.route
     ) {
-        composable(SelectionUI.HOME.route) {}
+        composable(SelectionUI.HOME.route) {
+            val parentEntry = remember(it) {
+                navController.getBackStackEntry(SelectionUI.HOME.route)
+            }
+            val homeViewModel = hiltViewModel<HomeViewModel>(parentEntry)
+            HomeScreen(navController, homeViewModel)
+        }
         composable(SelectionUI.TRANSACTION.route) {}
         navigation(
             startDestination = SelectionUI.ADD_TRANSACTION.route,
@@ -310,7 +323,7 @@ private fun Navigation(
                     )
                 }
                 val viewModel = hiltViewModel<EditWalletViewModel>(parentEntry)
-                EditWalletScreen(navController = navController, viewModel = viewModel )
+                EditWalletScreen(navController = navController, viewModel = viewModel)
             }
             composable(screenRoute(SelectionUI.EDIT_WALLET.route, SelectionUI.SELECT_ICON.route)) {
                 val parentEntry = remember(it) {
@@ -321,7 +334,8 @@ private fun Navigation(
                 val viewModel = hiltViewModel<EditWalletViewModel>(parentEntry)
                 SelectIconScreen(navController, viewModel)
             }
-            composable(screenRoute(SelectionUI.EDIT_WALLET.route, SelectionUI.SELECT_CURRENCY.route)
+            composable(
+                screenRoute(SelectionUI.EDIT_WALLET.route, SelectionUI.SELECT_CURRENCY.route)
             ) {
                 val parentEntry = remember(it) {
                     navController.getBackStackEntry(
