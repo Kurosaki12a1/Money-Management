@@ -214,12 +214,7 @@ fun SelectIconScreen(
     selectIconScreenViewModel: SelectIconScreenViewModel = hiltViewModel()
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    BackHandler(
-        enabled = navBackStackEntry?.destination?.route == screenRoute(
-            SelectionUI.EDIT_WALLET.route,
-            SelectionUI.SELECT_ICON.route
-        )
-    ) {
+    BackHandler {
         navController.popBackStack()
     }
 

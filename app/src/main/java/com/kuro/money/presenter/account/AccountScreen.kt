@@ -74,14 +74,7 @@ fun AccountScreen(
             ) {
                 itemsIndexed(listMenuAccount, key = { _, item -> item.text }) { _, item ->
                     Column {
-                        ItemAccountMenu(item) {
-                            navController.navigate(
-                                screenRoute(
-                                    SelectionUI.ACCOUNT.route,
-                                    it
-                                )
-                            )
-                        }
+                        ItemAccountMenu(item) { navController.navigate(it) }
                         Divider(
                             modifier = Modifier
                                 .fillMaxWidth()

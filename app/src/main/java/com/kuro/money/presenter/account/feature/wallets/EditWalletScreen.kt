@@ -41,9 +41,8 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import com.kuro.money.R
 import com.kuro.money.data.utils.Resource
-import com.kuro.money.domain.model.SelectionUI
-import com.kuro.money.domain.model.screenRoute
 import com.kuro.money.extension.noRippleClickable
+import com.kuro.money.navigation.routes.NavigationRoute
 import com.kuro.money.presenter.utils.toPainterResource
 import com.kuro.money.ui.theme.Gray
 import kotlinx.coroutines.flow.collectLatest
@@ -54,12 +53,7 @@ fun EditWalletScreen(
     viewModel: EditWalletViewModel
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    BackHandler(
-        navBackStackEntry?.destination?.route == screenRoute(
-            SelectionUI.ACCOUNT.route,
-            SelectionUI.EDIT_WALLET.route
-        )
-    ) {
+    BackHandler {
         navController.popBackStack()
     }
 
@@ -141,12 +135,7 @@ fun EditWalletScreen(
             ) {
                 Image(painter = iconSelected.toPainterResource(), contentDescription = "Icon",
                     modifier = Modifier.noRippleClickable {
-                        navController.navigate(
-                            screenRoute(
-                                SelectionUI.EDIT_WALLET.route,
-                                SelectionUI.SELECT_ICON.route
-                            )
-                        )
+                        navController.navigate(NavigationRoute.EditWalletSelectIcon.route)
                     })
                 Box(modifier = Modifier.fillMaxWidth()) {
                     if (nameWallet.isEmpty()) {
@@ -171,12 +160,7 @@ fun EditWalletScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .noRippleClickable {
-                        navController.navigate(
-                            screenRoute(
-                                SelectionUI.EDIT_WALLET.route,
-                                SelectionUI.SELECT_CURRENCY.route
-                            )
-                        )
+                        navController.navigate(NavigationRoute.EditWalletSelectCurrency.route)
                     },
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(20.dp)

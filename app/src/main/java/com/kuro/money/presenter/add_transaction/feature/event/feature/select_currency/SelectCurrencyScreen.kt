@@ -259,12 +259,7 @@ fun SelectCurrencyScreen(
     val fullListCurrency = remember { mutableStateListOf<CurrencyEntity>() }
     val navBackStackEntry by navController.currentBackStackEntryAsState()
 
-    BackHandler(
-        navBackStackEntry?.destination?.route == screenRoute(
-            SelectionUI.EDIT_WALLET.route,
-            SelectionUI.SELECT_CURRENCY.route
-        )
-    ) {
+    BackHandler {
         if (isSearching.value) {
             isSearching.value = false
             listCurrency.clear()

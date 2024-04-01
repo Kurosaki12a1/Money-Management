@@ -30,7 +30,7 @@ fun generateListBottomNavItem(context: Context): MutableList<BottomNavItem> {
         ),
         BottomNavItem(
             name = "",
-            route = SelectionUI.SUB_GRAPH_TRANSACTION.route,
+            route = SelectionUI.SUB_GRAPH_ADD_TRANSACTION.route,
         ),
         BottomNavItem(
             name = context.getString(R.string.budget),

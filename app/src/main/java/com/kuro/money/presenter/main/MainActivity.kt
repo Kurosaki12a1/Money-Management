@@ -1,5 +1,6 @@
 package com.kuro.money.presenter.main
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -45,6 +46,8 @@ import com.kuro.money.domain.model.BottomNavItem
 import com.kuro.money.domain.model.SelectionUI
 import com.kuro.money.domain.model.generateListBottomNavItem
 import com.kuro.money.domain.model.screenRoute
+import com.kuro.money.navigation.graph.RootNavGraph
+import com.kuro.money.navigation.routes.NavigationGraphRoute
 import com.kuro.money.presenter.account.AccountScreen
 import com.kuro.money.presenter.account.feature.about.AboutScreen
 import com.kuro.money.presenter.account.feature.wallets.AddWalletScreen
@@ -86,6 +89,7 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 private fun MainScreen() {
     val navController = rememberNavController()
@@ -125,7 +129,8 @@ private fun MainScreen() {
         floatingActionButtonPosition = FabPosition.Center,
         isFloatingActionButtonDocked = true,
         content = {
-            Navigation(navController = navController, paddingValues = it)
+            RootNavGraph(navController, NavigationGraphRoute.HomeGraph)
+         //   Navigation(navController = navController, paddingValues = it)
         })
 }
 
@@ -149,7 +154,7 @@ private fun Navigation(
         composable(SelectionUI.TRANSACTION.route) {}
         navigation(
             startDestination = SelectionUI.ADD_TRANSACTION.route,
-            route = SelectionUI.SUB_GRAPH_TRANSACTION.route
+            route = SelectionUI.SUB_GRAPH_ADD_TRANSACTION.route
         ) {
             val parentRoute = SelectionUI.ADD_TRANSACTION.route
             composable(
@@ -159,7 +164,7 @@ private fun Navigation(
                 popEnterTransition = { slideHorizontalAnimation.popEnterTransition },
                 popExitTransition = { slideHorizontalAnimation.popExitTransition }) {
                 val parentEntry = remember(it) {
-                    navController.getBackStackEntry(SelectionUI.SUB_GRAPH_TRANSACTION.route)
+                    navController.getBackStackEntry(SelectionUI.SUB_GRAPH_ADD_TRANSACTION.route)
                 }
                 val transactionViewModel = hiltViewModel<AddTransactionViewModel>(parentEntry)
                 AddTransactionScreen(navController, transactionViewModel)
@@ -171,7 +176,7 @@ private fun Navigation(
                 popExitTransition = { slideHorizontalAnimation.popExitTransition },
                 popEnterTransition = { slideHorizontalAnimation.popEnterTransition }) {
                 val parentEntry = remember(it) {
-                    navController.getBackStackEntry(SelectionUI.SUB_GRAPH_TRANSACTION.route)
+                    navController.getBackStackEntry(SelectionUI.SUB_GRAPH_ADD_TRANSACTION.route)
                 }
                 val transactionViewModel = hiltViewModel<AddTransactionViewModel>(parentEntry)
                 NoteScreen(navController, transactionViewModel)
@@ -183,7 +188,7 @@ private fun Navigation(
                 popExitTransition = { slideHorizontalAnimation.popExitTransition },
                 popEnterTransition = { slideHorizontalAnimation.popEnterTransition }) {
                 val parentEntry = remember(it) {
-                    navController.getBackStackEntry(SelectionUI.SUB_GRAPH_TRANSACTION.route)
+                    navController.getBackStackEntry(SelectionUI.SUB_GRAPH_ADD_TRANSACTION.route)
                 }
                 val transactionViewModel = hiltViewModel<AddTransactionViewModel>(parentEntry)
                 SelectCategoryScreen(navController, transactionViewModel)
@@ -195,7 +200,7 @@ private fun Navigation(
                 popExitTransition = { slideHorizontalAnimation.popExitTransition },
                 popEnterTransition = { slideHorizontalAnimation.popEnterTransition }) {
                 val parentEntry = remember(it) {
-                    navController.getBackStackEntry(SelectionUI.SUB_GRAPH_TRANSACTION.route)
+                    navController.getBackStackEntry(SelectionUI.SUB_GRAPH_ADD_TRANSACTION.route)
                 }
                 val transactionViewModel = hiltViewModel<AddTransactionViewModel>(parentEntry)
                 SelectWalletScreen(navController, transactionViewModel)
@@ -221,7 +226,7 @@ private fun Navigation(
                 popExitTransition = { slideHorizontalAnimation.popExitTransition },
                 popEnterTransition = { slideHorizontalAnimation.popEnterTransition }) {
                 val parentEntry = remember(it) {
-                    navController.getBackStackEntry(SelectionUI.SUB_GRAPH_TRANSACTION.route)
+                    navController.getBackStackEntry(SelectionUI.SUB_GRAPH_ADD_TRANSACTION.route)
                 }
                 val transactionViewModel = hiltViewModel<AddTransactionViewModel>(parentEntry)
                 SelectPeopleScreen(navController, transactionViewModel)
@@ -233,7 +238,7 @@ private fun Navigation(
                 popExitTransition = { slideHorizontalAnimation.popExitTransition },
                 popEnterTransition = { slideHorizontalAnimation.popEnterTransition }) {
                 val parentEntry = remember(it) {
-                    navController.getBackStackEntry(SelectionUI.SUB_GRAPH_TRANSACTION.route)
+                    navController.getBackStackEntry(SelectionUI.SUB_GRAPH_ADD_TRANSACTION.route)
                 }
                 val transactionViewModel = hiltViewModel<AddTransactionViewModel>(parentEntry)
                 SelectEventScreen(navController, transactionViewModel)
@@ -382,7 +387,7 @@ private fun MainFloatingButton(
     onClick: (String) -> Unit
 ) {
     FloatingActionButton(
-        onClick = { onClick(SelectionUI.SUB_GRAPH_TRANSACTION.route) },
+        onClick = { onClick(SelectionUI.SUB_GRAPH_ADD_TRANSACTION.route) },
         backgroundColor = Teal200
     ) {
         Icon(

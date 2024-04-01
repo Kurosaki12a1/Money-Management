@@ -63,6 +63,8 @@ import com.kuro.money.domain.model.SelectionUI
 import com.kuro.money.domain.model.WalletOptions
 import com.kuro.money.domain.model.screenRoute
 import com.kuro.money.extension.noRippleClickable
+import com.kuro.money.navigation.routes.NavigationGraphRoute
+import com.kuro.money.navigation.routes.NavigationRoute
 import com.kuro.money.presenter.utils.toPainterResource
 import com.kuro.money.ui.theme.Gray
 import com.kuro.money.ui.theme.Teal200
@@ -83,10 +85,7 @@ fun WalletScreen(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
 
     LaunchedEffect(navController.currentDestination?.route) {
-        if (navController.currentDestination?.route ==
-            screenRoute(
-                SelectionUI.ACCOUNT.route,
-                SelectionUI.MY_WALLET.route)){
+        if (navController.currentDestination?.route == NavigationRoute.MY_WALLET.route) {
             walletViewModel.getWallets()
         }
     }
@@ -100,12 +99,7 @@ fun WalletScreen(
     val selectedItem = remember { mutableStateOf(0L) }
     val scope = rememberCoroutineScope()
 
-    BackHandler(
-        enabled = navBackStackEntry?.destination?.route == screenRoute(
-            SelectionUI.ACCOUNT.route,
-            SelectionUI.MY_WALLET.route
-        )
-    ) {
+    BackHandler {
         if (isSearching.value) {
             isSearching.value = false
             listWallet.clear()
@@ -254,35 +248,28 @@ fun WalletScreen(
                         onClick = {
                             if (isClickAllowed.getAndSet(false)) {
                                 editWalletViewModel.getWalletById(it.id)
-                                navController.navigate(
-                                    screenRoute(
-                                        SelectionUI.ACCOUNT.route,
-                                        SelectionUI.EDIT_WALLET.route
-                                    )
-                                )
+                                navController.navigate(NavigationGraphRoute.EditWalletGraph.route)
                                 scope.launch {
                                     delay(200)
                                     isClickAllowed.set(true)
                                 }
                             }
                         },
-                        onSelectMoreOption = { wallet , option ->
+                        onSelectMoreOption = { wallet, option ->
                             when (option) {
                                 WalletOptions.TRANSFER_MONEY -> {
                                     // TODO
                                 }
+
                                 WalletOptions.EDIT -> {
                                     editWalletViewModel.getWalletById(wallet.id)
-                                    navController.navigate(
-                                        screenRoute(
-                                            SelectionUI.ACCOUNT.route,
-                                            SelectionUI.EDIT_WALLET.route
-                                        )
-                                    )
+                                    navController.navigate(NavigationGraphRoute.EditWalletGraph.route)
                                 }
+
                                 WalletOptions.ARCHIVE -> {
                                     // TODO
                                 }
+
                                 else -> {
                                     walletViewModel.deleteWalletById(wallet.id)
                                 }
@@ -374,12 +361,7 @@ fun AddWalletScreen(
     addWalletViewModel: AddWalletViewModel
 ) {
     val navBackStackEntry by navController.currentBackStackEntryAsState()
-    BackHandler(
-        navBackStackEntry?.destination?.route == screenRoute(
-            SelectionUI.ACCOUNT.route,
-            SelectionUI.ADD_WALLET.route
-        )
-    ) {
+    BackHandler{
         navController.popBackStack()
     }
 
@@ -450,12 +432,7 @@ fun AddWalletScreen(
             ) {
                 Image(painter = iconSelected.toPainterResource(), contentDescription = "Icon",
                     modifier = Modifier.noRippleClickable {
-                        navController.navigate(
-                            screenRoute(
-                                SelectionUI.ACCOUNT.route,
-                                SelectionUI.SELECT_ICON.route
-                            )
-                        )
+                        navController.navigate(NavigationRoute.AddWalletSelectIcon.route)
                     })
                 Box(modifier = Modifier.fillMaxWidth()) {
                     if (nameWallet.isEmpty()) {
@@ -480,12 +457,7 @@ fun AddWalletScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .noRippleClickable {
-                        navController.navigate(
-                            screenRoute(
-                                SelectionUI.ACCOUNT.route,
-                                SelectionUI.SELECT_CURRENCY.route
-                            )
-                        )
+                        navController.navigate(NavigationRoute.AddWalletSelectCurrency.route)
                     },
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(20.dp)
