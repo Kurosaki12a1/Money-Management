@@ -70,8 +70,8 @@ fun NavGraphBuilder.addTransactionNavGraph(navHostController: NavHostController)
                 val parentEntry = remember(it) {
                     navHostController.getBackStackEntry(AddTransactionGraph.route)
                 }
-            //    val transactionViewModel = hiltViewModel<AddTransactionViewModel>(parentEntry)
-                // TODO
+                val transactionViewModel = hiltViewModel<AddTransactionViewModel>(parentEntry)
+                SelectCurrencyScreen(navHostController, transactionViewModel)
             }
             navigation(
                 startDestination = AddTransaction.AddEvent.route,

@@ -55,4 +55,15 @@ class CurrencyRepositoryImpl @Inject constructor(
         }
     }.flowOn(dispatcher)
 
+    override fun getCurrencyByCode(code: String): Flow<Resource<CurrencyEntity?>> = flow {
+        emit(Resource.Loading)
+        try {
+            val data = appDatabase.currencyDao().getCurrencyByCode(code.uppercase())
+            emit(Resource.success(data))
+        } catch (e : Exception) {
+            e.printStackTrace()
+            emit(Resource.failure(e, e.message))
+        }
+    }.flowOn(dispatcher)
+
 }

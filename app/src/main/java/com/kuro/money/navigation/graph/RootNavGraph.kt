@@ -17,7 +17,9 @@ fun RootNavGraph(
         startDestination = startGraphDestination.route,
         builder = {
             homeNavGraph(navHostController)
+            transactionGraph(navHostController)
             addTransactionNavGraph(navHostController)
+            budgetsGraph(navHostController)
             accountNavGraph(navHostController)
         }
     )

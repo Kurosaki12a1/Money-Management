@@ -58,16 +58,27 @@ class MainViewModel @Inject constructor(
 
     private fun getDefaultCurrency() {
         viewModelScope.launch {
-            preferencesUseCase.getDefaultCurrency().collectLatest {
+            preferencesUseCase.getDefaultCurrency().flatMapLatest {
                 AppCache.updateDefaultCurrency(it)
+                currenciesUseCase(it)
+            }.collectLatest { currency ->
+                if (currency is Resource.Success && currency.value != null) {
+                    AppCache.updateDefaultCurrencyEntity(currency.value)
+                }
             }
         }
     }
 
     fun setDefaultCurrency(value: String) {
         viewModelScope.launch {
-            preferencesUseCase.setDefaultCurrency(value).collectLatest { }
-            AppCache.updateDefaultCurrency(value)
+            preferencesUseCase.setDefaultCurrency(value).flatMapLatest {
+                AppCache.updateDefaultCurrency(value)
+                currenciesUseCase(value)
+            }.collectLatest { currency ->
+                if (currency is Resource.Success && currency.value != null) {
+                    AppCache.updateDefaultCurrencyEntity(currency.value)
+                }
+            }
         }
     }
 
@@ -88,7 +99,7 @@ class MainViewModel @Inject constructor(
 
     private fun getExchangesRatesFromDB() {
         viewModelScope.launch {
-            AppCache.defaultCurrency.collectLatest {currency ->
+            AppCache.defaultCurrency.collectLatest { currency ->
                 exchangeRatesUseCase(currency).collectLatest {
                     if (it is Resource.Success) {
                         if (it.value != null) {

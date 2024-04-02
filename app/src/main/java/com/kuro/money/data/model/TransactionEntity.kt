@@ -5,6 +5,7 @@ import androidx.room.Entity
 import androidx.room.PrimaryKey
 import androidx.room.TypeConverters
 import com.kuro.money.data.model.converter.AccountConverter
+import com.kuro.money.data.model.converter.CurrencyConverter
 import com.kuro.money.data.model.converter.EventConverter
 import com.kuro.money.data.model.converter.LocalDateConverter
 import com.kuro.money.data.model.converter.UriConverter
@@ -15,11 +16,13 @@ import java.time.LocalDate
     LocalDateConverter::class,
     AccountConverter::class,
     EventConverter::class,
-    UriConverter::class
+    UriConverter::class,
+    CurrencyConverter::class
 )
 data class TransactionEntity(
     @PrimaryKey(autoGenerate = true)
     var id: Long = 0L,
+    val currency : CurrencyEntity,
     val amount: Double,
     val createdDate: LocalDate,
     val displayDate: LocalDate,

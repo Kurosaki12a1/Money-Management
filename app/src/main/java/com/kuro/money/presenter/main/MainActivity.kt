@@ -37,10 +37,10 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.kuro.money.domain.model.BottomNavItem
-import com.kuro.money.domain.model.SelectionUI
 import com.kuro.money.domain.model.generateListBottomNavItem
 import com.kuro.money.navigation.graph.RootNavGraph
 import com.kuro.money.navigation.routes.NavigationGraphRoute
+import com.kuro.money.navigation.routes.NavigationRoute
 import com.kuro.money.ui.theme.Teal200
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -65,14 +65,14 @@ private fun MainScreen() {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val navRouteDestination = navBackStackEntry?.destination?.route
-    val currentRoute = remember { mutableStateOf(SelectionUI.HOME.route) }
+    val currentRoute = remember { mutableStateOf(NavigationRoute.Home.route) }
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
-            if (navRouteDestination == SelectionUI.HOME.route
-                || navRouteDestination == SelectionUI.TRANSACTION.route
-                || navRouteDestination == SelectionUI.BUDGETS.route
-                || navRouteDestination == SelectionUI.ACCOUNT.route
+            if (navRouteDestination == NavigationRoute.Home.route
+                || navRouteDestination == NavigationRoute.Transaction.route
+                || navRouteDestination == NavigationRoute.Budgets.route
+                || navRouteDestination == NavigationRoute.Account.route
             ) {
                 BottomBar(routeSelected = currentRoute.value) {
                     currentRoute.value = it
@@ -83,10 +83,10 @@ private fun MainScreen() {
             }
         },
         floatingActionButton = {
-            if (navRouteDestination == SelectionUI.HOME.route
-                || navRouteDestination == SelectionUI.TRANSACTION.route
-                || navRouteDestination == SelectionUI.BUDGETS.route
-                || navRouteDestination == SelectionUI.ACCOUNT.route
+            if (navRouteDestination == NavigationRoute.Home.route
+                || navRouteDestination == NavigationRoute.Transaction.route
+                || navRouteDestination == NavigationRoute.Budgets.route
+                || navRouteDestination == NavigationRoute.Account.route
             ) {
                 MainFloatingButton {
                     currentRoute.value = it
@@ -106,7 +106,7 @@ private fun MainFloatingButton(
     onClick: (String) -> Unit
 ) {
     FloatingActionButton(
-        onClick = { onClick(SelectionUI.SUB_GRAPH_ADD_TRANSACTION.route) },
+        onClick = { onClick(NavigationRoute.AddTransaction.route) },
         backgroundColor = Teal200
     ) {
         Icon(

@@ -11,4 +11,6 @@ interface CurrencyRepository {
 
     fun getListCurrenciesFromJSON() : Flow<Resource<List<CurrencyEntity>>>
 
+    fun getCurrencyByCode(code : String) : Flow<Resource<CurrencyEntity?>>
+
 }

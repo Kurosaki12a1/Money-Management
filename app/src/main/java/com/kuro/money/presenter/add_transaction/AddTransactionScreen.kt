@@ -77,6 +77,7 @@ import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.kuro.money.R
 import com.kuro.money.data.model.AccountEntity
+import com.kuro.money.data.model.CurrencyEntity
 import com.kuro.money.data.model.EventEntity
 import com.kuro.money.data.utils.FileUtils
 import com.kuro.money.data.utils.Resource
@@ -118,6 +119,7 @@ fun AddTransactionScreen(
     val scope = rememberCoroutineScope()
 
     val selectedCategory = addTransactionViewModel.selectedCategory.collectAsState().value
+    val selectedCurrency = addTransactionViewModel.currencySelected.collectAsState().value
     val amount = addTransactionViewModel.amount.collectAsState().value
     val note = addTransactionViewModel.note.collectAsState().value
     val wallet = addTransactionViewModel.wallet.collectAsState().value
@@ -132,9 +134,10 @@ fun AddTransactionScreen(
     val context = LocalContext.current
     val shouldSubmitTransaction = remember { mutableStateOf(false) }
 
-    LaunchedEffect(amount, selectedCategory, dateTransaction, wallet) {
+    LaunchedEffect(amount, selectedCategory, dateTransaction, wallet, selectedCurrency) {
         shouldSubmitTransaction.value = !(amount == null
                 || wallet == null
+                || selectedCurrency == null
                 || selectedCategory == SelectedCategory("", "")
                 || dateTransaction.value == null)
     }
@@ -175,11 +178,16 @@ fun AddTransactionScreen(
                 verticalArrangement = Arrangement.spacedBy(10.dp),
             ) {
                 item {
-                    BodyAddTransaction(amountFieldValue,
+                    BodyAddTransaction(
+                        selectedCurrency,
+                        amountFieldValue,
                         selectedCategory,
                         note,
                         dateTransaction.value,
                         wallet,
+                        onCurrencyClick = {
+                            navController.navigate(AddTransaction.SelectCurrency.route)
+                        },
                         onAmountClick = { isEnabledCustomKeyBoard.value = true },
                         onSelectCategoryClick = {
                             navController.navigate(AddTransaction.SelectCategory.route)
@@ -239,6 +247,7 @@ fun AddTransactionScreen(
                             )
                         }
                         if (shouldSubmitTransaction.value) {
+                            addTransactionViewModel.setDefaultCurrency()
                             addTransactionViewModel.submitData(
                                 dateTransaction.value!!,
                                 dateRemind.value
@@ -652,11 +661,13 @@ private fun ToolbarAddTransaction(
 
 @Composable
 private fun BodyAddTransaction(
+    currencyEntity: CurrencyEntity?,
     amount: MutableState<TextFieldValue>,
     selectedCategory: SelectedCategory,
     note: String,
     date: LocalDate?,
     wallet: AccountEntity?,
+    onCurrencyClick: () -> Unit,
     onAmountClick: () -> Unit,
     onSelectCategoryClick: () -> Unit,
     onNoteClick: () -> Unit,
@@ -683,15 +694,28 @@ private fun BodyAddTransaction(
                 .padding(horizontal = 20.dp, vertical = 10.dp),
             verticalArrangement = Arrangement.spacedBy(30.dp)
         ) {
-            CompositionLocalProvider(LocalTextInputService provides null) {
-                OutlinedTextField(
-                    modifier = Modifier.fillMaxWidth(),
-                    value = amount.value,
-                    interactionSource = interactionSource,
-                    onValueChange = { amount.value = it },
-                    singleLine = true,
-                    label = { Text(text = stringResource(id = R.string.amount)) },
-                )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                if (currencyEntity != null) {
+                    Image(
+                        painter = currencyEntity.icon.toPainterResource(),
+                        contentDescription = currencyEntity.name,
+                        modifier = Modifier.noRippleClickable { onCurrencyClick() }
+                    )
+                }
+                CompositionLocalProvider(LocalTextInputService provides null) {
+                    OutlinedTextField(
+                        modifier = Modifier.fillMaxWidth(),
+                        value = amount.value,
+                        interactionSource = interactionSource,
+                        onValueChange = { amount.value = it },
+                        singleLine = true,
+                        label = { Text(text = stringResource(id = R.string.amount)) },
+                    )
+                }
             }
             Row(
                 modifier = Modifier

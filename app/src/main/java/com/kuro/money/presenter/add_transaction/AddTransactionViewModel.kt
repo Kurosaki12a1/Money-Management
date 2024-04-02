@@ -3,24 +3,31 @@ package com.kuro.money.presenter.add_transaction
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kuro.money.data.AppCache
 import com.kuro.money.data.model.AccountEntity
+import com.kuro.money.data.model.CurrencyEntity
 import com.kuro.money.data.model.EventEntity
 import com.kuro.money.data.model.TransactionEntity
 import com.kuro.money.data.utils.Resource
 import com.kuro.money.domain.model.SelectedCategory
+import com.kuro.money.domain.usecase.CurrenciesUseCase
+import com.kuro.money.domain.usecase.PreferencesUseCase
 import com.kuro.money.domain.usecase.TransactionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
 class AddTransactionViewModel @Inject constructor(
-    private val transactionUseCase: TransactionUseCase
-) : ViewModel() {
+    private val transactionUseCase: TransactionUseCase,
+    private val currenciesUseCase: CurrenciesUseCase,
+    private val preferencesUseCase: PreferencesUseCase,
+    ) : ViewModel() {
     private val _selectedCategory = MutableStateFlow(SelectedCategory("", ""))
     val selectedCategory = _selectedCategory.asStateFlow()
 
@@ -39,11 +46,18 @@ class AddTransactionViewModel @Inject constructor(
     private val _uriSelected = MutableStateFlow<Uri?>(null)
     val uriSelected = _uriSelected.asStateFlow()
 
+    private val _currencySelected = MutableStateFlow<CurrencyEntity?>(null)
+    val currencySelected = _currencySelected.asStateFlow()
+
     private val _amount = MutableStateFlow<Double?>(null)
     val amount = _amount.asStateFlow()
 
     private val _insertTransaction = MutableStateFlow<Resource<Long>>(Resource.Default)
     val insertTransaction = _insertTransaction.asStateFlow()
+
+    init {
+        initCurrencySelected()
+    }
 
     fun setAmount(amount: Double?) {
         _amount.value = amount
@@ -53,9 +67,37 @@ class AddTransactionViewModel @Inject constructor(
         _uriSelected.value = value
     }
 
+    private fun initCurrencySelected() {
+        viewModelScope.launch {
+            AppCache.defaultCurrencyEntity.collectLatest {
+                _currencySelected.value = it
+            }
+        }
+    }
+
+    fun setCurrencySelected(value: CurrencyEntity) {
+        _currencySelected.value = value
+    }
+
+    fun setDefaultCurrency() {
+        if (currencySelected.value == null) return
+        val code = currencySelected.value?.code?.uppercase() ?: "VND"
+        viewModelScope.launch {
+            preferencesUseCase.setDefaultCurrency(code).flatMapLatest {
+                AppCache.updateDefaultCurrency(code)
+                currenciesUseCase(code)
+            }.collectLatest { currency ->
+                if (currency is Resource.Success && currency.value != null) {
+                    AppCache.updateDefaultCurrencyEntity(currency.value)
+                }
+            }
+        }
+    }
+
     fun submitData(displayDate: LocalDate, remindDate: LocalDate?) {
         viewModelScope.launch {
             val transactionEntity = TransactionEntity(
+                currency = currencySelected.value!!,
                 amount = amount.value ?: 0.0,
                 createdDate = LocalDate.now(),
                 displayDate = displayDate,

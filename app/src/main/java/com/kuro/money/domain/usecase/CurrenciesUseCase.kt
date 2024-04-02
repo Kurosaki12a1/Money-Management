@@ -9,5 +9,7 @@ class CurrenciesUseCase @Inject constructor(private val repo: CurrencyRepository
 
     operator fun invoke() = repo.getAllCurrencies()
 
+    operator fun invoke(code: String) = repo.getCurrencyByCode(code)
+
     fun getListCurrenciesFromJSON() = repo.getListCurrenciesFromJSON()
 }
