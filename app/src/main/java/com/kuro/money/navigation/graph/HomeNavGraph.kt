@@ -13,11 +13,11 @@ import com.kuro.money.presenter.home.HomeViewModel
 
 fun NavGraphBuilder.homeNavGraph(navHostController: NavHostController) {
     navigation(
-        startDestination = NavigationRoute.HOME.route,
+        startDestination = NavigationRoute.Home.route,
         route = NavigationGraphRoute.HomeGraph.route,
         builder = {
             /** Bottom Navigation Account Screen*/
-            composable(route = NavigationRoute.HOME.route) {
+            composable(route = NavigationRoute.Home.route) {
                 val parentEntry = remember(it) {
                     navHostController.getBackStackEntry(NavigationGraphRoute.HomeGraph.route)
                 }

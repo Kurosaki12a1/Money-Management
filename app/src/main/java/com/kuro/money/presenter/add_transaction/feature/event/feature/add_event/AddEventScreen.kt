@@ -30,7 +30,6 @@ import androidx.compose.material.icons.filled.Wallet
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -41,12 +40,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.compose.currentBackStackEntryAsState
 import com.kuro.money.R
 import com.kuro.money.data.utils.Resource
-import com.kuro.money.domain.model.SelectionUI
-import com.kuro.money.domain.model.screenRoute
 import com.kuro.money.extension.noRippleClickable
+import com.kuro.money.navigation.routes.NavigationRoute
 import com.kuro.money.presenter.add_transaction.showDatePicker
 import com.kuro.money.presenter.utils.SlideUpContent
 import com.kuro.money.presenter.utils.string
@@ -59,16 +56,7 @@ fun AddEventScreen(
     navController: NavController,
     addEventScreenViewModel: AddEventScreenViewModel
 ) {
-
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    BackHandler(
-        enabled = navBackStackEntry?.destination?.route == screenRoute(
-            SelectionUI.ADD_TRANSACTION.route,
-            SelectionUI.ADD_EVENT.route
-        )
-    ) {
-        navController.popBackStack()
-    }
+    BackHandler { navController.popBackStack() }
 
     val iconSelected = addEventScreenViewModel.iconSelected.collectAsState().value
     val walletSelected = addEventScreenViewModel.wallet.collectAsState().value
@@ -146,10 +134,7 @@ fun AddEventScreen(
                                 modifier = Modifier
                                     .noRippleClickable {
                                         navController.navigate(
-                                            screenRoute(
-                                                SelectionUI.ADD_TRANSACTION.route,
-                                                SelectionUI.SELECT_ICON.route
-                                            )
+                                            NavigationRoute.AddTransaction.AddEvent.SelectIcon.route
                                         )
                                     }
                                     .background(Gray, CircleShape)
@@ -166,10 +151,7 @@ fun AddEventScreen(
                             Image(
                                 modifier = Modifier.noRippleClickable {
                                     navController.navigate(
-                                        screenRoute(
-                                            SelectionUI.ADD_TRANSACTION.route,
-                                            SelectionUI.SELECT_ICON.route
-                                        )
+                                        NavigationRoute.AddTransaction.AddEvent.SelectIcon.route
                                     )
                                 },
                                 painter = iconSelected.toPainterResource(),
@@ -231,10 +213,7 @@ fun AddEventScreen(
                             .fillMaxWidth()
                             .noRippleClickable {
                                 navController.navigate(
-                                    screenRoute(
-                                        SelectionUI.ADD_TRANSACTION.route,
-                                        SelectionUI.SELECT_CURRENCY.route
-                                    )
+                                    NavigationRoute.AddTransaction.AddEvent.SelectCurrency.route
                                 )
                             },
                         verticalAlignment = Alignment.CenterVertically,
@@ -278,10 +257,7 @@ fun AddEventScreen(
                             .fillMaxWidth()
                             .noRippleClickable {
                                 navController.navigate(
-                                    screenRoute(
-                                        SelectionUI.EVENT.route,
-                                        SelectionUI.WALLET.route
-                                    )
+                                    NavigationRoute.AddTransaction.AddEvent.SelectWallet.route
                                 )
                             },
                         verticalAlignment = Alignment.CenterVertically,

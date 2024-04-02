@@ -32,9 +32,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.kuro.money.R
 import com.kuro.money.domain.model.AccountMenu
-import com.kuro.money.domain.model.SelectionUI
 import com.kuro.money.domain.model.generateListAccountMenu
-import com.kuro.money.domain.model.screenRoute
 import com.kuro.money.extension.noRippleClickable
 import com.kuro.money.ui.theme.Gray
 

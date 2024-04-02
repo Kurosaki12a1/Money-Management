@@ -37,13 +37,14 @@ import androidx.compose.material.icons.filled.Sort
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
@@ -55,13 +56,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.compose.currentBackStackEntryAsState
 import com.kuro.money.R
 import com.kuro.money.data.model.AccountEntity
 import com.kuro.money.data.utils.Resource
-import com.kuro.money.domain.model.SelectionUI
 import com.kuro.money.domain.model.WalletOptions
-import com.kuro.money.domain.model.screenRoute
 import com.kuro.money.extension.noRippleClickable
 import com.kuro.money.navigation.routes.NavigationGraphRoute
 import com.kuro.money.navigation.routes.NavigationRoute
@@ -82,10 +80,8 @@ fun WalletScreen(
     walletViewModel: WalletViewModel,
     editWalletViewModel: EditWalletViewModel
 ) {
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-
     LaunchedEffect(navController.currentDestination?.route) {
-        if (navController.currentDestination?.route == NavigationRoute.MY_WALLET.route) {
+        if (navController.currentDestination?.route == NavigationRoute.Account.Wallet.route) {
             walletViewModel.getWallets()
         }
     }
@@ -97,6 +93,7 @@ fun WalletScreen(
     val isClickAllowed = remember { AtomicBoolean(true) }
     val shouldShowMoreOption = remember { mutableStateOf(false) }
     val selectedItem = remember { mutableStateOf(0L) }
+    val focusRequester = remember { FocusRequester() }
     val scope = rememberCoroutineScope()
 
     BackHandler {
@@ -107,6 +104,11 @@ fun WalletScreen(
             return@BackHandler
         }
         navController.popBackStack()
+    }
+
+    LaunchedEffect(isSearching.value) {
+        if (isSearching.value)
+            focusRequester.requestFocus()
     }
 
     LaunchedEffect(Unit) {
@@ -179,6 +181,7 @@ fun WalletScreen(
                     }
                     BasicTextField(
                         value = searchTextFlow.collectAsState().value,
+                        modifier = Modifier.focusRequester(focusRequester),
                         onValueChange = { searchTextFlow.value = it },
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                         textStyle = TextStyle(
@@ -248,7 +251,7 @@ fun WalletScreen(
                         onClick = {
                             if (isClickAllowed.getAndSet(false)) {
                                 editWalletViewModel.getWalletById(it.id)
-                                navController.navigate(NavigationGraphRoute.EditWalletGraph.route)
+                                navController.navigate(NavigationGraphRoute.AccountGraph.EditWalletGraph.route)
                                 scope.launch {
                                     delay(200)
                                     isClickAllowed.set(true)
@@ -263,7 +266,7 @@ fun WalletScreen(
 
                                 WalletOptions.EDIT -> {
                                     editWalletViewModel.getWalletById(wallet.id)
-                                    navController.navigate(NavigationGraphRoute.EditWalletGraph.route)
+                                    navController.navigate(NavigationGraphRoute.AccountGraph.EditWalletGraph.route)
                                 }
 
                                 WalletOptions.ARCHIVE -> {
@@ -287,14 +290,7 @@ fun WalletScreen(
                 FloatingActionButton(
                     modifier = Modifier.align(Alignment.BottomEnd),
                     backgroundColor = Teal200,
-                    onClick = {
-                        navController.navigate(
-                            screenRoute(
-                                SelectionUI.ACCOUNT.route,
-                                SelectionUI.ADD_WALLET.route
-                            )
-                        )
-                    }) {
+                    onClick = { navController.navigate(NavigationGraphRoute.AccountGraph.AddWalletGraph.route) }) {
                     Icon(
                         imageVector = Icons.Default.AddCircle,
                         contentDescription = "Add",
@@ -304,7 +300,6 @@ fun WalletScreen(
                 }
             }
         }
-
     }
 }
 
@@ -360,8 +355,7 @@ fun AddWalletScreen(
     navController: NavController,
     addWalletViewModel: AddWalletViewModel
 ) {
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    BackHandler{
+    BackHandler {
         navController.popBackStack()
     }
 
@@ -432,7 +426,7 @@ fun AddWalletScreen(
             ) {
                 Image(painter = iconSelected.toPainterResource(), contentDescription = "Icon",
                     modifier = Modifier.noRippleClickable {
-                        navController.navigate(NavigationRoute.AddWalletSelectIcon.route)
+                        navController.navigate(NavigationRoute.Account.Wallet.AddWallet.SelectIcon.route)
                     })
                 Box(modifier = Modifier.fillMaxWidth()) {
                     if (nameWallet.isEmpty()) {
@@ -457,7 +451,7 @@ fun AddWalletScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .noRippleClickable {
-                        navController.navigate(NavigationRoute.AddWalletSelectCurrency.route)
+                        navController.navigate(NavigationRoute.Account.Wallet.AddWallet.SelectCurrency.route)
                     },
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(20.dp)
@@ -604,7 +598,7 @@ fun MoreOptions(
     )
     DropdownMenu(expanded = isExpanded,
         onDismissRequest = { onDismissRequest() }) {
-        items.forEachIndexed { index, walletOption ->
+        items.forEachIndexed { _, walletOption ->
             Row(
                 modifier = Modifier
                     .padding(20.dp)

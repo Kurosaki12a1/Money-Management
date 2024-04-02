@@ -73,7 +73,6 @@ import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import androidx.navigation.compose.currentBackStackEntryAsState
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.kuro.money.R
@@ -82,10 +81,9 @@ import com.kuro.money.data.model.EventEntity
 import com.kuro.money.data.utils.FileUtils
 import com.kuro.money.data.utils.Resource
 import com.kuro.money.domain.model.SelectedCategory
-import com.kuro.money.domain.model.SelectionUI
-import com.kuro.money.domain.model.screenRoute
 import com.kuro.money.extension.noRippleClickable
 import com.kuro.money.extension.randomColor
+import com.kuro.money.navigation.routes.NavigationRoute.AddTransaction
 import com.kuro.money.presenter.utils.CustomKeyBoard
 import com.kuro.money.presenter.utils.SlideUpContent
 import com.kuro.money.presenter.utils.TextFieldValueUtils
@@ -106,9 +104,8 @@ fun AddTransactionScreen(
     addTransactionViewModel: AddTransactionViewModel
 ) {
     val isEnabledCustomKeyBoard = remember { mutableStateOf(false) }
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
 
-    BackHandler(enabled = navBackStackEntry?.destination?.route == stringResource(id = R.string.add_transaction)) {
+    BackHandler {
         if (isEnabledCustomKeyBoard.value) {
             isEnabledCustomKeyBoard.value = false
             return@BackHandler
@@ -185,33 +182,16 @@ fun AddTransactionScreen(
                         wallet,
                         onAmountClick = { isEnabledCustomKeyBoard.value = true },
                         onSelectCategoryClick = {
-                            navController.navigate(
-                                screenRoute(
-                                    SelectionUI.ADD_TRANSACTION.route,
-                                    SelectionUI.SELECT_CATEGORY.route
-                                )
-                            )
+                            navController.navigate(AddTransaction.SelectCategory.route)
                         },
                         onNoteClick = {
-                            navController.navigate(
-                                screenRoute(
-                                    SelectionUI.ADD_TRANSACTION.route,
-                                    SelectionUI.NOTE.route
-                                )
-                            )
+                            navController.navigate(AddTransaction.Note.route)
                         },
                         onDateClick = {
-                            showDatePicker(context) {
-                                dateTransaction.value = it
-                            }
+                            showDatePicker(context) { dateTransaction.value = it }
                         },
                         onWalletClick = {
-                            navController.navigate(
-                                screenRoute(
-                                    SelectionUI.ADD_TRANSACTION.route,
-                                    SelectionUI.WALLET.route
-                                )
-                            )
+                            navController.navigate(AddTransaction.SelectWallet.route)
                         })
                 }
                 item {
@@ -220,21 +200,9 @@ fun AddTransactionScreen(
                         eventSelected,
                         dateRemind.value,
                         imageSelectedFromGallery,
-                        onSelectPeopleClick = {
-                            navController.navigate(
-                                screenRoute(
-                                    SelectionUI.ADD_TRANSACTION.route,
-                                    SelectionUI.WITH.route
-                                )
-                            )
-                        },
+                        onSelectPeopleClick = { navController.navigate(AddTransaction.With.route) },
                         onSelectEventClick = {
-                            navController.navigate(
-                                screenRoute(
-                                    SelectionUI.ADD_TRANSACTION.route,
-                                    SelectionUI.EVENT.route
-                                )
-                            )
+                            navController.navigate(AddTransaction.SelectEvent.route)
                         },
                         onAlarmClick = {
                             showDatePicker(context, true) {

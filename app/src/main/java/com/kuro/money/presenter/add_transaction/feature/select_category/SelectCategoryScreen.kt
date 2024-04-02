@@ -27,7 +27,6 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -38,13 +37,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.currentBackStackEntryAsState
 import com.kuro.money.R
 import com.kuro.money.data.model.CategoryEntity
 import com.kuro.money.data.utils.Resource
 import com.kuro.money.domain.model.SelectedCategory
-import com.kuro.money.domain.model.SelectionUI
-import com.kuro.money.domain.model.screenRoute
 import com.kuro.money.extension.detectHorizontalWithDelay
 import com.kuro.money.presenter.add_transaction.AddTransactionViewModel
 import com.kuro.money.presenter.add_transaction.feature.select_category.feature.DebtScreen
@@ -60,14 +56,8 @@ fun SelectCategoryScreen(
     addTransactionViewModel: AddTransactionViewModel,
     selectCategoryViewModel: SelectCategoryViewModel = hiltViewModel()
 ) {
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
 
-    BackHandler(
-        enabled = navBackStackEntry?.destination?.route == screenRoute(
-            SelectionUI.ADD_TRANSACTION.route,
-            SelectionUI.SELECT_CATEGORY.route
-        )
-    ) {
+    BackHandler {
         navController.popBackStack()
     }
 
@@ -127,16 +117,16 @@ fun SelectCategoryScreen(
                 orderedContent = listOf(0, 1, 2)
             ) {
                 when (it) {
-                    0 -> ExpenseScreen(listCategories.filter {
-                        it.type == "expense" && !listSpecialCategories.contains(it.name)
+                    0 -> ExpenseScreen(listCategories.filter { cate ->
+                        cate.type == "expense" && !listSpecialCategories.contains(cate.name)
                     }, addTransactionViewModel)
 
-                    1 -> IncomeScreen(listCategories.filter {
-                        it.type == "income" && !listSpecialCategories.contains(it.name)
+                    1 -> IncomeScreen(listCategories.filter { cate ->
+                        cate.type == "income" && !listSpecialCategories.contains(cate.name)
                     }, addTransactionViewModel)
 
                     2 -> DebtScreen(
-                        listCategories.filter { listSpecialCategories.contains(it.name) },
+                        listCategories.filter { cate -> listSpecialCategories.contains(cate.name) },
                         addTransactionViewModel
                     )
                 }

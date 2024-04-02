@@ -1,24 +1,29 @@
 package com.kuro.money.navigation.routes
 
-import com.kuro.money.domain.model.SelectionUI
-
 sealed class NavigationGraphRoute(val route: String) {
 
-    object RootGraph : NavigationGraphRoute(route = "root_graph")
+    data object RootGraph : NavigationGraphRoute(route = "root_graph")
 
-    object HomeGraph : NavigationGraphRoute(route = SelectionUI.SUB_GRAPH_HOME.route)
+    data object HomeGraph : NavigationGraphRoute(route = "home_graph")
 
-    object TransactionGraph : NavigationGraphRoute(route = SelectionUI.SUB_GRAPH_TRANSACTION.route)
+    data object TransactionGraph : NavigationGraphRoute(route = "transaction_graph")
 
-    object AddTransactionGraph : NavigationGraphRoute(route = SelectionUI.SUB_GRAPH_ADD_TRANSACTION.route)
+    sealed class AddTransactionGraph(route: String) : NavigationGraphRoute(route) {
+        data object AddEvent : AddTransactionGraph(route = "sub_graph_add_transaction_add_event")
+        companion object : AddTransactionGraph("add_transaction_graph")
+    }
 
-    object BudgetsGraph : NavigationGraphRoute(route = SelectionUI.BUDGETS.route)
+    data object BudgetsGraph : NavigationGraphRoute(route = "budgets_graph")
 
-    object AccountGraph : NavigationGraphRoute(route = SelectionUI.SUB_GRAPH_ACCOUNT.route)
+    sealed class AccountGraph(route: String) : NavigationGraphRoute(route) {
 
-    object MyWalletGraph : NavigationGraphRoute(route = "sub_graph_wallet")
+        data object MyWalletGraph : NavigationGraphRoute(route = "sub_graph_account_my_wallet")
 
-    object AddWalletGraph : NavigationGraphRoute(route = "sub_graph_add_wallet")
+        data object AddWalletGraph : NavigationGraphRoute(route = "sub_graph_account_add_wallet")
 
-    object EditWalletGraph : NavigationGraphRoute(route = "sub_graph_edit_wallet")
+        data object EditWalletGraph : NavigationGraphRoute(route = "sub_graph_account_edit_wallet")
+
+        companion object : AccountGraph("account_graph")
+    }
+
 }

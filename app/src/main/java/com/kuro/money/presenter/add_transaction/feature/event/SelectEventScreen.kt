@@ -32,7 +32,6 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -43,13 +42,11 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.currentBackStackEntryAsState
 import com.kuro.money.R
 import com.kuro.money.data.model.EventEntity
 import com.kuro.money.data.utils.Resource
-import com.kuro.money.domain.model.SelectionUI
-import com.kuro.money.domain.model.screenRoute
 import com.kuro.money.extension.detectHorizontalWithDelay
+import com.kuro.money.navigation.routes.NavigationRoute
 import com.kuro.money.presenter.add_transaction.AddTransactionViewModel
 import com.kuro.money.presenter.utils.CrossSlide
 import com.kuro.money.presenter.utils.toPainterResource
@@ -64,21 +61,9 @@ fun SelectEventScreen(
     addTransactionViewModel: AddTransactionViewModel,
     selectEventViewModel: SelectEventViewModel = hiltViewModel()
 ) {
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    BackHandler(
-        enabled = navBackStackEntry?.destination?.route == screenRoute(
-            SelectionUI.ADD_TRANSACTION.route,
-            SelectionUI.EVENT.route
-        )
-    ) {
-        navController.popBackStack()
-    }
+    BackHandler { navController.popBackStack() }
 
-    if (navBackStackEntry?.destination?.route == screenRoute(
-            SelectionUI.ADD_TRANSACTION.route,
-            SelectionUI.EVENT.route
-        )
-    ) {
+    if (navController.currentDestination?.route == NavigationRoute.AddTransaction.SelectEvent.route) {
         selectEventViewModel.getAllEvents()
     }
 
@@ -149,12 +134,7 @@ fun SelectEventScreen(
 
             FloatingActionButton(
                 onClick = {
-                    navController.navigate(
-                        screenRoute(
-                            SelectionUI.ADD_TRANSACTION.route,
-                            SelectionUI.ADD_EVENT.route
-                        )
-                    )
+                    navController.navigate(NavigationRoute.AddTransaction.AddEvent.route)
                 },
                 modifier = Modifier
                     .align(Alignment.BottomEnd)

@@ -8,6 +8,7 @@ import androidx.compose.material.icons.filled.MonetizationOn
 import androidx.compose.material.icons.filled.Payments
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.kuro.money.R
+import com.kuro.money.navigation.routes.NavigationGraphRoute
 
 data class BottomNavItem(
     val name: String,
@@ -20,26 +21,26 @@ fun generateListBottomNavItem(context: Context): MutableList<BottomNavItem> {
     return mutableListOf(
         BottomNavItem(
             name = context.getString(R.string.home),
-            route = SelectionUI.HOME.route,
+            route = NavigationGraphRoute.HomeGraph.route,
             icon = Icons.Default.Home
         ),
         BottomNavItem(
             name = context.getString(R.string.transactions),
-            route = SelectionUI.TRANSACTION.route,
+            route = NavigationGraphRoute.TransactionGraph.route,
             icon = Icons.Default.MonetizationOn
         ),
         BottomNavItem(
             name = "",
-            route = SelectionUI.SUB_GRAPH_ADD_TRANSACTION.route,
+            route = NavigationGraphRoute.AddTransactionGraph.route,
         ),
         BottomNavItem(
             name = context.getString(R.string.budget),
-            route = SelectionUI.BUDGETS.route,
+            route = NavigationGraphRoute.BudgetsGraph.route,
             icon = Icons.Default.Payments
         ),
         BottomNavItem(
             name = context.getString(R.string.account),
-            route = SelectionUI.SUB_GRAPH_ACCOUNT.route,
+            route = NavigationGraphRoute.AccountGraph.route,
             icon = Icons.Default.AccountBox
         )
     )

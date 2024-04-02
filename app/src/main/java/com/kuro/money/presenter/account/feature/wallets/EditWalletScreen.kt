@@ -25,7 +25,6 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -38,7 +37,6 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.compose.currentBackStackEntryAsState
 import com.kuro.money.R
 import com.kuro.money.data.utils.Resource
 import com.kuro.money.extension.noRippleClickable
@@ -52,11 +50,7 @@ fun EditWalletScreen(
     navController: NavController,
     viewModel: EditWalletViewModel
 ) {
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    BackHandler {
-        navController.popBackStack()
-    }
-
+    BackHandler { navController.popBackStack() }
 
     LaunchedEffect(Unit) {
         viewModel.deleteWallet.collectLatest {
@@ -135,7 +129,7 @@ fun EditWalletScreen(
             ) {
                 Image(painter = iconSelected.toPainterResource(), contentDescription = "Icon",
                     modifier = Modifier.noRippleClickable {
-                        navController.navigate(NavigationRoute.EditWalletSelectIcon.route)
+                        navController.navigate(NavigationRoute.Account.Wallet.EditWallet.SelectIcon.route)
                     })
                 Box(modifier = Modifier.fillMaxWidth()) {
                     if (nameWallet.isEmpty()) {
@@ -160,7 +154,7 @@ fun EditWalletScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .noRippleClickable {
-                        navController.navigate(NavigationRoute.EditWalletSelectCurrency.route)
+                        navController.navigate(NavigationRoute.Account.Wallet.EditWallet.SelectCurrency.route)
                     },
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(20.dp)

@@ -1,37 +1,72 @@
 package com.kuro.money.navigation.routes
 
-import com.kuro.money.domain.model.SelectionUI
-
 sealed class NavigationRoute(val route: String) {
-    object MY_WALLET : NavigationRoute(route = SelectionUI.MY_WALLET.route)
-    object MY_EVENT : NavigationRoute(route = SelectionUI.MY_EVENT.route)
-    object MY_CATEGORY : NavigationRoute(route = SelectionUI.MY_CATEGORY.route)
-    object MY_RECURRING_TRANSACTIONS :
-        NavigationRoute(route = SelectionUI.MY_RECURRING_TRANSACTIONS.route)
+    sealed class AddTransaction(route: String) : NavigationRoute(route) {
+        data object SelectCategory : AddTransaction(route = "add_transaction_select_category")
 
-    object MY_BILLS : NavigationRoute(route = SelectionUI.MY_BILLS.route)
-    object MY_DEBTS : NavigationRoute(route = SelectionUI.MY_DEBTS.route)
-    object MY_TOOLS : NavigationRoute(route = SelectionUI.MY_TOOLS.route)
-    object MY_TRAVEL_MODE : NavigationRoute(route = SelectionUI.MY_TRAVEL_MODE.route)
-    object MY_SETTINGS : NavigationRoute(route = SelectionUI.MY_SETTINGS.route)
-    object MY_ABOUT : NavigationRoute(route = SelectionUI.MY_ABOUT.route)
-    object SELECT_CATEGORY : NavigationRoute(route = SelectionUI.SELECT_CATEGORY.route)
-    object EditWalletSelectIcon : NavigationRoute(route = "edit_wallet_select_icon")
-    object EditWalletSelectCurrency : NavigationRoute(route = "edit_wallet_select_currency")
-    object AddWalletSelectIcon : NavigationRoute(route = "add_wallet_select_icon")
-    object AddWalletSelectCurrency : NavigationRoute(route = "add_wallet_select_currency")
+        data object SelectWallet : AddTransaction(route = "add_transactions_select_wallet")
 
-    object ADD_EVENT : NavigationRoute(route = SelectionUI.ADD_EVENT.route)
-    object ADD_WALLET : NavigationRoute(route = SelectionUI.ADD_WALLET.route)
-    object NOTE : NavigationRoute(route = SelectionUI.NOTE.route)
-    object WITH : NavigationRoute(route = SelectionUI.WITH.route)
-    object EVENT : NavigationRoute(route = SelectionUI.EVENT.route)
+        data object SelectCurrency : AddTransaction(route = "add_transaction_select_currency")
 
-    object HOME : NavigationRoute(route = SelectionUI.HOME.route)
+        data object Note : AddTransaction(route = "add_transaction_note")
 
-    object ACCOUNT : NavigationRoute(route = SelectionUI.ACCOUNT.route)
+        data object SelectEvent : AddTransaction(route = "add_transactions_select_event")
 
-    object EDIT_WALLET : NavigationRoute(route = SelectionUI.EDIT_WALLET.route)
+        data object With : AddTransaction(route = "add_transactions_with")
 
+        sealed class AddEvent(route: String) : AddTransaction(route) {
 
+            data object SelectWallet : AddEvent("add_transaction_add_event_select_wallet")
+            data object SelectCurrency : AddEvent("add_transaction_add_event_select_currency")
+            data object SelectIcon : AddEvent("add_Transaction_add_event_select_icon")
+            companion object : AddEvent("add_transaction_add_event")
+        }
+
+        companion object : AddTransaction("add_transaction")
+    }
+
+    sealed class Account(route: String) : NavigationRoute(route) {
+
+        data object About : NavigationRoute(route = "account_about")
+
+        data object Category : NavigationRoute(route = "account_category")
+
+        data object Event : NavigationRoute(route = "account_route")
+
+        data object RecurringTransaction : NavigationRoute(route = "account_recurring_transaction")
+
+        data object Bills : NavigationRoute(route = "account_bills")
+
+        data object Debts : NavigationRoute(route = "account_debts")
+
+        data object Tools : NavigationRoute(route = "account_tools")
+
+        data object TravelMode : NavigationRoute(route = "account_travel_mode")
+
+        data object Settings : NavigationRoute(route = "account_settings")
+
+        sealed class Wallet(route: String) : Account(route) {
+
+            sealed class AddWallet(route: String) : Wallet(route) {
+                data object SelectCurrency : EditWallet("account_wallet_add_select_currency")
+                data object SelectIcon : EditWallet("account_wallet_add_select_icon")
+                companion object : AddWallet("account_wallet_add")
+            }
+
+            sealed class EditWallet(route: String) : Wallet(route) {
+                data object SelectCurrency : EditWallet("account_wallet_edit_select_currency")
+                data object SelectIcon : EditWallet("account_wallet_edit_select_icon")
+                companion object : EditWallet("account_wallet_edit")
+            }
+
+            companion object : Wallet("account_wallet")
+        }
+
+        companion object : Account("account")
+    }
+
+    sealed class Home(route : String) : NavigationRoute(route) {
+        companion object : Home("home")
+    }
 }
+

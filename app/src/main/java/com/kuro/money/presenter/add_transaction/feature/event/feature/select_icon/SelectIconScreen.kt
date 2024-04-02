@@ -22,7 +22,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -32,10 +31,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.currentBackStackEntryAsState
 import com.kuro.money.R
-import com.kuro.money.domain.model.SelectionUI
-import com.kuro.money.domain.model.screenRoute
 import com.kuro.money.extension.noRippleClickable
 import com.kuro.money.presenter.account.feature.wallets.AddWalletViewModel
 import com.kuro.money.presenter.account.feature.wallets.EditWalletViewModel
@@ -52,13 +48,7 @@ fun SelectIconScreen(
     addEventScreenViewModel: AddEventScreenViewModel,
     selectIconScreenViewModel: SelectIconScreenViewModel = hiltViewModel()
 ) {
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    BackHandler(
-        enabled = navBackStackEntry?.destination?.route == screenRoute(
-            SelectionUI.ADD_TRANSACTION.route,
-            SelectionUI.SELECT_ICON.route
-        )
-    ) {
+    BackHandler {
         navController.popBackStack()
     }
 
@@ -133,13 +123,7 @@ fun SelectIconScreen(
     addWalletViewModel: AddWalletViewModel,
     selectIconScreenViewModel: SelectIconScreenViewModel = hiltViewModel()
 ) {
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    BackHandler(
-        enabled = navBackStackEntry?.destination?.route == screenRoute(
-            SelectionUI.ACCOUNT.route,
-            SelectionUI.SELECT_ICON.route
-        )
-    ) {
+    BackHandler {
         navController.popBackStack()
     }
 
@@ -213,7 +197,6 @@ fun SelectIconScreen(
     editWalletViewModel: EditWalletViewModel,
     selectIconScreenViewModel: SelectIconScreenViewModel = hiltViewModel()
 ) {
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
     BackHandler {
         navController.popBackStack()
     }

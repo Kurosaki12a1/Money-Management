@@ -33,7 +33,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -51,12 +50,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import androidx.navigation.compose.currentBackStackEntryAsState
 import com.kuro.money.R
 import com.kuro.money.data.model.CurrencyEntity
 import com.kuro.money.data.utils.Resource
-import com.kuro.money.domain.model.SelectionUI
-import com.kuro.money.domain.model.screenRoute
 import com.kuro.money.extension.noRippleClickable
 import com.kuro.money.presenter.account.feature.wallets.AddWalletViewModel
 import com.kuro.money.presenter.account.feature.wallets.EditWalletViewModel
@@ -77,14 +73,8 @@ fun SelectCurrencyScreen(
     val isSearching = remember { mutableStateOf(false) }
     val listCurrency = remember { mutableStateListOf<CurrencyEntity>() }
     val fullListCurrency = remember { mutableStateListOf<CurrencyEntity>() }
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
 
-    BackHandler(
-        navBackStackEntry?.destination?.route == screenRoute(
-            SelectionUI.ADD_TRANSACTION.route,
-            SelectionUI.SELECT_CURRENCY.route
-        )
-    ) {
+    BackHandler {
         if (isSearching.value) {
             isSearching.value = false
             listCurrency.clear()
@@ -98,7 +88,7 @@ fun SelectCurrencyScreen(
     val selectedCurrency = addEventScreenViewModel.currencySelected.collectAsState().value
     val searchTextFlow = remember { MutableStateFlow("") }
 
-    LaunchedEffect(selectCurrencyViewModel.getListCurrencies.collectAsState().value) {
+    LaunchedEffect(Unit) {
         selectCurrencyViewModel.getListCurrencies.collectLatest {
             if (it is Resource.Success) {
                 listCurrency.clear()
@@ -167,14 +157,8 @@ fun SelectCurrencyScreen(
     val isSearching = remember { mutableStateOf(false) }
     val listCurrency = remember { mutableStateListOf<CurrencyEntity>() }
     val fullListCurrency = remember { mutableStateListOf<CurrencyEntity>() }
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
 
-    BackHandler(
-        navBackStackEntry?.destination?.route == screenRoute(
-            SelectionUI.ACCOUNT.route,
-            SelectionUI.SELECT_CURRENCY.route
-        )
-    ) {
+    BackHandler {
         if (isSearching.value) {
             isSearching.value = false
             listCurrency.clear()
@@ -188,7 +172,7 @@ fun SelectCurrencyScreen(
     val selectedCurrency = addWalletViewModel.currencySelected.collectAsState().value
     val searchTextFlow = remember { MutableStateFlow("") }
 
-    LaunchedEffect(selectCurrencyViewModel.getListCurrencies.collectAsState().value) {
+    LaunchedEffect(Unit) {
         selectCurrencyViewModel.getListCurrencies.collectLatest {
             if (it is Resource.Success) {
                 listCurrency.clear()
@@ -257,7 +241,6 @@ fun SelectCurrencyScreen(
     val isSearching = remember { mutableStateOf(false) }
     val listCurrency = remember { mutableStateListOf<CurrencyEntity>() }
     val fullListCurrency = remember { mutableStateListOf<CurrencyEntity>() }
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
 
     BackHandler {
         if (isSearching.value) {

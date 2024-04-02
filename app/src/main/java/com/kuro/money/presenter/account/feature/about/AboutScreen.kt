@@ -16,7 +16,6 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -25,25 +24,14 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import androidx.navigation.compose.currentBackStackEntryAsState
 import com.kuro.money.R
-import com.kuro.money.domain.model.SelectionUI
-import com.kuro.money.domain.model.screenRoute
 import com.kuro.money.extension.noRippleClickable
 
 @Composable
 fun AboutScreen(
     navController: NavController
 ) {
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    BackHandler(
-        navBackStackEntry?.destination?.route == screenRoute(
-            SelectionUI.ACCOUNT.route,
-            SelectionUI.MY_ABOUT.route
-        )
-    ) {
-        navController.popBackStack()
-    }
+    BackHandler { navController.popBackStack() }
 
     Surface(
         modifier = Modifier

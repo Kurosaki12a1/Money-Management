@@ -17,7 +17,6 @@ import androidx.compose.material.icons.filled.RemoveRedEye
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -25,28 +24,25 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import androidx.navigation.compose.currentBackStackEntryAsState
-import androidx.navigation.compose.rememberNavController
 import com.kuro.money.R
 import com.kuro.money.data.model.AccountEntity
 import com.kuro.money.data.utils.Resource
-import com.kuro.money.domain.model.SelectionUI
+import com.kuro.money.navigation.routes.NavigationRoute
 import com.kuro.money.presenter.utils.string
 import com.kuro.money.ui.theme.Gray
 import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun HomeScreen(
-    navController : NavController,
+    navController: NavController,
     homeViewModel: HomeViewModel,
 ) {
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-    BackHandler(navBackStackEntry?.destination?.route == SelectionUI.HOME.route) {
+    BackHandler {
         navController.popBackStack()
     }
 
     LaunchedEffect(navController.currentDestination?.route) {
-        if (navController.currentDestination?.route == SelectionUI.HOME.route) {
+        if (navController.currentDestination?.route == NavigationRoute.Home.route) {
             homeViewModel.getAllWallets()
             homeViewModel.getBalance()
         }

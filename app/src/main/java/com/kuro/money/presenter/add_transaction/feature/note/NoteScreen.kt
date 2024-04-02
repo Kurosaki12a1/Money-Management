@@ -22,7 +22,6 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -36,10 +35,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
-import androidx.navigation.compose.currentBackStackEntryAsState
 import com.kuro.money.R
-import com.kuro.money.domain.model.SelectionUI
-import com.kuro.money.domain.model.screenRoute
 import com.kuro.money.presenter.add_transaction.AddTransactionViewModel
 import com.kuro.money.ui.theme.Gray
 
@@ -48,14 +44,7 @@ fun NoteScreen(
     navController: NavController,
     addTransactionViewModel: AddTransactionViewModel
 ) {
-    val navBackStackEntry by navController.currentBackStackEntryAsState()
-
-    BackHandler(enabled = navBackStackEntry?.destination?.route == screenRoute(
-        SelectionUI.ADD_TRANSACTION.route,
-        SelectionUI.NOTE.route
-    )) {
-        navController.popBackStack()
-    }
+    BackHandler { navController.popBackStack() }
 
     val noteValue = addTransactionViewModel.note.collectAsState().value
     val note = remember { mutableStateOf(noteValue) }
