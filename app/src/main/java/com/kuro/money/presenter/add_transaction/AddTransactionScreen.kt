@@ -12,15 +12,12 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -33,6 +30,7 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Checkbox
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
@@ -53,31 +51,25 @@ import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.QuestionMark
 import androidx.compose.material.icons.filled.Wallet
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalTextInputService
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.input.TextFieldValue
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.kuro.money.R
-import com.kuro.money.data.model.AccountEntity
-import com.kuro.money.data.model.CurrencyEntity
 import com.kuro.money.data.model.EventEntity
 import com.kuro.money.data.utils.FileUtils
 import com.kuro.money.data.utils.Resource
@@ -85,17 +77,13 @@ import com.kuro.money.domain.model.SelectedCategory
 import com.kuro.money.extension.noRippleClickable
 import com.kuro.money.extension.randomColor
 import com.kuro.money.navigation.routes.NavigationRoute.AddTransaction
-import com.kuro.money.presenter.utils.CustomKeyBoard
-import com.kuro.money.presenter.utils.SlideUpContent
-import com.kuro.money.presenter.utils.TextFieldValueUtils
-import com.kuro.money.presenter.utils.evaluateExpression
+import com.kuro.money.presenter.utils.DecimalFormatter
+import com.kuro.money.presenter.utils.DecimalInputVisualTransformation
 import com.kuro.money.presenter.utils.string
 import com.kuro.money.presenter.utils.toPainterResource
 import com.kuro.money.ui.theme.Gray
 import com.kuro.money.ui.theme.Green
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -114,22 +102,17 @@ fun AddTransactionScreen(
         navController.popBackStack()
     }
 
-    val amountFieldValue = remember { mutableStateOf(TextFieldValue()) }
-    val shakeEnabled = remember { mutableStateOf(false) }
-    val scope = rememberCoroutineScope()
-
     val selectedCategory = addTransactionViewModel.selectedCategory.collectAsState().value
     val selectedCurrency = addTransactionViewModel.currencySelected.collectAsState().value
     val amount = addTransactionViewModel.amount.collectAsState().value
-    val note = addTransactionViewModel.note.collectAsState().value
     val wallet = addTransactionViewModel.wallet.collectAsState().value
     val peopleSelected = addTransactionViewModel.nameOfPeople.collectAsState().value
     val eventSelected = addTransactionViewModel.eventSelected.collectAsState().value
     val imageSelectedFromGallery = addTransactionViewModel.uriSelected.collectAsState().value
-    val imageFromCamera = remember { mutableStateOf<Bitmap?>(null) }
+    val imageFromCamera = addTransactionViewModel.bitmapFlow.collectAsState().value
 
-    val dateTransaction = remember { mutableStateOf<LocalDate?>(null) }
-    val dateRemind = remember { mutableStateOf<LocalDate?>(null) }
+    val dateTransaction = addTransactionViewModel.dateTransaction.collectAsState().value
+    val dateRemind = addTransactionViewModel.dateRemind.collectAsState().value
 
     val context = LocalContext.current
     val shouldSubmitTransaction = remember { mutableStateOf(false) }
@@ -138,8 +121,7 @@ fun AddTransactionScreen(
         shouldSubmitTransaction.value = !(amount == null
                 || wallet == null
                 || selectedCurrency == null
-                || selectedCategory == SelectedCategory("", "")
-                || dateTransaction.value == null)
+                || selectedCategory == SelectedCategory())
     }
 
     LaunchedEffect(Unit) {
@@ -179,24 +161,15 @@ fun AddTransactionScreen(
             ) {
                 item {
                     BodyAddTransaction(
-                        selectedCurrency,
-                        amountFieldValue,
-                        selectedCategory,
-                        note,
-                        dateTransaction.value,
-                        wallet,
+                        addTransactionViewModel,
                         onCurrencyClick = {
                             navController.navigate(AddTransaction.SelectCurrency.route)
                         },
-                        onAmountClick = { isEnabledCustomKeyBoard.value = true },
                         onSelectCategoryClick = {
                             navController.navigate(AddTransaction.SelectCategory.route)
                         },
                         onNoteClick = {
                             navController.navigate(AddTransaction.Note.route)
-                        },
-                        onDateClick = {
-                            showDatePicker(context) { dateTransaction.value = it }
                         },
                         onWalletClick = {
                             navController.navigate(AddTransaction.SelectWallet.route)
@@ -206,22 +179,23 @@ fun AddTransactionScreen(
                     MoreDetailsTransaction(
                         peopleSelected,
                         eventSelected,
-                        dateRemind.value,
+                        dateRemind,
                         imageSelectedFromGallery,
+                        imageFromCamera,
                         onSelectPeopleClick = { navController.navigate(AddTransaction.With.route) },
                         onSelectEventClick = {
                             navController.navigate(AddTransaction.SelectEvent.route)
                         },
                         onAlarmClick = {
                             showDatePicker(context, true) {
-                                dateRemind.value = it
+                                addTransactionViewModel.setDateRemind(it)
                             }
                         },
                         onImagePicked = {
                             addTransactionViewModel.setUriSelected(it)
                         },
                         onCameraPicked = {
-                            imageFromCamera.value = it
+                            addTransactionViewModel.setBitmap(it)
                         }
                     )
                 }
@@ -237,21 +211,18 @@ fun AddTransactionScreen(
                         RoundedCornerShape(16.dp)
                     )
                     .noRippleClickable {
-                        if (imageFromCamera.value != null) {
+                        if (imageFromCamera != null) {
                             addTransactionViewModel.setUriSelected(
                                 FileUtils.getUriForFile(
                                     context, FileUtils.saveBitmapToFile(
-                                        context, imageFromCamera.value!!
+                                        context, imageFromCamera
                                     )
                                 )
                             )
                         }
                         if (shouldSubmitTransaction.value) {
                             addTransactionViewModel.setDefaultCurrency()
-                            addTransactionViewModel.submitData(
-                                dateTransaction.value!!,
-                                dateRemind.value
-                            )
+                            addTransactionViewModel.submitData()
                         }
                     },
             ) {
@@ -260,56 +231,6 @@ fun AddTransactionScreen(
                     text = stringResource(id = R.string.save),
                     textAlign = TextAlign.Center,
                     color = Color.Black.copy(alpha = 0.7f)
-                )
-            }
-        }
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight(0.3f)
-                .align(Alignment.BottomCenter)
-        ) {
-            SlideUpContent(
-                isVisible = isEnabledCustomKeyBoard.value
-            ) {
-                CustomKeyBoard(
-                    onClear = {
-                        TextFieldValueUtils.clear(amountFieldValue)
-                        addTransactionViewModel.setAmount(null)
-                    },
-                    onBack = {
-                        TextFieldValueUtils.deleteAt(amountFieldValue)
-                        val value = evaluateExpression(amountFieldValue.value.text)
-                        if (!value.isNaN()) {
-                            addTransactionViewModel.setAmount(value)
-                        } else {
-                            addTransactionViewModel.setAmount(null)
-                        }
-                    },
-                    onInput = {
-                        TextFieldValueUtils.add(amountFieldValue, it)
-                        val value = evaluateExpression(amountFieldValue.value.text)
-                        if (!value.isNaN()) {
-                            addTransactionViewModel.setAmount(value)
-                        } else {
-                            addTransactionViewModel.setAmount(null)
-                        }
-                    },
-                    onConfirm = {
-                        val value = evaluateExpression(amountFieldValue.value.text)
-                        if (value.isNaN()) {
-                            scope.launch {
-                                shakeEnabled.value = true
-                                delay(500)
-                                shakeEnabled.value = false
-                            }
-                        } else {
-                            TextFieldValueUtils.set(amountFieldValue, value.toString())
-                            addTransactionViewModel.setAmount(value)
-                        }
-                    },
-                    // Wrong expression start shaking
-                    shakeEnabled = shakeEnabled.value
                 )
             }
         }
@@ -340,6 +261,7 @@ private fun MoreDetailsTransaction(
     eventSelected: EventEntity?,
     dateRemind: LocalDate?,
     uriSelected: Uri?,
+    imageFromCamera : Bitmap?,
     onSelectPeopleClick: () -> Unit,
     onSelectEventClick: () -> Unit,
     onAlarmClick: () -> Unit,
@@ -368,7 +290,8 @@ private fun MoreDetailsTransaction(
             if (peopleSelected == null) {
                 Text(text = stringResource(id = R.string.with))
             } else {
-                val listPeople = peopleSelected.split(",")
+                val listPeople =
+                    peopleSelected.split(",").filter { it.isNotEmpty() }.map { it.trim() }
                 val listRandomColor = listPeople.map { randomColor() }
                 LazyRow(
                     horizontalArrangement = Arrangement.spacedBy(5.dp),
@@ -488,7 +411,6 @@ private fun MoreDetailsTransaction(
     /**
      * Add picture and camera
      */
-    val bitmapCamera = remember { mutableStateOf<Bitmap?>(null) }
     val launcherChooseImage =
         rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) {
             onImagePicked(it)
@@ -496,19 +418,14 @@ private fun MoreDetailsTransaction(
     val launcherChooseCamera =
         rememberLauncherForActivityResult(contract = ActivityResultContracts.TakePicturePreview()) {
             onCameraPicked(it)
-            bitmapCamera.value = it
         }
     val launcherRequestPermission =
         rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestPermission()) {
-            if (it) {
-                launcherChooseImage.launch("image/*")
-            }
+            if (it) { launcherChooseImage.launch("image/*") }
         }
     val launcherRequestCameraPermission =
         rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestPermission()) {
-            if (it) {
-                launcherChooseCamera.launch(null)
-            }
+            if (it) { launcherChooseCamera.launch(null) }
         }
     BoxWithConstraints(
         modifier = Modifier
@@ -516,7 +433,7 @@ private fun MoreDetailsTransaction(
             .background(Color.White)
             .padding(10.dp)
     ) {
-        if (uriSelected == null && bitmapCamera.value == null) {
+        if (uriSelected == null && imageFromCamera == null) {
             Icon(
                 modifier = Modifier
                     .width(this.maxWidth * 0.5f)
@@ -569,7 +486,7 @@ private fun MoreDetailsTransaction(
         } else {
             AsyncImage(
                 model = ImageRequest.Builder(LocalContext.current)
-                    .data(bitmapCamera.value)
+                    .data(imageFromCamera)
                     .build(),
                 contentDescription = "Photo",
                 modifier = Modifier
@@ -661,29 +578,23 @@ private fun ToolbarAddTransaction(
 
 @Composable
 private fun BodyAddTransaction(
-    currencyEntity: CurrencyEntity?,
-    amount: MutableState<TextFieldValue>,
-    selectedCategory: SelectedCategory,
-    note: String,
-    date: LocalDate?,
-    wallet: AccountEntity?,
+    addTransactionViewModel: AddTransactionViewModel,
     onCurrencyClick: () -> Unit,
-    onAmountClick: () -> Unit,
     onSelectCategoryClick: () -> Unit,
     onNoteClick: () -> Unit,
-    onDateClick: () -> Unit,
     onWalletClick: () -> Unit
 ) {
-    val interactionSource = remember { MutableInteractionSource() }.also {
-        val isPressed by it.collectIsPressedAsState()
-        if (isPressed) onAmountClick()
-    }
-    val textTime = if (date == null) {
-        stringResource(id = R.string.select_date)
-    } else {
-        if (date == LocalDate.now()) stringResource(id = R.string.today)
-        else DateTimeFormatter.ofPattern("dd/MM/yyyy").format(date)
-    }
+    val context = LocalContext.current
+    val selectedCategory = addTransactionViewModel.selectedCategory.collectAsState().value
+    val selectedCurrency = addTransactionViewModel.currencySelected.collectAsState().value
+    val amount = addTransactionViewModel.amount.collectAsState().value
+    val note = addTransactionViewModel.note.collectAsState().value
+    val wallet = addTransactionViewModel.wallet.collectAsState().value
+    val dateTransaction = addTransactionViewModel.dateTransaction.collectAsState().value
+
+    val textTime = if (dateTransaction == LocalDate.now()) stringResource(id = R.string.today)
+    else DateTimeFormatter.ofPattern("dd/MM/yyyy").format(dateTransaction)
+    val decimalFormatter = DecimalFormatter()
 
     Surface(
         modifier = Modifier.fillMaxWidth(), color = Color.White
@@ -699,23 +610,27 @@ private fun BodyAddTransaction(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                if (currencyEntity != null) {
+                if (selectedCurrency != null) {
                     Image(
-                        painter = currencyEntity.icon.toPainterResource(),
-                        contentDescription = currencyEntity.name,
+                        painter = selectedCurrency.icon.toPainterResource(),
+                        contentDescription = selectedCurrency.name,
                         modifier = Modifier.noRippleClickable { onCurrencyClick() }
                     )
                 }
-                CompositionLocalProvider(LocalTextInputService provides null) {
-                    OutlinedTextField(
-                        modifier = Modifier.fillMaxWidth(),
-                        value = amount.value,
-                        interactionSource = interactionSource,
-                        onValueChange = { amount.value = it },
-                        singleLine = true,
-                        label = { Text(text = stringResource(id = R.string.amount)) },
-                    )
-                }
+                OutlinedTextField(
+                    modifier = Modifier.fillMaxWidth(),
+                    value = amount ?: "",
+                    onValueChange = {
+                        addTransactionViewModel.setAmount(decimalFormatter.cleanup(it))
+                    },
+                    singleLine = true,
+                    label = { Text(text = stringResource(id = R.string.amount)) },
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Decimal,
+                        imeAction = ImeAction.Done
+                    ),
+                    visualTransformation = DecimalInputVisualTransformation(decimalFormatter)
+                )
             }
             Row(
                 modifier = Modifier
@@ -776,7 +691,11 @@ private fun BodyAddTransaction(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable { onDateClick() },
+                    .clickable {
+                        showDatePicker(context) {
+                            addTransactionViewModel.setDateTransaction(it)
+                        }
+                    },
                 horizontalArrangement = Arrangement.spacedBy(20.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {

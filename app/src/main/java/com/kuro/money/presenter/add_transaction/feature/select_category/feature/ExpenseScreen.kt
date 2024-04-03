@@ -26,8 +26,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.scale
@@ -37,7 +35,6 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.kuro.money.R
 import com.kuro.money.data.model.CategoryEntity
 import com.kuro.money.domain.model.SelectedCategory
@@ -54,10 +51,10 @@ fun ExpenseScreen(
     vm: SelectCategoryViewModel = hiltViewModel(),
 ) {
     val newListCategory = mutableListOf<CategoryEntity>()
-    val sortedNameList = listCategory.sortedBy { it.name }
-    newListCategory.addAll(sortedNameList.map { parent ->
-        parent.copy(subCategories = parent.subCategories.sortedBy { it.name })
-    }.toCollection(ArrayList()))
+    listCategory.forEach { category ->
+        category.subCategories = category.subCategories.sortedBy { it.name }.toMutableList()
+    }
+    newListCategory.addAll(listCategory.sortedBy { it.name })
 
     val selectedCategory = addTransactionViewModel.selectedCategory.collectAsState().value
     Surface(
@@ -89,7 +86,7 @@ fun ExpenseScreen(
                 Divider(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(10.dp)
+                        .height(1.dp)
                         .background(Gray.copy(alpha = 0.1f))
                 )
             }
@@ -115,7 +112,7 @@ private fun CategoryItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(10.dp)
-                .clickable { onClick(SelectedCategory(entity.name, entity.icon)) },
+                .clickable { onClick(SelectedCategory(entity.name, entity.icon, entity.type)) },
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -145,7 +142,7 @@ private fun CategoryItem(
                     .clickable {
                         onClick(
                             SelectedCategory(
-                                subCategoryEntity.name, subCategoryEntity.icon
+                                subCategoryEntity.name, subCategoryEntity.icon, subCategoryEntity.type
                             )
                         )
                     }) {
@@ -189,7 +186,7 @@ private fun CategoryItem(
             Divider(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(10.dp)
+                    .height(1.dp)
                     .background(Gray.copy(alpha = 0.1f))
             )
         }

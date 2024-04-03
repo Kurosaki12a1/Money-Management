@@ -17,5 +17,7 @@ class AccountsUseCase @Inject constructor(private val repo: AccountsRepository) 
 
     operator fun invoke(id: Long) = repo.getAccountById(id)
 
+    operator fun invoke(count : Int) = repo.getAccounts(count)
+
     fun delete(id : Long) = repo.deleteAccountById(id)
 }

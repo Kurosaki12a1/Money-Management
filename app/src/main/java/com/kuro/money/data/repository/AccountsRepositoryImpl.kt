@@ -99,4 +99,15 @@ class AccountsRepositoryImpl @Inject constructor(
             emit(Resource.failure(e, e.message))
         }
     }
+
+    override fun getAccounts(count: Int): Flow<Resource<List<AccountEntity>>> = flow {
+        emit(Resource.Loading)
+        try {
+            val data = appDatabase.accountsDao().getWallets(count)
+            emit(Resource.success(data))
+        } catch (e : Exception) {
+            e.printStackTrace()
+            emit(Resource.failure(e, e.message))
+        }
+    }.flowOn(dispatcher)
 }

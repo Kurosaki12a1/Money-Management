@@ -6,18 +6,20 @@ import com.kuro.money.domain.model.Category
 import com.kuro.money.domain.model.SubCategory
 
 fun Category.toCategoryEntity(): CategoryEntity = CategoryEntity(
-    this.name ?: "",
-    this.title ?: "",
-    this.icon ?: "",
-    this.type ?: "",
-    this.metadata ?: "",
-    this.subCategories?.map { it.toSubCategoryEntity() }?: listOf()
-)
+    id = id ?: 0L,
+    name = name ?: "",
+    title = title ?: "",
+    icon = icon ?: "",
+    type = type ?: "",
+    metadata = metadata ?: ""
+).also { it.subCategories = subCategories?.map { it.toSubCategoryEntity() } ?: listOf() }
 
-fun SubCategory.toSubCategoryEntity() : SubCategoryEntity = SubCategoryEntity(
-    this.name ?: "",
-    this.title ?: "",
-    this.icon ?: "",
-    this.type ?: "",
-    this.metadata ?: ""
+fun SubCategory.toSubCategoryEntity(): SubCategoryEntity = SubCategoryEntity(
+    id = id ?: 0L,
+    parentId = parentId ?: 0L,
+    name = name ?: "",
+    title = title ?: "",
+    icon = icon ?: "",
+    type = type ?: "",
+    metadata = metadata ?: ""
 )

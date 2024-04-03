@@ -65,4 +65,10 @@
     <string name="delete_wallet">DELETE THIS WALLET</string>
     <string name="transfer_money">Transfer money</string>
     <string name="edit">Edit</string>
+
+    <string name="total_balance">Total Balance</string>
+    <string name="spending_report">Spending report</string>
+    <string name="see_reports">See reports</string>
+    <string name="see_all">See all</string>
+    <string name="recent_transactions">Recent Transactions</string>
 </resources>

@@ -18,6 +18,7 @@ import com.kuro.money.presenter.add_transaction.feature.event.feature.select_ico
 import com.kuro.money.presenter.add_transaction.feature.note.NoteScreen
 import com.kuro.money.presenter.add_transaction.feature.people.SelectPeopleScreen
 import com.kuro.money.presenter.add_transaction.feature.select_category.SelectCategoryScreen
+import com.kuro.money.presenter.add_transaction.feature.select_category.SelectCategoryViewModel
 import com.kuro.money.presenter.add_transaction.feature.wallet.SelectWalletScreen
 
 fun NavGraphBuilder.addTransactionNavGraph(navHostController: NavHostController) {
@@ -36,7 +37,12 @@ fun NavGraphBuilder.addTransactionNavGraph(navHostController: NavHostController)
                     navHostController.getBackStackEntry(AddTransactionGraph.route)
                 }
                 val transactionViewModel = hiltViewModel<AddTransactionViewModel>(parentEntry)
-                SelectCategoryScreen(navHostController, transactionViewModel)
+                val selectedCategoryViewModel = hiltViewModel<SelectCategoryViewModel>(parentEntry)
+                SelectCategoryScreen(
+                    navHostController,
+                    transactionViewModel,
+                    selectedCategoryViewModel
+                )
             }
             composable(route = AddTransaction.Note.route) {
                 val parentEntry = remember(it) {

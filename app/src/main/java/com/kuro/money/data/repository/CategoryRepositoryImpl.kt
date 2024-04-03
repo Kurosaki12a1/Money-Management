@@ -3,10 +3,13 @@ package com.kuro.money.data.repository
 import android.content.Context
 import com.kuro.money.data.data_source.local.AppDatabase
 import com.kuro.money.data.mapper.toCategoryEntity
+import com.kuro.money.data.mapper.toSubCategoryEntity
 import com.kuro.money.data.model.CategoryEntity
+import com.kuro.money.data.model.SubCategoryEntity
 import com.kuro.money.data.utils.FileUtils
 import com.kuro.money.data.utils.Resource
 import com.kuro.money.domain.model.Category
+import com.kuro.money.domain.model.SubCategory
 import com.kuro.money.domain.repository.CategoryRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -31,6 +34,17 @@ class CategoryRepositoryImpl @Inject constructor(
         }
     }.flowOn(dispatcher)
 
+    override fun insert(entity: SubCategoryEntity): Flow<Resource<Long>> = flow {
+        emit(Resource.Loading)
+        try {
+            val data = appDatabase.subCategoryDao().insert(entity)
+            emit(Resource.success(data))
+        } catch (e : Exception) {
+            e.printStackTrace()
+            emit(Resource.failure(e, e.message))
+        }
+    }.flowOn(dispatcher)
+
     override fun insert(list: List<CategoryEntity>): Flow<Resource<Long>> = flow {
         emit(Resource.Loading)
         try {
@@ -49,7 +63,7 @@ class CategoryRepositoryImpl @Inject constructor(
         }
     }.flowOn(dispatcher)
 
-    override fun isNameExist(name: String): Flow<Resource<Boolean>> = flow {
+    override fun isNameCategoryExist(name: String): Flow<Resource<Boolean>> = flow {
         emit(Resource.Loading)
         try {
             val isNameExist = appDatabase.categoryDao().countByName(name)
@@ -60,7 +74,29 @@ class CategoryRepositoryImpl @Inject constructor(
         }
     }.flowOn(dispatcher)
 
-    override fun loadAll(): Flow<Resource<List<CategoryEntity>>> = flow {
+    override fun isNameSubCategoryExist(name: String): Flow<Resource<Boolean>> = flow {
+        emit(Resource.Loading)
+        try {
+            val isNameExist = appDatabase.subCategoryDao().countByName(name)
+            emit(Resource.success(isNameExist > 0))
+        } catch (e: java.lang.Exception) {
+            e.printStackTrace()
+            emit(Resource.failure(e, e.message))
+        }
+    }.flowOn(dispatcher)
+
+    override fun getAllSubCategories(): Flow<Resource<List<SubCategoryEntity>>> = flow {
+        emit(Resource.Loading)
+        try {
+            val data = appDatabase.subCategoryDao().loadAll()
+            emit(Resource.success(data))
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emit(Resource.Failure(e, e.message))
+        }
+    }.flowOn(dispatcher)
+
+    override fun getAllCategories(): Flow<Resource<List<CategoryEntity>>> = flow {
         emit(Resource.Loading)
         try {
             val data = appDatabase.categoryDao().loadAll()
@@ -71,11 +107,18 @@ class CategoryRepositoryImpl @Inject constructor(
         }
     }.flowOn(dispatcher)
 
-    override fun readFileFromJson(jsonName: String): Flow<Resource<List<CategoryEntity>?>> = flow {
+    override fun readFileFromJson(jsonName: String): Flow<Resource<Boolean>> = flow {
         emit(Resource.Loading)
         try {
             val data = FileUtils.loadJsonFromAsset<List<Category>>(context, jsonName)
-            emit(Resource.success(data?.map { it.toCategoryEntity() }))
+            println("Data: $data")
+            data?.forEach { category ->
+                appDatabase.categoryDao().insert(category.toCategoryEntity())
+                category.subCategories?.forEach { subCategory ->
+                    appDatabase.subCategoryDao().insert(subCategory.toSubCategoryEntity())
+                }
+            }
+            emit(Resource.success(true))
         } catch (e: Exception) {
             e.printStackTrace()
             emit(Resource.failure(e, e.message))

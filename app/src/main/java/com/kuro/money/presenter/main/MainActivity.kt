@@ -65,7 +65,7 @@ private fun MainScreen() {
     val navController = rememberNavController()
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val navRouteDestination = navBackStackEntry?.destination?.route
-    val currentRoute = remember { mutableStateOf(NavigationRoute.Home.route) }
+    val currentRoute = remember { mutableStateOf(NavigationGraphRoute.HomeGraph.route) }
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {

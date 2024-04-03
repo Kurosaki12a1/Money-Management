@@ -39,6 +39,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.kuro.money.R
 import com.kuro.money.data.model.CategoryEntity
+import com.kuro.money.data.model.SubCategoryEntity
 import com.kuro.money.data.utils.Resource
 import com.kuro.money.domain.model.SelectedCategory
 import com.kuro.money.extension.detectHorizontalWithDelay
@@ -54,9 +55,8 @@ import kotlinx.coroutines.flow.collectLatest
 fun SelectCategoryScreen(
     navController: NavController,
     addTransactionViewModel: AddTransactionViewModel,
-    selectCategoryViewModel: SelectCategoryViewModel = hiltViewModel()
+    selectCategoryViewModel: SelectCategoryViewModel
 ) {
-
     BackHandler {
         navController.popBackStack()
     }
@@ -64,26 +64,43 @@ fun SelectCategoryScreen(
     val selectedTabIndexed = remember { mutableStateOf(0) }
     val prevSelectedTabIndex = remember { mutableStateOf(0) }
     val listCategories = remember { mutableStateListOf<CategoryEntity>() }
+    val listSubCategories = remember { mutableStateListOf<SubCategoryEntity>() }
     val listSpecialCategories = listOf(
         "Debt", "Debt Collection", "Loan", "Repayment"
     )
 
-    LaunchedEffect(selectCategoryViewModel.selectedCategory.collectAsState().value) {
+    LaunchedEffect(Unit) {
         selectCategoryViewModel.selectedCategory.collectLatest {
-            if (it.name != "" && it.icon != "") {
+            if (it.name != "" && it.icon != "" && it.type != "") {
                 addTransactionViewModel.setSelectedCategory(it)
-                selectCategoryViewModel.setSelectedCategories(SelectedCategory("", ""))
+                selectCategoryViewModel.setSelectedCategories(SelectedCategory())
                 navController.popBackStack()
             }
         }
     }
 
-    LaunchedEffect(selectCategoryViewModel.getCategoryResponse.collectAsState().value) {
+    LaunchedEffect(Unit) {
         selectCategoryViewModel.getCategoryResponse.collectLatest {
             if (it is Resource.Success) {
                 listCategories.clear()
                 listCategories.addAll(it.value)
             }
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        selectCategoryViewModel.getSubCategoryResponse.collectLatest {
+            if (it is Resource.Success) {
+                listSubCategories.clear()
+                listSubCategories.addAll(it.value)
+            }
+        }
+    }
+
+    LaunchedEffect(listCategories.size, listSubCategories.size) {
+        val subCategoryMap = listSubCategories.groupBy { it.parentId }
+        listCategories.forEach { category ->
+            category.subCategories = subCategoryMap[category.id] ?: emptyList()
         }
     }
 
@@ -119,15 +136,15 @@ fun SelectCategoryScreen(
                 when (it) {
                     0 -> ExpenseScreen(listCategories.filter { cate ->
                         cate.type == "expense" && !listSpecialCategories.contains(cate.name)
-                    }, addTransactionViewModel)
+                    }, addTransactionViewModel, selectCategoryViewModel)
 
                     1 -> IncomeScreen(listCategories.filter { cate ->
                         cate.type == "income" && !listSpecialCategories.contains(cate.name)
-                    }, addTransactionViewModel)
+                    }, addTransactionViewModel, selectCategoryViewModel)
 
                     2 -> DebtScreen(
                         listCategories.filter { cate -> listSpecialCategories.contains(cate.name) },
-                        addTransactionViewModel
+                        addTransactionViewModel, selectCategoryViewModel
                     )
                 }
             }

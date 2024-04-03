@@ -18,9 +18,6 @@ class HomeViewModel @Inject constructor(
     private val accountsUseCase: AccountsUseCase
 ) : ViewModel() {
 
-    private val _allWallets = MutableStateFlow<Resource<List<AccountEntity>>>(Resource.Default)
-    val allWallets = _allWallets.asStateFlow()
-
     private val _balance = MutableStateFlow(0.0)
     val balance = _balance.asStateFlow()
 
@@ -40,14 +37,6 @@ class HomeViewModel @Inject constructor(
                         }
                     }
                 }
-            }
-        }
-    }
-
-    fun getAllWallets() {
-        viewModelScope.launch {
-            accountsUseCase().collectLatest {
-                _allWallets.value = it
             }
         }
     }

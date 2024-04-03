@@ -1,5 +1,6 @@
 package com.kuro.money.presenter.add_transaction
 
+import android.graphics.Bitmap
 import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -14,6 +15,7 @@ import com.kuro.money.domain.usecase.CurrenciesUseCase
 import com.kuro.money.domain.usecase.PreferencesUseCase
 import com.kuro.money.domain.usecase.TransactionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -27,8 +29,8 @@ class AddTransactionViewModel @Inject constructor(
     private val transactionUseCase: TransactionUseCase,
     private val currenciesUseCase: CurrenciesUseCase,
     private val preferencesUseCase: PreferencesUseCase,
-    ) : ViewModel() {
-    private val _selectedCategory = MutableStateFlow(SelectedCategory("", ""))
+) : ViewModel() {
+    private val _selectedCategory = MutableStateFlow(SelectedCategory())
     val selectedCategory = _selectedCategory.asStateFlow()
 
     private val _wallet = MutableStateFlow<AccountEntity?>(null)
@@ -40,6 +42,12 @@ class AddTransactionViewModel @Inject constructor(
     private val _eventSelected = MutableStateFlow<EventEntity?>(null)
     val eventSelected = _eventSelected.asStateFlow()
 
+    private val _dateTransaction = MutableStateFlow<LocalDate>(LocalDate.now())
+    val dateTransaction = _dateTransaction.asStateFlow()
+
+    private val _dateRemind = MutableStateFlow<LocalDate>(LocalDate.now())
+    val dateRemind = _dateRemind.asStateFlow()
+
     private val _note = MutableStateFlow("")
     val note = _note.asStateFlow()
 
@@ -49,17 +57,32 @@ class AddTransactionViewModel @Inject constructor(
     private val _currencySelected = MutableStateFlow<CurrencyEntity?>(null)
     val currencySelected = _currencySelected.asStateFlow()
 
-    private val _amount = MutableStateFlow<Double?>(null)
+    private val _amount = MutableStateFlow<String?>(null)
     val amount = _amount.asStateFlow()
 
     private val _insertTransaction = MutableStateFlow<Resource<Long>>(Resource.Default)
     val insertTransaction = _insertTransaction.asStateFlow()
 
+    private val _bitmapFlow = MutableStateFlow<Bitmap?>(null)
+    val bitmapFlow = _bitmapFlow.asStateFlow()
+
     init {
         initCurrencySelected()
     }
 
-    fun setAmount(amount: Double?) {
+    fun setBitmap(bitmap: Bitmap?) {
+        _bitmapFlow.value = bitmap
+    }
+
+    fun setDateTransaction(value: LocalDate) {
+        _dateTransaction.value = value
+    }
+
+    fun setDateRemind(value: LocalDate) {
+        _dateRemind.value = value
+    }
+
+    fun setAmount(amount: String?) {
         _amount.value = amount
     }
 
@@ -79,6 +102,7 @@ class AddTransactionViewModel @Inject constructor(
         _currencySelected.value = value
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     fun setDefaultCurrency() {
         if (currencySelected.value == null) return
         val code = currencySelected.value?.code?.uppercase() ?: "VND"
@@ -94,19 +118,19 @@ class AddTransactionViewModel @Inject constructor(
         }
     }
 
-    fun submitData(displayDate: LocalDate, remindDate: LocalDate?) {
+    fun submitData() {
         viewModelScope.launch {
             val transactionEntity = TransactionEntity(
                 currency = currencySelected.value!!,
-                amount = amount.value ?: 0.0,
+                amount = amount.value?.toDouble() ?: 0.0,
                 createdDate = LocalDate.now(),
-                displayDate = displayDate,
-                category = selectedCategory.value.name,
+                displayDate = dateTransaction.value,
+                category = selectedCategory.value,
                 note = note.value,
                 wallet = wallet.value!!,
                 people = nameOfPeople.value,
                 event = eventSelected.value,
-                remindDate = remindDate,
+                remindDate = dateRemind.value,
                 image = uriSelected.value,
                 isExcludedReport = false // TODO
             )
@@ -135,6 +159,14 @@ class AddTransactionViewModel @Inject constructor(
 
     fun setWallet(entity: AccountEntity) {
         _wallet.value = entity
+    }
+
+    override fun onCleared() {
+        _bitmapFlow.value = null
+        viewModelScope.launch {
+            bitmapFlow.collect { it?.recycle() }
+        }
+        super.onCleared()
     }
 
 

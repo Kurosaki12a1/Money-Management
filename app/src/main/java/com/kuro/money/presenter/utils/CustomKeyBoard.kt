@@ -353,3 +353,54 @@ fun evaluateExpression(expression: String): Double {
         Context.exit()
     }
 }
+
+/* Box(
+         modifier = Modifier
+             .fillMaxWidth()
+             .fillMaxHeight(0.3f)
+             .align(Alignment.BottomCenter)
+     ) {
+         SlideUpContent(
+             isVisible = isEnabledCustomKeyBoard.value
+         ) {
+             CustomKeyBoard(
+                 onClear = {
+                     TextFieldValueUtils.clear(amountFieldValue)
+                     addTransactionViewModel.setAmount(null)
+                 },
+                 onBack = {
+                     TextFieldValueUtils.deleteAt(amountFieldValue)
+                     val value = evaluateExpression(amountFieldValue.value.text)
+                     if (!value.isNaN()) {
+                         addTransactionViewModel.setAmount(value)
+                     } else {
+                         addTransactionViewModel.setAmount(null)
+                     }
+                 },
+                 onInput = {
+                     TextFieldValueUtils.add(amountFieldValue, it)
+                     val value = evaluateExpression(amountFieldValue.value.text)
+                     if (!value.isNaN()) {
+                         addTransactionViewModel.setAmount(value)
+                     } else {
+                         addTransactionViewModel.setAmount(null)
+                     }
+                 },
+                 onConfirm = {
+                     val value = evaluateExpression(amountFieldValue.value.text)
+                     if (value.isNaN()) {
+                         scope.launch {
+                             shakeEnabled.value = true
+                             delay(500)
+                             shakeEnabled.value = false
+                         }
+                     } else {
+                         TextFieldValueUtils.set(amountFieldValue, value.toString())
+                         addTransactionViewModel.setAmount(value)
+                     }
+                 },
+                 // Wrong expression start shaking
+                 shakeEnabled = shakeEnabled.value
+             )
+         }
+     }*/

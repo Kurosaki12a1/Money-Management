@@ -16,5 +16,4 @@ interface CategoryDao {
 
     @Query("SELECT * FROM categories")
     fun loadAll(): List<CategoryEntity>
-
 }

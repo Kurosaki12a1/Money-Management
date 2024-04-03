@@ -74,6 +74,8 @@ sealed class NavigationRoute(val route: String) {
     }
 
     sealed class Home(route : String) : NavigationRoute(route) {
+
+        data object MyWallet : NavigationRoute("home_my_wallet")
         companion object : Home("home")
     }
 }

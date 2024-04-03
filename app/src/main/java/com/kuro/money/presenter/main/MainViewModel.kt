@@ -36,24 +36,11 @@ class MainViewModel @Inject constructor(
     private val transactionUseCase: TransactionUseCase
 ) : ViewModel() {
 
-    private val _getListTransaction =
-        MutableStateFlow<Resource<List<TransactionEntity>?>>(Resource.Default)
-    val getListTransaction = _getListTransaction.asStateFlow()
-
     init {
         getAndInsertCategoriesFromJson()
         getAndInsertExchangeRatesFromInternet()
-        getListTransaction()
         getExchangesRatesFromDB()
         getDefaultCurrency()
-    }
-
-    private fun getListTransaction() {
-        viewModelScope.launch {
-            transactionUseCase().collectLatest {
-                _getListTransaction.value = it
-            }
-        }
     }
 
     private fun getDefaultCurrency() {
@@ -115,16 +102,7 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             preferencesUseCase.isFirstTimeOpenApp().first().let { isFirstTimeOpen ->
                 if (isFirstTimeOpen) {
-                    val insertCategory = categoryUseCase("categories.json").flatMapLatest {
-                        when (it) {
-                            is Resource.Success -> {
-                                if (it.value.isNullOrEmpty()) flowOf(Resource.failure(Exception("No data from Json")))
-                                else categoryUseCase(it.value)
-                            }
-
-                            else -> flowOf(it) as Flow<Resource<Long>>
-                        }
-                    }
+                    val insertCategory = categoryUseCase("categories.json")
                     val insertAccount = accountUseCase("accounts.json").flatMapLatest {
                         when (it) {
                             is Resource.Success -> {

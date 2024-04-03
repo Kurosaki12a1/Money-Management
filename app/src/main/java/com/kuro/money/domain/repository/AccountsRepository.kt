@@ -17,5 +17,7 @@ interface AccountsRepository {
 
     fun getAccountById(id : Long) : Flow<Resource<AccountEntity>>
 
+    fun getAccounts(count : Int) : Flow<Resource<List<AccountEntity>>>
+
     fun deleteAccountById(id: Long) : Flow<Resource<Int>>
 }

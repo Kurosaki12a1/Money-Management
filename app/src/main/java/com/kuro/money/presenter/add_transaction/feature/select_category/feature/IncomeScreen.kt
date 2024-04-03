@@ -51,10 +51,10 @@ fun IncomeScreen(
     vm: SelectCategoryViewModel = viewModel(),
 ) {
     val newListCategory = mutableListOf<CategoryEntity>()
-    val sortedNameList = listCategory.sortedBy { it.name }
-    newListCategory.addAll(sortedNameList.map { parent ->
-        parent.copy(subCategories = parent.subCategories.sortedBy { it.name })
-    }.toCollection(ArrayList()))
+    listCategory.forEach { category ->
+        category.subCategories = category.subCategories.sortedBy { it.name }.toMutableList()
+    }
+    newListCategory.addAll(listCategory.sortedBy { it.name })
 
     val selectedCategory = addTransactionViewModel.selectedCategory.collectAsState().value
 
@@ -89,7 +89,7 @@ fun IncomeScreen(
                 Divider(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(10.dp)
+                        .height(1.dp)
                         .background(Gray.copy(alpha = 0.1f))
                 )
             }
@@ -115,7 +115,7 @@ private fun CategoryItem(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(10.dp)
-                .clickable { onClick(SelectedCategory(entity.name, entity.icon)) },
+                .clickable { onClick(SelectedCategory(entity.name, entity.icon, entity.type)) },
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -145,7 +145,7 @@ private fun CategoryItem(
                     .clickable {
                         onClick(
                             SelectedCategory(
-                                subCategoryEntity.name, subCategoryEntity.icon
+                                subCategoryEntity.name, subCategoryEntity.icon, subCategoryEntity.type
                             )
                         )
                     }) {
@@ -189,7 +189,7 @@ private fun CategoryItem(
             Divider(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(10.dp)
+                    .height(1.dp)
                     .background(Gray.copy(alpha = 0.1f))
             )
         }

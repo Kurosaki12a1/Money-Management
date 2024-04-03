@@ -8,7 +8,9 @@ import com.kuro.money.data.model.converter.AccountConverter
 import com.kuro.money.data.model.converter.CurrencyConverter
 import com.kuro.money.data.model.converter.EventConverter
 import com.kuro.money.data.model.converter.LocalDateConverter
+import com.kuro.money.data.model.converter.SelectedCategoryConverter
 import com.kuro.money.data.model.converter.UriConverter
+import com.kuro.money.domain.model.SelectedCategory
 import java.time.LocalDate
 
 @Entity(tableName = "transactions")
@@ -17,7 +19,8 @@ import java.time.LocalDate
     AccountConverter::class,
     EventConverter::class,
     UriConverter::class,
-    CurrencyConverter::class
+    CurrencyConverter::class,
+    SelectedCategoryConverter::class
 )
 data class TransactionEntity(
     @PrimaryKey(autoGenerate = true)
@@ -26,7 +29,7 @@ data class TransactionEntity(
     val amount: Double,
     val createdDate: LocalDate,
     val displayDate: LocalDate,
-    val category: String,
+    val category : SelectedCategory,
     val note: String?,
     val wallet: AccountEntity,
     val people: String? = "",

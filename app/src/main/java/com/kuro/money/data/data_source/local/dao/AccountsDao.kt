@@ -21,6 +21,9 @@ interface AccountsDao {
     @Query("SELECT * FROM accounts WHERE id=:id")
     fun getWalletById(id: Long): AccountEntity
 
+    @Query("SELECT * FROM accounts ORDER BY id LIMIT :count")
+    fun getWallets(count : Int) : List<AccountEntity>
+
     @Query("DELETE FROM accounts WHERE id=:id")
     fun deleteWalletById(id: Long) : Int
 }
