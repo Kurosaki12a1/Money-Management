@@ -25,8 +25,8 @@ sealed class NavigationRoute(val route: String) {
         companion object : AddTransaction("add_transaction")
     }
 
-    sealed class Transaction(route : String) : NavigationRoute(route) {
-        companion object: Transaction("transaction")
+    sealed class Transaction(route: String) : NavigationRoute(route) {
+        companion object : Transaction("transaction")
     }
 
     sealed class Budgets(route: String) : NavigationRoute(route) {
@@ -73,9 +73,12 @@ sealed class NavigationRoute(val route: String) {
         companion object : Account("account")
     }
 
-    sealed class Home(route : String) : NavigationRoute(route) {
+    sealed class Home(route: String) : NavigationRoute(route) {
 
-        data object MyWallet : NavigationRoute("home_my_wallet")
+        sealed class TransactionDetails(route: String) : Home(route) {
+            companion object : TransactionDetails("home_transaction_details")
+        }
+
         companion object : Home("home")
     }
 }

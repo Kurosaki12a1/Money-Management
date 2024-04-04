@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kuro.money.data.AppCache
 import com.kuro.money.data.model.AccountEntity
+import com.kuro.money.data.model.TransactionEntity
 import com.kuro.money.data.utils.Resource
 import com.kuro.money.domain.usecase.AccountsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -20,6 +21,9 @@ class HomeViewModel @Inject constructor(
 
     private val _balance = MutableStateFlow(0.0)
     val balance = _balance.asStateFlow()
+
+    private val _selectedTransaction = MutableStateFlow<TransactionEntity?>(null)
+    val selectedTransaction = _selectedTransaction.asStateFlow()
 
     fun getBalance() {
         viewModelScope.launch {
@@ -39,5 +43,9 @@ class HomeViewModel @Inject constructor(
                 }
             }
         }
+    }
+
+    fun setSelectedTransaction(entity : TransactionEntity) {
+        _selectedTransaction.value = entity
     }
 }

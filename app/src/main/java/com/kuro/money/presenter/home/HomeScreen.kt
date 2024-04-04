@@ -32,6 +32,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.kuro.customimagevector.EyeHidden
@@ -52,6 +53,7 @@ import kotlinx.coroutines.flow.collectLatest
 @Composable
 fun HomeScreen(
     navController: NavController,
+    paddingValues: PaddingValues,
     homeViewModel: HomeViewModel,
     myWalletViewModel: MyWalletViewModel,
     spendingReportViewModel: SpendingReportViewModel,
@@ -73,7 +75,7 @@ fun HomeScreen(
             .fillMaxSize()
             .background(Gray)
             .padding(10.dp),
-        contentPadding = PaddingValues(horizontal = 10.dp)
+        contentPadding = PaddingValues(horizontal = 10.dp, vertical = paddingValues.calculateBottomPadding())
     ) {
         item {
             Row(
@@ -156,7 +158,7 @@ fun HomeScreen(
             }
             Spacer(modifier = Modifier.height(20.dp))
             /** Recent Transaction */
-            RecentTransaction(navController, recentTransactionViewModel)
+            RecentTransaction(navController, homeViewModel, recentTransactionViewModel)
         }
     }
 }
@@ -174,6 +176,7 @@ fun SpendingReport(navController: NavController, spendingReportViewModel: Spendi
 @Composable
 fun RecentTransaction(
     navController: NavController,
+    homeViewModel: HomeViewModel,
     recentTransactionViewModel: RecentTransactionViewModel
 ) {
 
@@ -186,7 +189,8 @@ fun RecentTransaction(
         recentTransactionViewModel.allTransactions.collectLatest {
             if (it is Resource.Success) {
                 listRecentTransactions.clear()
-                listRecentTransactions.addAll(it.value?.take(5) ?: listOf())
+                listRecentTransactions.addAll(it.value?.reversed()?.take(5) ?: listOf())
+                listRecentTransactions.reversed()
             }
         }
     }
@@ -196,12 +200,15 @@ fun RecentTransaction(
         shape = RoundedCornerShape(16.dp)
     ) {
         Column(
-            modifier = Modifier.fillMaxWidth().padding(10.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(10.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             listRecentTransactions.forEach { item ->
                 ItemRecentTransactions(item) {
-
+                    homeViewModel.setSelectedTransaction(item)
+                    navController.navigate(NavigationRoute.Home.TransactionDetails.route)
                 }
             }
         }
@@ -233,8 +240,10 @@ private fun ItemRecentTransactions(item: TransactionEntity, onClick: (Transactio
         Spacer(modifier = Modifier.weight(1f))
         Text(
             text = "${item.amount.string()} ${item.currency.symbol}",
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
             color = if (item.category.type == "income") Color.Cyan else Color.Red,
-            style = MaterialTheme.typography.body1
+            style = MaterialTheme.typography.body1,
         )
     }
 }

@@ -3,6 +3,7 @@ package com.kuro.money.presenter.add_transaction
 import android.Manifest
 import android.app.DatePickerDialog
 import android.content.Context
+import android.content.Intent
 import android.graphics.Bitmap
 import android.net.Uri
 import androidx.activity.compose.BackHandler
@@ -73,9 +74,9 @@ import com.kuro.money.R
 import com.kuro.money.data.model.EventEntity
 import com.kuro.money.data.utils.FileUtils
 import com.kuro.money.data.utils.Resource
+import com.kuro.money.domain.model.LetterColor
 import com.kuro.money.domain.model.SelectedCategory
 import com.kuro.money.extension.noRippleClickable
-import com.kuro.money.extension.randomColor
 import com.kuro.money.navigation.routes.NavigationRoute.AddTransaction
 import com.kuro.money.presenter.utils.DecimalFormatter
 import com.kuro.money.presenter.utils.DecimalInputVisualTransformation
@@ -86,6 +87,7 @@ import com.kuro.money.ui.theme.Green
 import kotlinx.coroutines.flow.collectLatest
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
+
 
 @Composable
 fun AddTransactionScreen(
@@ -261,7 +263,7 @@ private fun MoreDetailsTransaction(
     eventSelected: EventEntity?,
     dateRemind: LocalDate?,
     uriSelected: Uri?,
-    imageFromCamera : Bitmap?,
+    imageFromCamera: Bitmap?,
     onSelectPeopleClick: () -> Unit,
     onSelectEventClick: () -> Unit,
     onAlarmClick: () -> Unit,
@@ -292,12 +294,11 @@ private fun MoreDetailsTransaction(
             } else {
                 val listPeople =
                     peopleSelected.split(",").filter { it.isNotEmpty() }.map { it.trim() }
-                val listRandomColor = listPeople.map { randomColor() }
                 LazyRow(
                     horizontalArrangement = Arrangement.spacedBy(5.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    itemsIndexed(listPeople) { index, item ->
+                    itemsIndexed(listPeople) { _, item ->
                         Row(
                             modifier = Modifier
                                 .background(Gray, RoundedCornerShape(16.dp))
@@ -307,7 +308,7 @@ private fun MoreDetailsTransaction(
                         ) {
                             Box(
                                 modifier = Modifier
-                                    .background(listRandomColor[index], CircleShape)
+                                    .background(LetterColor.getColor(item[0]), CircleShape)
                                     .size(30.dp)
                             ) {
                                 Text(
@@ -411,21 +412,30 @@ private fun MoreDetailsTransaction(
     /**
      * Add picture and camera
      */
-    val launcherChooseImage =
+    /*val launcherChooseImage =
         rememberLauncherForActivityResult(contract = ActivityResultContracts.GetContent()) {
             onImagePicked(it)
-        }
+        }*/
+    val context = LocalContext.current
     val launcherChooseCamera =
         rememberLauncherForActivityResult(contract = ActivityResultContracts.TakePicturePreview()) {
             onCameraPicked(it)
         }
     val launcherRequestPermission =
-        rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestPermission()) {
-            if (it) { launcherChooseImage.launch("image/*") }
+        rememberLauncherForActivityResult(contract = ActivityResultContracts.OpenDocument()) { result ->
+            result?.let {
+                context.contentResolver.takePersistableUriPermission(
+                    it,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+                )
+            }
+            onImagePicked(result)
         }
     val launcherRequestCameraPermission =
         rememberLauncherForActivityResult(contract = ActivityResultContracts.RequestPermission()) {
-            if (it) { launcherChooseCamera.launch(null) }
+            if (it) {
+                launcherChooseCamera.launch(null)
+            }
         }
     BoxWithConstraints(
         modifier = Modifier
@@ -438,7 +448,9 @@ private fun MoreDetailsTransaction(
                 modifier = Modifier
                     .width(this.maxWidth * 0.5f)
                     .align(Alignment.CenterStart)
-                    .noRippleClickable { launcherRequestPermission.launch(Manifest.permission.READ_EXTERNAL_STORAGE) },
+                    .noRippleClickable {
+                        launcherRequestPermission.launch(arrayOf("image/*"))
+                    },
                 imageVector = Icons.Default.Image,
                 tint = Color.Black,
                 contentDescription = "Image"

@@ -1,5 +1,6 @@
 package com.kuro.money.navigation.graph
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.remember
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavGraphBuilder
@@ -13,8 +14,12 @@ import com.kuro.money.presenter.home.HomeViewModel
 import com.kuro.money.presenter.home.MyWalletViewModel
 import com.kuro.money.presenter.home.RecentTransactionViewModel
 import com.kuro.money.presenter.home.SpendingReportViewModel
+import com.kuro.money.presenter.home.feature.TransactionDetailsScreen
 
-fun NavGraphBuilder.homeNavGraph(navHostController: NavHostController) {
+fun NavGraphBuilder.homeNavGraph(
+    navHostController: NavHostController,
+    paddingValues: PaddingValues
+) {
     navigation(
         startDestination = NavigationRoute.Home.route,
         route = NavigationGraphRoute.HomeGraph.route,
@@ -31,12 +36,26 @@ fun NavGraphBuilder.homeNavGraph(navHostController: NavHostController) {
                     hiltViewModel<RecentTransactionViewModel>(parentEntry)
                 HomeScreen(
                     navHostController,
+                    paddingValues,
                     homeViewModel,
                     myWalletViewModel,
                     spendingReportViewModel,
                     recentTransactionViewModel
                 )
             }
+            navigation(
+                startDestination = NavigationRoute.Home.TransactionDetails.route,
+                route = NavigationGraphRoute.HomeGraph.TransactionDetails.route,
+                builder = {
+                    composable(route = NavigationRoute.Home.TransactionDetails.route) {
+                        val parentEntry = remember(it) {
+                            navHostController.getBackStackEntry(NavigationGraphRoute.HomeGraph.route)
+                        }
+                        val homeViewModel = hiltViewModel<HomeViewModel>(parentEntry)
+                        TransactionDetailsScreen(navController = navHostController, homeViewModel)
+                    }
+                }
+            )
         }
     )
 }

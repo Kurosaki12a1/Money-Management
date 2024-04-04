@@ -22,6 +22,7 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -36,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import com.kuro.money.data.AppCache
 import com.kuro.money.domain.model.BottomNavItem
 import com.kuro.money.domain.model.generateListBottomNavItem
 import com.kuro.money.navigation.graph.RootNavGraph
@@ -43,6 +45,7 @@ import com.kuro.money.navigation.routes.NavigationGraphRoute
 import com.kuro.money.navigation.routes.NavigationRoute
 import com.kuro.money.ui.theme.Teal200
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.flow.collectLatest
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -54,12 +57,16 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         setContent {
             mainViewModel
+            LaunchedEffect(Unit) {
+                AppCache.defaultCurrency.collectLatest {
+                    mainViewModel.getAndInsertExchangeRatesFromInternet()
+                }
+            }
             MainScreen()
         }
     }
 }
 
-@SuppressLint("UnusedMaterialScaffoldPaddingParameter")
 @Composable
 private fun MainScreen() {
     val navController = rememberNavController()
@@ -98,7 +105,7 @@ private fun MainScreen() {
         },
         floatingActionButtonPosition = FabPosition.Center,
         isFloatingActionButtonDocked = true,
-        content = { RootNavGraph(navController, NavigationGraphRoute.HomeGraph) })
+        content = { RootNavGraph(navController, NavigationGraphRoute.HomeGraph, it) })
 }
 
 @Composable

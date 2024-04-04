@@ -4,7 +4,6 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kuro.money.data.AppCache
 import com.kuro.money.data.mapper.toExchangeRateEntity
-import com.kuro.money.data.model.TransactionEntity
 import com.kuro.money.data.utils.Resource
 import com.kuro.money.domain.usecase.AccountsUseCase
 import com.kuro.money.domain.usecase.CategoryUseCase
@@ -15,8 +14,6 @@ import com.kuro.money.domain.usecase.TransactionUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flatMapLatest
@@ -38,8 +35,6 @@ class MainViewModel @Inject constructor(
 
     init {
         getAndInsertCategoriesFromJson()
-        getAndInsertExchangeRatesFromInternet()
-        getExchangesRatesFromDB()
         getDefaultCurrency()
     }
 
@@ -47,11 +42,14 @@ class MainViewModel @Inject constructor(
         viewModelScope.launch {
             preferencesUseCase.getDefaultCurrency().flatMapLatest {
                 AppCache.updateDefaultCurrency(it)
+                // Get Currency by code
                 currenciesUseCase(it)
             }.collectLatest { currency ->
                 if (currency is Resource.Success && currency.value != null) {
+                    // Set cache for default currency
                     AppCache.updateDefaultCurrencyEntity(currency.value)
                 }
+                getAndInsertExchangeRatesFromInternet()
             }
         }
     }
@@ -69,7 +67,7 @@ class MainViewModel @Inject constructor(
         }
     }
 
-    private fun getAndInsertExchangeRatesFromInternet() {
+    fun getAndInsertExchangeRatesFromInternet() {
         viewModelScope.launch {
             exchangeRatesUseCase.getExchangeRatesResponse(AppCache.defaultCurrency.value)
                 .flatMapLatest {
@@ -80,7 +78,9 @@ class MainViewModel @Inject constructor(
 
                         else -> flowOf(it)
                     }
-                }.collectLatest {}
+                }.collectLatest {
+                    getExchangesRatesFromDB()
+                }
         }
     }
 
@@ -129,6 +129,7 @@ class MainViewModel @Inject constructor(
                         .zip(insertCurrencies) { _, _ -> }
                         .collectLatest {
                             preferencesUseCase.setFirstTimeOpenApp(false).collectLatest { }
+                            getDefaultCurrency()
                         }
                 }
             }

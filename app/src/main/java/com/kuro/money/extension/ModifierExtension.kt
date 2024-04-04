@@ -46,10 +46,3 @@ fun Dp.toPx(): Float {
     val density = LocalDensity.current.density
     return value * density
 }
-
-fun randomColor(): Color {
-    val red = Random.nextInt(256)
-    val green = Random.nextInt(256)
-    val blue = Random.nextInt(256)
-    return Color(red, green, blue)
-}

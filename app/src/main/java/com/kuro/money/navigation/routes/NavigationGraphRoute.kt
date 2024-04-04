@@ -4,7 +4,11 @@ sealed class NavigationGraphRoute(val route: String) {
 
     data object RootGraph : NavigationGraphRoute(route = "root_graph")
 
-    data object HomeGraph : NavigationGraphRoute(route = "home_graph")
+    sealed class HomeGraph(route: String) : NavigationGraphRoute(route) {
+
+        data object TransactionDetails : HomeGraph("sub_graph_home_transaction_details")
+        companion object : HomeGraph("home_graph")
+    }
 
     data object TransactionGraph : NavigationGraphRoute(route = "transaction_graph")
 

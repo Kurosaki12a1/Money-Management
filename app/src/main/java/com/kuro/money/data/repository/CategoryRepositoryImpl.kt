@@ -111,7 +111,6 @@ class CategoryRepositoryImpl @Inject constructor(
         emit(Resource.Loading)
         try {
             val data = FileUtils.loadJsonFromAsset<List<Category>>(context, jsonName)
-            println("Data: $data")
             data?.forEach { category ->
                 appDatabase.categoryDao().insert(category.toCategoryEntity())
                 category.subCategories?.forEach { subCategory ->
