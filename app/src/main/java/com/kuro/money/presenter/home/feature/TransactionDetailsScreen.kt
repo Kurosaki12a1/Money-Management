@@ -1,5 +1,6 @@
 package com.kuro.money.presenter.home.feature
 
+import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -23,38 +24,61 @@ import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Alarm
 import androidx.compose.material.icons.filled.CalendarMonth
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Notes
+import androidx.compose.material.icons.filled.RotateRight
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.kuro.money.R
+import com.kuro.money.data.utils.Resource
 import com.kuro.money.domain.model.LetterColor
 import com.kuro.money.extension.noRippleClickable
 import com.kuro.money.presenter.home.HomeViewModel
 import com.kuro.money.presenter.utils.string
 import com.kuro.money.presenter.utils.toPainterResource
 import com.kuro.money.ui.theme.Gray
+import kotlinx.coroutines.flow.collectLatest
 
 @Composable
 fun TransactionDetailsScreen(
     navController: NavController,
     homeViewModel: HomeViewModel,
+    transactionDetailsViewModel: TransactionDetailsViewModel
 ) {
     BackHandler { navController.popBackStack() }
 
     val transactionEntity = homeViewModel.selectedTransaction.collectAsState().value ?: return
+    val showDeleteDialog = remember { mutableStateOf(false) }
+    val zoomInImage = remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        transactionDetailsViewModel.deleteTransaction.collectLatest {
+            if (it is Resource.Success) {
+                navController.popBackStack()
+                transactionDetailsViewModel.setDefault()
+            }
+        }
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -81,7 +105,11 @@ fun TransactionDetailsScreen(
                 Spacer(modifier = Modifier.weight(1f))
                 Icon(imageVector = Icons.Default.Share, contentDescription = "Share")
                 Icon(imageVector = Icons.Default.Edit, contentDescription = "Edit")
-                Icon(imageVector = Icons.Default.Delete, contentDescription = "Delete")
+                Icon(imageVector = Icons.Default.Delete, contentDescription = "Delete",
+                    modifier = Modifier.noRippleClickable {
+                        showDeleteDialog.value = true
+                    }
+                )
             }
             if (transactionEntity.image != null) {
                 Image(
@@ -89,7 +117,8 @@ fun TransactionDetailsScreen(
                     contentDescription = "Photo",
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(200.dp),
+                        .height(200.dp)
+                        .noRippleClickable { zoomInImage.value = true },
                     contentScale = ContentScale.Inside
                 )
             }
@@ -293,6 +322,105 @@ fun TransactionDetailsScreen(
                     }
                 }
             }
+        }
+    }
+    DialogDeleteTransaction(
+        showDeleteDialog.value,
+        onDismissRequest = {
+            showDeleteDialog.value = false
+        },
+        onAcceptClick = {
+            showDeleteDialog.value = false
+            transactionDetailsViewModel.deleteTransaction(transactionEntity.id)
+        }
+    )
+    ZoomInImage(
+        zoomInImage.value,
+        onDismissRequest = {
+            zoomInImage.value = false
+        },
+        image = transactionEntity.image
+    )
+}
+
+@Composable
+private fun DialogDeleteTransaction(
+    isVisible: Boolean,
+    onDismissRequest: () -> Unit,
+    onAcceptClick: () -> Unit
+) {
+    if (!isVisible) return
+    Dialog(onDismissRequest = { onDismissRequest() }) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(100.dp)
+                .background(Color.White)
+                .padding(20.dp)
+        ) {
+            Text(
+                text = stringResource(id = R.string.delete_this_transaction), color = Color.Black,
+                style = MaterialTheme.typography.body1,
+                modifier = Modifier.align(Alignment.TopStart)
+            )
+            Row(
+                modifier = Modifier.align(Alignment.BottomEnd),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(20.dp)
+            ) {
+                Text(
+                    text = stringResource(id = R.string.no),
+                    color = Color.Green,
+                    style = MaterialTheme.typography.body1,
+                    modifier = Modifier.noRippleClickable { onDismissRequest() }
+                )
+                Text(
+                    text = stringResource(id = R.string.yes),
+                    color = Color.Green,
+                    style = MaterialTheme.typography.body1,
+                    modifier = Modifier.noRippleClickable { onAcceptClick() }
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun ZoomInImage(isVisible: Boolean, image: Uri?, onDismissRequest: () -> Unit) {
+    if (!isVisible || image == null) return
+    BackHandler() { onDismissRequest() }
+    val rotate = remember { mutableFloatStateOf(0f) }
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.Black)
+    ) {
+        Image(
+            painter = rememberAsyncImagePainter(model = image),
+            contentDescription = "Photo",
+            modifier = Modifier
+                .align(Alignment.Center)
+                .rotate(rotate.floatValue),
+            contentScale = ContentScale.FillBounds
+        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(30.dp)
+                .align(Alignment.BottomCenter),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(imageVector = Icons.Default.RotateRight,
+                contentDescription = "Rotate",
+                tint = Color.White,
+                modifier = Modifier.noRippleClickable { rotate.floatValue -= 90f })
+            Spacer(modifier = Modifier.weight(1f))
+            Icon(
+                imageVector = Icons.Default.Check,
+                contentDescription = "Check",
+                tint = Color.White,
+                modifier = Modifier.noRippleClickable { onDismissRequest() }
+            )
         }
     }
 }

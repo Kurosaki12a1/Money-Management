@@ -20,5 +20,5 @@ interface TransactionDao {
     fun getListTransactions(): List<TransactionEntity>
 
     @Query("DELETE FROM transactions WHERE id=:id")
-    fun deleteTransactionById(id: Long)
+    fun deleteTransactionById(id: Long) : Int
 }

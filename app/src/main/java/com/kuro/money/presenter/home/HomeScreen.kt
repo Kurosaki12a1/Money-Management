@@ -75,7 +75,7 @@ fun HomeScreen(
             .fillMaxSize()
             .background(Gray)
             .padding(10.dp),
-        contentPadding = PaddingValues(horizontal = 10.dp, vertical = paddingValues.calculateBottomPadding())
+        contentPadding = PaddingValues(start = 10.dp, end = 10.dp , bottom = paddingValues.calculateBottomPadding())
     ) {
         item {
             Row(

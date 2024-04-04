@@ -15,6 +15,7 @@ import com.kuro.money.presenter.home.MyWalletViewModel
 import com.kuro.money.presenter.home.RecentTransactionViewModel
 import com.kuro.money.presenter.home.SpendingReportViewModel
 import com.kuro.money.presenter.home.feature.TransactionDetailsScreen
+import com.kuro.money.presenter.home.feature.TransactionDetailsViewModel
 
 fun NavGraphBuilder.homeNavGraph(
     navHostController: NavHostController,
@@ -51,8 +52,17 @@ fun NavGraphBuilder.homeNavGraph(
                         val parentEntry = remember(it) {
                             navHostController.getBackStackEntry(NavigationGraphRoute.HomeGraph.route)
                         }
+                        val subEntry = remember(it) {
+                            navHostController.getBackStackEntry(NavigationGraphRoute.HomeGraph.TransactionDetails.route)
+                        }
                         val homeViewModel = hiltViewModel<HomeViewModel>(parentEntry)
-                        TransactionDetailsScreen(navController = navHostController, homeViewModel)
+                        val transactionDetailsViewModel =
+                            hiltViewModel<TransactionDetailsViewModel>(subEntry)
+                        TransactionDetailsScreen(
+                            navController = navHostController,
+                            homeViewModel,
+                            transactionDetailsViewModel
+                        )
                     }
                 }
             )

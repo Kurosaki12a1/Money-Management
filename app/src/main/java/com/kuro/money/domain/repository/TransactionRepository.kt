@@ -14,6 +14,6 @@ interface TransactionRepository {
 
     fun getListTransactions(): Flow<Resource<List<TransactionEntity>?>>
 
-    fun deleteTransactionById(id: Long): Flow<Resource<Unit>>
+    fun deleteTransactionById(id: Long): Flow<Resource<Int>>
 
 }

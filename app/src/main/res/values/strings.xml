@@ -71,4 +71,8 @@
     <string name="see_reports">See reports</string>
     <string name="see_all">See all</string>
     <string name="recent_transactions">Recent Transactions</string>
+
+    <string name="delete_this_transaction">Delete this transaction?</string>
+    <string name="yes">YES</string>
+    <string name="no">NO</string>
 </resources>

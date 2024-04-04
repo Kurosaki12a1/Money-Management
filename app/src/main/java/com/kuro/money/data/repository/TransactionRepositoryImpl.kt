@@ -48,11 +48,11 @@ class TransactionRepositoryImpl @Inject constructor(
         }
     }.flowOn(dispatcher)
 
-    override fun deleteTransactionById(id: Long): Flow<Resource<Unit>> = flow {
+    override fun deleteTransactionById(id: Long): Flow<Resource<Int>> = flow {
         emit(Resource.Loading)
         try {
-            appDatabase.transactionDao().deleteTransactionById(id)
-            emit(Resource.success(Unit))
+            val rowEffected = appDatabase.transactionDao().deleteTransactionById(id)
+            emit(Resource.success(rowEffected))
         } catch (e: Exception) {
             e.printStackTrace()
             emit(Resource.failure(e, e.message))
