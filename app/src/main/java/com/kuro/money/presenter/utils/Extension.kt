@@ -12,7 +12,7 @@ fun LocalDate.string(pattern: String = "dd/MM/yyyy"): String {
 }
 
 fun Double.string(): String {
-    val decimalFormat = DecimalFormat("#,###.##")
+    val decimalFormat = DecimalFormat("#.######")
     return decimalFormat.format(this)
 }
 

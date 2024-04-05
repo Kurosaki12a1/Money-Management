@@ -30,6 +30,7 @@ import com.kuro.money.data.model.CategoryEntity
 import com.kuro.money.domain.model.SelectedCategory
 import com.kuro.money.presenter.add_transaction.AddTransactionViewModel
 import com.kuro.money.presenter.add_transaction.feature.select_category.SelectCategoryViewModel
+import com.kuro.money.presenter.home.feature.EditTransactionDetailViewModel
 import com.kuro.money.presenter.utils.toPainterResource
 import com.kuro.money.ui.theme.Gray
 
@@ -46,6 +47,40 @@ fun DebtScreen(
     newListCategory.addAll(listCategory.sortedBy { it.name })
 
     val selectedCategory = addTransactionViewModel.selectedCategory.collectAsState().value
+
+    Surface(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
+    ) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(vertical = 10.dp)
+        ) {
+            itemsIndexed(newListCategory, key = { _, item -> item.name }) { index, item ->
+                val isLastIndex = index == newListCategory.size - 1
+                CategoryItem(item, isLastIndex, selectedCategory) {
+                    vm.setSelectedCategories(it)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun DebtScreen(
+    listCategory: List<CategoryEntity>,
+    editTransactionViewModel: EditTransactionDetailViewModel,
+    vm: SelectCategoryViewModel = hiltViewModel(),
+) {
+    val newListCategory = mutableListOf<CategoryEntity>()
+    listCategory.forEach { category ->
+        category.subCategories = category.subCategories.sortedBy { it.name }.toMutableList()
+    }
+    newListCategory.addAll(listCategory.sortedBy { it.name })
+
+    val selectedCategory = editTransactionViewModel.selectedCategory.collectAsState().value
 
     Surface(
         modifier = Modifier

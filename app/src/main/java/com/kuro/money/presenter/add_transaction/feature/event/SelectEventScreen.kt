@@ -48,6 +48,7 @@ import com.kuro.money.data.utils.Resource
 import com.kuro.money.extension.detectHorizontalWithDelay
 import com.kuro.money.navigation.routes.NavigationRoute
 import com.kuro.money.presenter.add_transaction.AddTransactionViewModel
+import com.kuro.money.presenter.home.feature.EditTransactionDetailViewModel
 import com.kuro.money.presenter.utils.CrossSlide
 import com.kuro.money.presenter.utils.toPainterResource
 import com.kuro.money.ui.theme.Gray
@@ -153,6 +154,103 @@ fun SelectEventScreen(
 }
 
 @Composable
+fun SelectEventScreen(
+    navController: NavController,
+    editTransactionDetailViewModel: EditTransactionDetailViewModel,
+    selectEventViewModel: SelectEventViewModel = hiltViewModel()
+) {
+    BackHandler { navController.popBackStack() }
+
+    if (navController.currentDestination?.route == NavigationRoute.Home.TransactionDetails.Edit.SelectEvent.route) {
+        selectEventViewModel.getAllEvents()
+    }
+
+    val listEvent = remember { mutableListOf<EventEntity>() }
+    val selectedTabIndexed = remember { mutableStateOf(0) }
+
+    LaunchedEffect(Unit) {
+        selectEventViewModel.getAllEvents.collectLatest {
+            if (it is Resource.Success) {
+                listEvent.clear()
+                it.value?.let { item -> listEvent.addAll(item) }
+            }
+        }
+    }
+
+
+    Surface(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
+    ) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .align(Alignment.TopCenter)
+            ) {
+                ToolbarSelectEventScreen(navController)
+                TabSelectionEvent(selectedTabIndexed.value) {
+                    selectedTabIndexed.value = it
+                }
+                CrossSlide(
+                    modifier = Modifier.detectHorizontalWithDelay(
+                        onSwipeLeft = {
+                            if (selectedTabIndexed.value < 1) {
+                                selectedTabIndexed.value += 1
+                            }
+                        },
+                        onSwipeRight = {
+                            if (selectedTabIndexed.value > 0) {
+                                selectedTabIndexed.value -= 1
+                            }
+                        }
+                    ),
+                    currentState = 0,
+                    targetState = selectedTabIndexed.value,
+                    orderedContent = listOf(0, 1)
+                ) {
+                    when (it) {
+                        0 -> {
+                            ListEventScreen(
+                                navController,
+                                listEvent.filter { item -> item.endDate.isAfter(LocalDate.now()) },
+                                editTransactionDetailViewModel
+                            )
+                        }
+
+                        else -> {
+                            ListEventScreen(
+                                navController,
+                                listEvent.filter { item -> item.endDate.isBefore(LocalDate.now()) },
+                                editTransactionDetailViewModel
+                            )
+                        }
+                    }
+                }
+            }
+
+            FloatingActionButton(
+                onClick = {
+                    navController.navigate(NavigationRoute.AddTransaction.AddEvent.route)
+                },
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .padding(20.dp),
+                backgroundColor = Green
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.AddCircle,
+                    contentDescription = "Add",
+                    tint = Color.White,
+                    modifier = Modifier.size(36.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
 private fun ListEventScreen(
     navController: NavController,
     event: List<EventEntity>,
@@ -174,6 +272,60 @@ private fun ListEventScreen(
                     .padding(horizontal = 10.dp)
                     .clickable {
                         addTransactionViewModel.setEventSelected(it)
+                        navController.popBackStack()
+                    },
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(15.dp)
+            ) {
+                Image(painter = it.icon.toPainterResource(), contentDescription = it.name)
+                Column {
+                    Text(
+                        text = it.name,
+                        color = Color.Black,
+                        style = MaterialTheme.typography.body1
+                    )
+                    Text(
+                        text = it.wallet.balance.toString(),
+                        color = Color.Black.copy(alpha = 0.5f),
+                        style = MaterialTheme.typography.body2
+                    )
+                }
+                Spacer(modifier = Modifier.weight(1f))
+                if (isSelected) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_check_green),
+                        tint = Green,
+                        contentDescription = "Check"
+                    )
+                }
+            }
+        }
+    }
+}
+
+
+@Composable
+private fun ListEventScreen(
+    navController: NavController,
+    event: List<EventEntity>,
+    editTransactionDetailViewModel: EditTransactionDetailViewModel
+) {
+    //TODO show the blank event screen
+    if (event.isEmpty()) return
+    val selectedEvent = editTransactionDetailViewModel.eventSelected.collectAsState().value
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(10.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        items(event) {
+            val isSelected = selectedEvent == it
+            Row(
+                modifier = Modifier
+                    .padding(horizontal = 10.dp)
+                    .clickable {
+                        editTransactionDetailViewModel.setEventSelected(it)
                         navController.popBackStack()
                     },
                 verticalAlignment = Alignment.CenterVertically,

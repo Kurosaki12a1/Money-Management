@@ -58,4 +58,16 @@ class TransactionRepositoryImpl @Inject constructor(
             emit(Resource.failure(e, e.message))
         }
     }.flowOn(dispatcher)
+
+    override fun getTransactionById(id: Long): Flow<Resource<TransactionEntity>> = flow {
+        emit(Resource.Loading)
+        try {
+            val data = appDatabase.transactionDao().getTransactionById(id)
+            emit(Resource.success(data))
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emit(Resource.failure(e, e.message))
+        }
+    }.flowOn(dispatcher)
+
 }

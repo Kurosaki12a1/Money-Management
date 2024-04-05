@@ -134,7 +134,7 @@ fun AddEventScreen(
                                 modifier = Modifier
                                     .noRippleClickable {
                                         navController.navigate(
-                                            NavigationRoute.AddTransaction.AddEvent.SelectIcon.route
+                                           NavigationRoute.Home.TransactionDetails.Edit.AddEvent.SelectIcon.route
                                         )
                                     }
                                     .background(Gray, CircleShape)
@@ -151,7 +151,7 @@ fun AddEventScreen(
                             Image(
                                 modifier = Modifier.noRippleClickable {
                                     navController.navigate(
-                                        NavigationRoute.AddTransaction.AddEvent.SelectIcon.route
+                                       NavigationRoute.Home.TransactionDetails.Edit.AddEvent.SelectIcon.route
                                     )
                                 },
                                 painter = iconSelected.toPainterResource(),
@@ -213,7 +213,7 @@ fun AddEventScreen(
                             .fillMaxWidth()
                             .noRippleClickable {
                                 navController.navigate(
-                                    NavigationRoute.AddTransaction.AddEvent.SelectCurrency.route
+                                   NavigationRoute.Home.TransactionDetails.Edit.AddEvent.SelectCurrency.route
                                 )
                             },
                         verticalAlignment = Alignment.CenterVertically,
@@ -257,7 +257,7 @@ fun AddEventScreen(
                             .fillMaxWidth()
                             .noRippleClickable {
                                 navController.navigate(
-                                    NavigationRoute.AddTransaction.AddEvent.SelectWallet.route
+                                   NavigationRoute.Home.TransactionDetails.Edit.AddEvent.SelectWallet.route
                                 )
                             },
                         verticalAlignment = Alignment.CenterVertically,

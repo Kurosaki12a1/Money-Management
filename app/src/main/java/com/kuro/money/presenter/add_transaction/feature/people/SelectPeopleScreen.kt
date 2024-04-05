@@ -40,6 +40,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.kuro.money.R
 import com.kuro.money.presenter.add_transaction.AddTransactionViewModel
+import com.kuro.money.presenter.home.feature.EditTransactionDetailViewModel
 import com.kuro.money.ui.theme.Gray
 import com.kuro.money.ui.theme.Green
 
@@ -99,6 +100,90 @@ fun SelectPeopleScreen(
                     textAlign = TextAlign.Center,
                     modifier = Modifier.clickable {
                         name.value.let { addTransactionViewModel.setNamePeople(it.text) }
+                        navController.popBackStack()
+                    }
+                )
+            }
+            Divider(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(1.dp)
+                    .background(Gray)
+            )
+            BasicTextField(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 10.dp)
+                    .focusRequester(focusRequester)
+                    .offset(x = 50.dp),
+                value = name.value,
+                onValueChange = { name.value = it },
+                textStyle = TextStyle(
+                    fontSize = 18.sp,
+                    color = Color.Black
+                )
+            )
+        }
+    }
+}
+
+
+@Composable
+fun SelectPeopleScreen(
+    navController: NavController,
+    editTransactionDetailViewModel: EditTransactionDetailViewModel
+) {
+    BackHandler { navController.popBackStack() }
+
+    val focusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
+    }
+
+    val nameOfPeople = editTransactionDetailViewModel.nameOfPeople.collectAsState().value
+    val name = remember {
+        mutableStateOf(
+            TextFieldValue(
+                text = nameOfPeople ?: "",
+                selection = TextRange(nameOfPeople?.length ?: 0)
+            )
+        )
+    }
+
+    Surface(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(30.dp)
+            ) {
+                Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back",
+                    modifier = Modifier.clickable {
+                        navController.popBackStack()
+                    })
+                Text(
+                    text = stringResource(id = R.string.with),
+                    style = MaterialTheme.typography.h6,
+                    color = Color.Black,
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.weight(1f))
+                Text(
+                    text = stringResource(id = R.string.done),
+                    style = MaterialTheme.typography.body1,
+                    color = Green,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.clickable {
+                        name.value.let { editTransactionDetailViewModel.setNamePeople(it.text) }
                         navController.popBackStack()
                     }
                 )

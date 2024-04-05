@@ -10,6 +10,8 @@ class TransactionUseCase @Inject constructor(
     operator fun invoke(entity: TransactionEntity) = repo.insert(entity)
     fun update(entity: TransactionEntity) = repo.update(entity)
 
+    fun getTransactionById(id: Long) = repo.getTransactionById(id)
+
     operator fun invoke(id: Long) = repo.deleteTransactionById(id)
     operator fun invoke() = repo.getListTransactions()
 }

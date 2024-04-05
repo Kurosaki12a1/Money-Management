@@ -1,4 +1,4 @@
-package com.kuro.money.presenter.add_transaction
+package com.kuro.money.presenter.home.feature
 
 import android.graphics.Bitmap
 import android.net.Uri
@@ -14,6 +14,7 @@ import com.kuro.money.domain.model.SelectedCategory
 import com.kuro.money.domain.usecase.CurrenciesUseCase
 import com.kuro.money.domain.usecase.PreferencesUseCase
 import com.kuro.money.domain.usecase.TransactionUseCase
+import com.kuro.money.presenter.utils.string
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -25,7 +26,7 @@ import java.time.LocalDate
 import javax.inject.Inject
 
 @HiltViewModel
-class AddTransactionViewModel @Inject constructor(
+class EditTransactionDetailViewModel @Inject constructor(
     private val transactionUseCase: TransactionUseCase,
     private val currenciesUseCase: CurrenciesUseCase,
     private val preferencesUseCase: PreferencesUseCase,
@@ -60,14 +61,40 @@ class AddTransactionViewModel @Inject constructor(
     private val _amount = MutableStateFlow<String?>(null)
     val amount = _amount.asStateFlow()
 
-    private val _insertTransaction = MutableStateFlow<Resource<Long>>(Resource.Default)
-    val insertTransaction = _insertTransaction.asStateFlow()
+    private val _updateTransaction = MutableStateFlow<Resource<Int>>(Resource.Default)
+    val updateTransaction = _updateTransaction.asStateFlow()
 
     private val _bitmapFlow = MutableStateFlow<Bitmap?>(null)
     val bitmapFlow = _bitmapFlow.asStateFlow()
 
+    private val _id = MutableStateFlow(0L)
+
     init {
         initCurrencySelected()
+    }
+
+    fun getTransaction(id : Long) {
+        viewModelScope.launch {
+            transactionUseCase.getTransactionById(id).collectLatest {
+                if (it is Resource.Success) {
+                    setData(it.value)
+                }
+            }
+        }
+    }
+
+    private fun setData(data: TransactionEntity) {
+        _id.value = data.id
+        _amount.value = data.amount.string()
+        _currencySelected.value = data.currency
+        _dateTransaction.value = data.displayDate
+        _selectedCategory.value = data.category
+        _note.value = data.note ?: ""
+        _wallet.value = data.wallet
+        _nameOfPeople.value = data.people
+        _eventSelected.value = data.event
+        _dateRemind.value = data.remindDate
+        _uriSelected.value = data.image
     }
 
     fun setBitmap(bitmap: Bitmap?) {
@@ -121,6 +148,7 @@ class AddTransactionViewModel @Inject constructor(
     fun submitData() {
         viewModelScope.launch {
             val transactionEntity = TransactionEntity(
+                id = _id.value,
                 currency = currencySelected.value!!,
                 amount = amount.value?.toDouble() ?: 0.0,
                 createdDate = LocalDate.now(),
@@ -134,8 +162,8 @@ class AddTransactionViewModel @Inject constructor(
                 image = uriSelected.value,
                 isExcludedReport = false // TODO
             )
-            transactionUseCase(transactionEntity).collectLatest {
-                _insertTransaction.value = it
+            transactionUseCase.update(transactionEntity).collectLatest {
+                _updateTransaction.value = it
             }
         }
     }

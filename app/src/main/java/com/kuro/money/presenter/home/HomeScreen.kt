@@ -208,7 +208,7 @@ fun RecentTransaction(
             listRecentTransactions.forEach { item ->
                 ItemRecentTransactions(item) {
                     homeViewModel.setSelectedTransaction(item)
-                    navController.navigate(NavigationRoute.Home.TransactionDetails.route)
+                    navController.navigate("${NavigationRoute.Home.TransactionDetails.route}/${item.id}")
                 }
             }
         }

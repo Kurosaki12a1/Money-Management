@@ -26,7 +26,6 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -35,7 +34,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.kuro.money.R
 import com.kuro.money.data.model.CategoryEntity
@@ -47,6 +45,7 @@ import com.kuro.money.presenter.add_transaction.AddTransactionViewModel
 import com.kuro.money.presenter.add_transaction.feature.select_category.feature.DebtScreen
 import com.kuro.money.presenter.add_transaction.feature.select_category.feature.ExpenseScreen
 import com.kuro.money.presenter.add_transaction.feature.select_category.feature.IncomeScreen
+import com.kuro.money.presenter.home.feature.EditTransactionDetailViewModel
 import com.kuro.money.presenter.utils.CrossSlide
 import com.kuro.money.ui.theme.Gray
 import kotlinx.coroutines.flow.collectLatest
@@ -145,6 +144,107 @@ fun SelectCategoryScreen(
                     2 -> DebtScreen(
                         listCategories.filter { cate -> listSpecialCategories.contains(cate.name) },
                         addTransactionViewModel, selectCategoryViewModel
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun SelectCategoryScreen(
+    navController: NavController,
+    editTransactionDetailViewModel: EditTransactionDetailViewModel,
+    selectCategoryViewModel: SelectCategoryViewModel
+) {
+    BackHandler {
+        navController.popBackStack()
+    }
+
+    val selectedTabIndexed = remember { mutableStateOf(0) }
+    val prevSelectedTabIndex = remember { mutableStateOf(0) }
+    val listCategories = remember { mutableStateListOf<CategoryEntity>() }
+    val listSubCategories = remember { mutableStateListOf<SubCategoryEntity>() }
+    val listSpecialCategories = listOf(
+        "Debt", "Debt Collection", "Loan", "Repayment"
+    )
+
+    LaunchedEffect(Unit) {
+        selectCategoryViewModel.selectedCategory.collectLatest {
+            if (it.name != "" && it.icon != "" && it.type != "") {
+                editTransactionDetailViewModel.setSelectedCategory(it)
+                selectCategoryViewModel.setSelectedCategories(SelectedCategory())
+                navController.popBackStack()
+            }
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        selectCategoryViewModel.getCategoryResponse.collectLatest {
+            if (it is Resource.Success) {
+                listCategories.clear()
+                listCategories.addAll(it.value)
+            }
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        selectCategoryViewModel.getSubCategoryResponse.collectLatest {
+            if (it is Resource.Success) {
+                listSubCategories.clear()
+                listSubCategories.addAll(it.value)
+            }
+        }
+    }
+
+    LaunchedEffect(listCategories.size, listSubCategories.size) {
+        val subCategoryMap = listSubCategories.groupBy { it.parentId }
+        listCategories.forEach { category ->
+            category.subCategories = subCategoryMap[category.id] ?: emptyList()
+        }
+    }
+
+    Surface(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
+    ) {
+        Column {
+            ToolbarSelectCategory(navController)
+            TabSelectionCategory(selectedTabIndexed.value) {
+                if (prevSelectedTabIndex.value != selectedTabIndexed.value) {
+                    prevSelectedTabIndex.value = selectedTabIndexed.value
+                }
+                selectedTabIndexed.value = it
+            }
+            CrossSlide(
+                modifier = Modifier.detectHorizontalWithDelay(onSwipeLeft = {
+                    if (selectedTabIndexed.value < 2) {
+                        prevSelectedTabIndex.value = selectedTabIndexed.value
+                        selectedTabIndexed.value += 1
+                    }
+                }, onSwipeRight = {
+                    if (selectedTabIndexed.value > 0) {
+                        prevSelectedTabIndex.value = selectedTabIndexed.value
+                        selectedTabIndexed.value -= 1
+                    }
+                }),
+                currentState = prevSelectedTabIndex.value,
+                targetState = selectedTabIndexed.value,
+                orderedContent = listOf(0, 1, 2)
+            ) {
+                when (it) {
+                    0 -> ExpenseScreen(listCategories.filter { cate ->
+                        cate.type == "expense" && !listSpecialCategories.contains(cate.name)
+                    }, editTransactionDetailViewModel, selectCategoryViewModel)
+
+                    1 -> IncomeScreen(listCategories.filter { cate ->
+                        cate.type == "income" && !listSpecialCategories.contains(cate.name)
+                    }, editTransactionDetailViewModel, selectCategoryViewModel)
+
+                    2 -> DebtScreen(
+                        listCategories.filter { cate -> listSpecialCategories.contains(cate.name) },
+                        editTransactionDetailViewModel, selectCategoryViewModel
                     )
                 }
             }

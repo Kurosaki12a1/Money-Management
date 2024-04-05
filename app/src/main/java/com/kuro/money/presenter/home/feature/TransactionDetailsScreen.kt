@@ -4,6 +4,8 @@ import android.net.Uri
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.rememberTransformableState
+import androidx.compose.foundation.gestures.transformable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -29,18 +31,19 @@ import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Notes
-import androidx.compose.material.icons.filled.RotateRight
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Undo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.rotate
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
@@ -49,10 +52,11 @@ import androidx.compose.ui.window.Dialog
 import androidx.navigation.NavController
 import coil.compose.rememberAsyncImagePainter
 import com.kuro.money.R
+import com.kuro.money.data.model.TransactionEntity
 import com.kuro.money.data.utils.Resource
 import com.kuro.money.domain.model.LetterColor
 import com.kuro.money.extension.noRippleClickable
-import com.kuro.money.presenter.home.HomeViewModel
+import com.kuro.money.navigation.routes.NavigationRoute
 import com.kuro.money.presenter.utils.string
 import com.kuro.money.presenter.utils.toPainterResource
 import com.kuro.money.ui.theme.Gray
@@ -61,12 +65,26 @@ import kotlinx.coroutines.flow.collectLatest
 @Composable
 fun TransactionDetailsScreen(
     navController: NavController,
-    homeViewModel: HomeViewModel,
+    transactionID: Long,
     transactionDetailsViewModel: TransactionDetailsViewModel
 ) {
     BackHandler { navController.popBackStack() }
+    if (navController.currentDestination?.route?.contains(NavigationRoute.Home.TransactionDetails.route) == true) {
+        transactionDetailsViewModel.getTransactionById(transactionID)
+    }
 
-    val transactionEntity = homeViewModel.selectedTransaction.collectAsState().value ?: return
+    var transactionEntity by remember { mutableStateOf<TransactionEntity?>(null) }
+
+    LaunchedEffect(Unit) {
+        transactionDetailsViewModel.detailTransaction.collectLatest {
+            if (it is Resource.Success) {
+                transactionEntity = it.value
+            }
+        }
+    }
+
+    if (transactionEntity == null) return
+
     val showDeleteDialog = remember { mutableStateOf(false) }
     val zoomInImage = remember { mutableStateOf(false) }
 
@@ -104,16 +122,19 @@ fun TransactionDetailsScreen(
                     })
                 Spacer(modifier = Modifier.weight(1f))
                 Icon(imageVector = Icons.Default.Share, contentDescription = "Share")
-                Icon(imageVector = Icons.Default.Edit, contentDescription = "Edit")
+                Icon(imageVector = Icons.Default.Edit, contentDescription = "Edit",
+                    modifier = Modifier.noRippleClickable {
+                        navController.navigate("${NavigationRoute.Home.TransactionDetails.Edit.route}/$transactionID")
+                    })
                 Icon(imageVector = Icons.Default.Delete, contentDescription = "Delete",
                     modifier = Modifier.noRippleClickable {
                         showDeleteDialog.value = true
                     }
                 )
             }
-            if (transactionEntity.image != null) {
+            if (transactionEntity!!.image != null) {
                 Image(
-                    painter = rememberAsyncImagePainter(model = transactionEntity.image),
+                    painter = rememberAsyncImagePainter(model = transactionEntity!!.image),
                     contentDescription = "Photo",
                     modifier = Modifier
                         .fillMaxWidth()
@@ -134,12 +155,12 @@ fun TransactionDetailsScreen(
                         horizontalArrangement = Arrangement.spacedBy(20.dp)
                     ) {
                         Image(
-                            painter = transactionEntity.category.icon.toPainterResource(),
+                            painter = transactionEntity!!.category.icon.toPainterResource(),
                             contentDescription = "Icon",
                             modifier = Modifier.weight(0.2f)
                         )
                         Text(
-                            text = transactionEntity.category.name,
+                            text = transactionEntity!!.category.name,
                             style = MaterialTheme.typography.body1,
                             modifier = Modifier.weight(0.8f)
                         )
@@ -152,16 +173,16 @@ fun TransactionDetailsScreen(
                     ) {
                         Spacer(modifier = Modifier.weight(0.2f))
                         Text(
-                            text = "${transactionEntity.amount.string()} ${transactionEntity.currency.symbol}",
+                            text = "${transactionEntity!!.amount.string()} ${transactionEntity!!.currency.symbol}",
                             style = MaterialTheme.typography.body1,
-                            color = if (transactionEntity.category.type == "expense") Color.Red else Color.Cyan,
+                            color = if (transactionEntity!!.category.type == "expense") Color.Red else Color.Cyan,
                             modifier = Modifier
                                 .offset(x = 20.dp)
                                 .weight(0.8f)
                         )
                     }
                 }
-                if (transactionEntity.note != null) {
+                if (transactionEntity!!.note != null) {
                     item {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -174,7 +195,7 @@ fun TransactionDetailsScreen(
                                 modifier = Modifier.weight(0.2f)
                             )
                             Text(
-                                text = transactionEntity.note,
+                                text = transactionEntity!!.note ?: "",
                                 color = Color.Black.copy(0.5f),
                                 style = MaterialTheme.typography.body2,
                                 modifier = Modifier.weight(0.8f)
@@ -194,7 +215,7 @@ fun TransactionDetailsScreen(
                             modifier = Modifier.weight(0.2f)
                         )
                         Text(
-                            text = transactionEntity.displayDate.string(),
+                            text = transactionEntity!!.displayDate.string(),
                             style = MaterialTheme.typography.body2,
                             modifier = Modifier.weight(0.8f)
                         )
@@ -207,21 +228,21 @@ fun TransactionDetailsScreen(
                         horizontalArrangement = Arrangement.spacedBy(20.dp)
                     ) {
                         Image(
-                            painter = transactionEntity.wallet.icon.toPainterResource(),
+                            painter = transactionEntity!!.wallet.icon.toPainterResource(),
                             contentDescription = "Wallet",
                             modifier = Modifier.weight(0.2f)
                         )
                         Text(
-                            text = transactionEntity.wallet.name,
+                            text = transactionEntity!!.wallet.name,
                             style = MaterialTheme.typography.body2,
                             modifier = Modifier.weight(0.8f)
                         )
                     }
                 }
-                if (transactionEntity.people != null) {
+                if (transactionEntity!!.people != null) {
                     item {
                         val listOfPeople =
-                            transactionEntity.people.split(",").filter { it.isNotEmpty() }
+                            transactionEntity!!.people!!.split(",").filter { it.isNotEmpty() }
                                 .map { it.trim() }
                         Column(verticalArrangement = Arrangement.spacedBy(20.dp)) {
                             Row(modifier = Modifier.fillMaxWidth()) {
@@ -272,7 +293,7 @@ fun TransactionDetailsScreen(
 
                     }
                 }
-                if (transactionEntity.event != null) {
+                if (transactionEntity!!.event != null) {
                     item {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -280,7 +301,7 @@ fun TransactionDetailsScreen(
                         ) {
                             Image(
                                 modifier = Modifier.weight(0.2f),
-                                painter = transactionEntity.event.icon.toPainterResource(),
+                                painter = transactionEntity!!.event!!.icon.toPainterResource(),
                                 contentDescription = "Event"
                             )
                             Column(
@@ -293,7 +314,7 @@ fun TransactionDetailsScreen(
                                     style = MaterialTheme.typography.body2,
                                 )
                                 Text(
-                                    text = transactionEntity.event.name,
+                                    text = transactionEntity!!.event!!.name,
                                     color = Color.Black.copy(0.5f),
                                     style = MaterialTheme.typography.body2,
                                 )
@@ -301,7 +322,7 @@ fun TransactionDetailsScreen(
                         }
                     }
                 }
-                if (transactionEntity.remindDate != null) {
+                if (transactionEntity!!.remindDate != null) {
                     item {
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -313,7 +334,7 @@ fun TransactionDetailsScreen(
                                 contentDescription = "Alarm"
                             )
                             Text(
-                                text = transactionEntity.remindDate.string(),
+                                text = transactionEntity!!.remindDate!!.string(),
                                 color = Color.Black.copy(0.5f),
                                 style = MaterialTheme.typography.body2,
                                 modifier = Modifier.weight(0.8f)
@@ -331,7 +352,7 @@ fun TransactionDetailsScreen(
         },
         onAcceptClick = {
             showDeleteDialog.value = false
-            transactionDetailsViewModel.deleteTransaction(transactionEntity.id)
+            transactionDetailsViewModel.deleteTransaction(transactionEntity!!.id)
         }
     )
     ZoomInImage(
@@ -339,7 +360,7 @@ fun TransactionDetailsScreen(
         onDismissRequest = {
             zoomInImage.value = false
         },
-        image = transactionEntity.image
+        image = transactionEntity!!.image
     )
 }
 
@@ -388,19 +409,36 @@ private fun DialogDeleteTransaction(
 @Composable
 private fun ZoomInImage(isVisible: Boolean, image: Uri?, onDismissRequest: () -> Unit) {
     if (!isVisible || image == null) return
-    BackHandler() { onDismissRequest() }
-    val rotate = remember { mutableFloatStateOf(0f) }
+    BackHandler { onDismissRequest() }
+    var scale by remember { mutableStateOf(1f) }
+    var rotation by remember { mutableStateOf(0f) }
+    var offset by remember { mutableStateOf(Offset.Zero) }
     Box(
         modifier = Modifier
             .fillMaxSize()
             .background(Color.Black)
     ) {
+        val state = rememberTransformableState { zoomChange, panChange, rotationChange ->
+            scale = (scale * zoomChange).coerceIn(0.25f, 5f)
+            rotation += rotationChange
+            offset = Offset(
+                x = (offset.x + scale * panChange.x),
+                y = (offset.y + scale * panChange.y),
+            )
+        }
         Image(
             painter = rememberAsyncImagePainter(model = image),
             contentDescription = "Photo",
             modifier = Modifier
                 .align(Alignment.Center)
-                .rotate(rotate.floatValue),
+                .graphicsLayer {
+                    scaleX = scale
+                    scaleY = scale
+                    rotationZ = rotation
+                    translationX = offset.x
+                    translationY = offset.y
+                }
+                .transformable(state),
             contentScale = ContentScale.FillBounds
         )
         Row(
@@ -410,10 +448,14 @@ private fun ZoomInImage(isVisible: Boolean, image: Uri?, onDismissRequest: () ->
                 .align(Alignment.BottomCenter),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(imageVector = Icons.Default.RotateRight,
+            Icon(imageVector = Icons.Default.Undo,
                 contentDescription = "Rotate",
                 tint = Color.White,
-                modifier = Modifier.noRippleClickable { rotate.floatValue -= 90f })
+                modifier = Modifier.noRippleClickable {
+                    scale = 1f
+                    rotation = 0f
+                    offset = Offset.Zero
+                })
             Spacer(modifier = Modifier.weight(1f))
             Icon(
                 imageVector = Icons.Default.Check,

@@ -16,9 +16,12 @@ interface TransactionDao {
     @Update(onConflict = OnConflictStrategy.REPLACE)
     fun update(entity: TransactionEntity): Int
 
+    @Query("SELECT * FROM transactions WHERE id=:id")
+    fun getTransactionById(id: Long): TransactionEntity
+
     @Query("SELECT * FROM transactions")
     fun getListTransactions(): List<TransactionEntity>
 
     @Query("DELETE FROM transactions WHERE id=:id")
-    fun deleteTransactionById(id: Long) : Int
+    fun deleteTransactionById(id: Long): Int
 }

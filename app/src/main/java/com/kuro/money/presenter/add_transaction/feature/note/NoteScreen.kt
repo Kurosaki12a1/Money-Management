@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.kuro.money.R
 import com.kuro.money.presenter.add_transaction.AddTransactionViewModel
+import com.kuro.money.presenter.home.feature.EditTransactionDetailViewModel
 import com.kuro.money.ui.theme.Gray
 
 @Composable
@@ -89,6 +90,77 @@ fun NoteScreen(
                     textAlign = TextAlign.Center,
                     modifier = Modifier.clickable {
                         addTransactionViewModel.setNote(note.value)
+                        navController.popBackStack()
+                    })
+            }
+            Divider(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(1.dp)
+                    .background(Gray)
+            )
+            BasicTextField(modifier = Modifier
+                .fillMaxSize()
+                .focusRequester(focusRequester)
+                .padding(10.dp),
+                value = note.value,
+                textStyle = TextStyle(
+                    fontSize = 18.sp
+                ),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Ascii),
+                onValueChange = { note.value = it })
+        }
+    }
+}
+
+@Composable
+fun NoteScreen(
+    navController: NavController,
+    editTransactionDetailViewModel: EditTransactionDetailViewModel
+) {
+    BackHandler { navController.popBackStack() }
+
+    val noteValue = editTransactionDetailViewModel.note.collectAsState().value
+    val note = remember { mutableStateOf(noteValue) }
+    val focusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
+    }
+
+    Surface(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(20.dp)
+            ) {
+                Icon(imageVector = Icons.Default.ArrowBack,
+                    contentDescription = "Back",
+                    modifier = Modifier.clickable {
+                        navController.popBackStack()
+                    })
+                Text(
+                    text = stringResource(id = R.string.note),
+                    style = MaterialTheme.typography.h6,
+                    textAlign = TextAlign.Center,
+                    color = Color.Black
+                )
+                Spacer(modifier = Modifier.weight(1f))
+                Text(text = stringResource(id = R.string.save),
+                    style = MaterialTheme.typography.h6,
+                    color = Color.Black,
+                    textAlign = TextAlign.Center,
+                    modifier = Modifier.clickable {
+                        editTransactionDetailViewModel.setNote(note.value)
                         navController.popBackStack()
                     })
             }

@@ -6,6 +6,10 @@ sealed class NavigationGraphRoute(val route: String) {
 
     sealed class HomeGraph(route: String) : NavigationGraphRoute(route) {
 
+        data object EditTransactionEvent : HomeGraph("sub_graph_home_edit_transactions_event")
+
+        data object EditTransactions : HomeGraph("sub_graph_home_edit_transactions")
+
         data object TransactionDetails : HomeGraph("sub_graph_home_transaction_details")
         companion object : HomeGraph("home_graph")
     }

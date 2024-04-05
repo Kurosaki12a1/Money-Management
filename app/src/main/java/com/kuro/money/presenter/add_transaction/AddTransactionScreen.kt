@@ -12,7 +12,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -59,7 +58,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -94,15 +92,7 @@ fun AddTransactionScreen(
     navController: NavController,
     addTransactionViewModel: AddTransactionViewModel
 ) {
-    val isEnabledCustomKeyBoard = remember { mutableStateOf(false) }
-
-    BackHandler {
-        if (isEnabledCustomKeyBoard.value) {
-            isEnabledCustomKeyBoard.value = false
-            return@BackHandler
-        }
-        navController.popBackStack()
-    }
+    BackHandler { navController.popBackStack() }
 
     val selectedCategory = addTransactionViewModel.selectedCategory.collectAsState().value
     val selectedCurrency = addTransactionViewModel.currencySelected.collectAsState().value
@@ -134,18 +124,9 @@ fun AddTransactionScreen(
         }
     }
 
-    BoxWithConstraints(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Gray)
-            .pointerInput(Unit) {
-                detectTapGestures(onTap = {
-                    if (isEnabledCustomKeyBoard.value) {
-                        isEnabledCustomKeyBoard.value = false
-                    }
-                })
-            },
-    ) {
+    BoxWithConstraints(modifier = Modifier
+        .fillMaxSize()
+        .background(Gray)) {
         val maxHeight = this.maxHeight
         Column(
             modifier = Modifier
@@ -258,7 +239,7 @@ fun showDatePicker(
 }
 
 @Composable
-private fun MoreDetailsTransaction(
+fun MoreDetailsTransaction(
     peopleSelected: String?,
     eventSelected: EventEntity?,
     dateRemind: LocalDate?,
@@ -561,7 +542,7 @@ private fun MoreDetailsTransaction(
 
 
 @Composable
-private fun ToolbarAddTransaction(
+fun ToolbarAddTransaction(
     navController: NavController
 ) {
     Surface(

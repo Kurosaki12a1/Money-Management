@@ -39,6 +39,7 @@ import com.kuro.money.data.model.AccountEntity
 import com.kuro.money.data.utils.Resource
 import com.kuro.money.presenter.add_transaction.AddTransactionViewModel
 import com.kuro.money.presenter.add_transaction.feature.event.feature.add_event.AddEventScreenViewModel
+import com.kuro.money.presenter.home.feature.EditTransactionDetailViewModel
 import com.kuro.money.presenter.utils.toPainterResource
 import com.kuro.money.ui.theme.Gray
 import kotlinx.coroutines.flow.collectLatest
@@ -65,9 +66,11 @@ fun SelectWalletScreen(
         }
     }
 
-    Surface(modifier = Modifier
-        .fillMaxSize()
-        .background(Color.White)) {
+    Surface(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
+    ) {
         Column(
             modifier = Modifier.fillMaxSize()
         ) {
@@ -193,6 +196,86 @@ fun SelectWalletScreen(
                 items(listWallet) {
                     WalletItem(item = it, isSelected = it == selectedWallet.value) { item ->
                         addEventScreenViewModel.setWallet(item)
+                        navController.popBackStack()
+                    }
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun SelectWalletScreen(
+    navController: NavController,
+    editTransactionDetailViewModel: EditTransactionDetailViewModel,
+    selectWalletViewModel: SelectWalletViewModel = hiltViewModel()
+) {
+    BackHandler { navController.popBackStack() }
+
+    val listWallet = remember { mutableStateListOf<AccountEntity>() }
+
+    val walletValue = editTransactionDetailViewModel.wallet.collectAsState().value
+    val selectedWallet = remember { mutableStateOf(walletValue) }
+
+    LaunchedEffect(Unit) {
+        selectWalletViewModel.getAccountUseCase.collectLatest {
+            if (it is Resource.Success) {
+                listWallet.clear()
+                listWallet.addAll(it.value)
+            }
+        }
+    }
+
+    Surface(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(20.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.ArrowBack,
+                    contentDescription = "Back",
+                    modifier = Modifier.clickable {
+                        navController.popBackStack()
+                    })
+                Text(
+                    text = stringResource(id = R.string.select_wallet),
+                    color = Color.Black,
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.h6
+                )
+            }
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Gray)
+                    .padding(10.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(id = R.string.included_in_total),
+                    style = MaterialTheme.typography.body1,
+                    color = Color.Black.copy(alpha = 0.7f)
+                )
+            }
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                items(listWallet) {
+                    WalletItem(item = it, isSelected = it == selectedWallet.value) { entity ->
+                        editTransactionDetailViewModel.setWallet(entity)
                         navController.popBackStack()
                     }
                 }

@@ -9,11 +9,12 @@ import kotlinx.coroutines.flow.Flow
 interface TransactionRepository {
     fun insert(entity: TransactionEntity): Flow<Resource<Long>>
 
-    @Update(onConflict = OnConflictStrategy.REPLACE)
     fun update(entity: TransactionEntity): Flow<Resource<Int>>
 
     fun getListTransactions(): Flow<Resource<List<TransactionEntity>?>>
 
     fun deleteTransactionById(id: Long): Flow<Resource<Int>>
+
+    fun getTransactionById(id : Long) : Flow<Resource<TransactionEntity>>
 
 }

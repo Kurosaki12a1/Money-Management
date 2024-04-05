@@ -40,6 +40,7 @@ import com.kuro.money.data.model.CategoryEntity
 import com.kuro.money.domain.model.SelectedCategory
 import com.kuro.money.presenter.add_transaction.AddTransactionViewModel
 import com.kuro.money.presenter.add_transaction.feature.select_category.SelectCategoryViewModel
+import com.kuro.money.presenter.home.feature.EditTransactionDetailViewModel
 import com.kuro.money.presenter.utils.toPainterResource
 import com.kuro.money.ui.theme.Gray
 import com.kuro.money.ui.theme.Green
@@ -57,6 +58,66 @@ fun IncomeScreen(
     newListCategory.addAll(listCategory.sortedBy { it.name })
 
     val selectedCategory = addTransactionViewModel.selectedCategory.collectAsState().value
+
+    Surface(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Color.White)
+    ) {
+        LazyColumn(modifier = Modifier.fillMaxSize()) {
+            item {
+                Column {
+                    Row(
+                        modifier = Modifier
+                            .padding(10.dp)
+                            .clickable { },
+                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.AddCircle,
+                            contentDescription = "Add",
+                            tint = Green,
+                            modifier = Modifier.size(48.dp)
+                        )
+                        Text(
+                            text = stringResource(id = R.string.new_category),
+                            style = MaterialTheme.typography.body1,
+                            color = Green
+                        )
+                    }
+                }
+                Divider(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(1.dp)
+                        .background(Gray.copy(alpha = 0.1f))
+                )
+            }
+            itemsIndexed(newListCategory, key = { _, item -> item.name }) { index, item ->
+                val isLastIndex = index == newListCategory.size - 1
+                CategoryItem(item, isLastIndex, selectedCategory) {
+                    vm.setSelectedCategories(it)
+                }
+            }
+        }
+    }
+}
+
+
+@Composable
+fun IncomeScreen(
+    listCategory: List<CategoryEntity>,
+    editTransactionDetailViewModel: EditTransactionDetailViewModel,
+    vm: SelectCategoryViewModel = viewModel(),
+) {
+    val newListCategory = mutableListOf<CategoryEntity>()
+    listCategory.forEach { category ->
+        category.subCategories = category.subCategories.sortedBy { it.name }.toMutableList()
+    }
+    newListCategory.addAll(listCategory.sortedBy { it.name })
+
+    val selectedCategory = editTransactionDetailViewModel.selectedCategory.collectAsState().value
 
     Surface(
         modifier = Modifier
@@ -145,7 +206,9 @@ private fun CategoryItem(
                     .clickable {
                         onClick(
                             SelectedCategory(
-                                subCategoryEntity.name, subCategoryEntity.icon, subCategoryEntity.type
+                                subCategoryEntity.name,
+                                subCategoryEntity.icon,
+                                subCategoryEntity.type
                             )
                         )
                     }) {
