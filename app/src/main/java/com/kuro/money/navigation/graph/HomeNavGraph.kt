@@ -19,6 +19,7 @@ import com.kuro.money.navigation.routes.NavigationRoute.Home.TransactionDetails.
 import com.kuro.money.navigation.routes.NavigationRoute.Home.TransactionDetails.Edit.SelectEvent
 import com.kuro.money.navigation.routes.NavigationRoute.Home.TransactionDetails.Edit.SelectWallet
 import com.kuro.money.navigation.routes.NavigationRoute.Home.TransactionDetails.Edit.With
+import com.kuro.money.presenter.account.feature.wallets.WalletScreen
 import com.kuro.money.presenter.add_transaction.feature.event.SelectEventScreen
 import com.kuro.money.presenter.add_transaction.feature.event.feature.add_event.AddEventScreen
 import com.kuro.money.presenter.add_transaction.feature.event.feature.add_event.AddEventScreenViewModel
@@ -64,6 +65,16 @@ fun NavGraphBuilder.homeNavGraph(
                     myWalletViewModel,
                     spendingReportViewModel,
                     recentTransactionViewModel
+                )
+            }
+            composable(route = Home.Wallet.route) {
+                val parentEntry = remember(it) {
+                    navHostController.getBackStackEntry(Home.Wallet.route)
+                }
+                val myWalletViewModel = hiltViewModel<MyWalletViewModel>(parentEntry)
+                WalletScreen(
+                    navController = navHostController,
+                    myWalletViewModel = myWalletViewModel
                 )
             }
             navigation(

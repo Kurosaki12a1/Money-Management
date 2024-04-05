@@ -31,6 +31,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Sort
@@ -50,6 +51,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
@@ -57,15 +59,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.kuro.money.R
+import com.kuro.money.data.AppCache
 import com.kuro.money.data.model.AccountEntity
 import com.kuro.money.data.utils.Resource
 import com.kuro.money.domain.model.WalletOptions
 import com.kuro.money.extension.noRippleClickable
 import com.kuro.money.navigation.routes.NavigationGraphRoute
 import com.kuro.money.navigation.routes.NavigationRoute
+import com.kuro.money.presenter.home.MyWalletViewModel
+import com.kuro.money.presenter.utils.string
 import com.kuro.money.presenter.utils.toPainterResource
 import com.kuro.money.ui.theme.Gray
 import com.kuro.money.ui.theme.Teal200
+import kotlinx.coroutines.FlowPreview
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.collectLatest
@@ -74,6 +80,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 import java.util.concurrent.atomic.AtomicBoolean
 
+@OptIn(FlowPreview::class)
 @Composable
 fun WalletScreen(
     navController: NavController,
@@ -304,6 +311,164 @@ fun WalletScreen(
 }
 
 @Composable
+fun WalletScreen(
+    navController: NavController,
+    myWalletViewModel: MyWalletViewModel
+) {
+    BackHandler { navController.popBackStack() }
+
+    if (navController.currentDestination?.route == NavigationRoute.Home.Wallet.route) {
+        myWalletViewModel.getAllWallets()
+        myWalletViewModel.getBalance()
+    }
+
+    val listWallet = remember { mutableStateListOf<AccountEntity>() }
+    val fullListWallet = remember { mutableStateListOf<AccountEntity>() }
+    val balance = myWalletViewModel.balance.collectAsState().value
+
+    LaunchedEffect(Unit) {
+        myWalletViewModel.allWallets.collect { data ->
+            if (data is Resource.Success) {
+                listWallet.clear()
+                fullListWallet.clear()
+                data.value.let {
+                    listWallet.addAll(it)
+                    fullListWallet.addAll(it)
+                }
+            }
+        }
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Gray)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color.White)
+                .padding(20.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(20.dp)
+        ) {
+            Icon(
+                imageVector = Icons.Default.ArrowBack,
+                contentDescription = "Back",
+                modifier = Modifier.clickable {
+                    navController.popBackStack()
+                })
+
+            Text(
+                text = stringResource(id = R.string.my_wallets),
+                color = Color.Black,
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.h6
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            Icon(
+                imageVector = Icons.Default.Edit,
+                contentDescription = "Search",
+                modifier = Modifier.noRippleClickable {
+                    navController.navigate(NavigationRoute.Account.Wallet.route)
+                }
+            )
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Gray)
+                .padding(10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = stringResource(id = R.string.my_wallet_hint),
+                style = MaterialTheme.typography.body2,
+                color = Color.Black.copy(alpha = 0.7f)
+            )
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color.White)
+                .padding(10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(20.dp)
+        ) {
+            Image(painterResource(id = R.drawable.ic_category_all), contentDescription = "All")
+            Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                Text(
+                    text = stringResource(id = R.string.total),
+                    style = MaterialTheme.typography.body1,
+                    color = Color.Black
+                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(5.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_approximation),
+                        contentDescription = "Approximation"
+                    )
+                    Text(
+                        text = "${balance.string()} ${AppCache.defaultCurrencyEntity.value?.symbol ?: ""}",
+                        style = MaterialTheme.typography.body2,
+                        color = Color.Black.copy(0.5f)
+                    )
+                }
+            }
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Gray)
+                .padding(10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = stringResource(id = R.string.included_in_total),
+                style = MaterialTheme.typography.body1,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black.copy(alpha = 0.7f)
+            )
+        }
+        Box(modifier = Modifier.fillMaxSize()) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.White)
+                    .padding(10.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                items(listWallet, key = { it.id }) { item ->
+                    WalletItem(item = item)
+                }
+            }
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight()
+                    .padding(20.dp)
+                    .align(Alignment.BottomEnd)
+            ) {
+                FloatingActionButton(
+                    modifier = Modifier.align(Alignment.BottomEnd),
+                    backgroundColor = Teal200,
+                    onClick = { navController.navigate(NavigationRoute.Account.Wallet.AddWallet.route) }) {
+                    Icon(
+                        imageVector = Icons.Default.AddCircle,
+                        contentDescription = "Add",
+                        tint = Color.White,
+                        modifier = Modifier.size(30.dp)
+                    )
+                }
+            }
+        }
+    }
+}
+
+
+@Composable
 private fun WalletItem(
     item: AccountEntity,
     shouldShowMoreOptions: Boolean,
@@ -347,6 +512,34 @@ private fun WalletItem(
                 onSelectMoreOption(item, it)
             }
         }
+    }
+}
+
+@Composable
+private fun WalletItem(
+    item: AccountEntity
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(20.dp)
+    ) {
+        Image(painter = item.icon.toPainterResource(), contentDescription = item.name)
+        Column(
+            verticalArrangement = Arrangement.spacedBy(5.dp)
+        ) {
+            Text(
+                text = item.name,
+                style = MaterialTheme.typography.body1,
+                color = Color.Black
+            )
+            Text(
+                text = "${item.balance} ${item.currencyEntity.symbol}",
+                style = MaterialTheme.typography.body2,
+                color = Color.Black.copy(alpha = 0.3f)
+            )
+        }
+        Spacer(modifier = Modifier.weight(1f))
     }
 }
 

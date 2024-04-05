@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyItemScope
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
@@ -75,7 +74,11 @@ fun HomeScreen(
             .fillMaxSize()
             .background(Gray)
             .padding(10.dp),
-        contentPadding = PaddingValues(start = 10.dp, end = 10.dp , bottom = paddingValues.calculateBottomPadding())
+        contentPadding = PaddingValues(
+            start = 10.dp,
+            end = 10.dp,
+            bottom = paddingValues.calculateBottomPadding()
+        )
     ) {
         item {
             Row(
@@ -249,7 +252,7 @@ private fun ItemRecentTransactions(item: TransactionEntity, onClick: (Transactio
 }
 
 @Composable
-fun LazyItemScope.MyWalletScreen(
+fun MyWalletScreen(
     navController: NavController,
     myWalletViewModel: MyWalletViewModel
 ) {
@@ -292,7 +295,8 @@ fun LazyItemScope.MyWalletScreen(
                 Text(
                     text = stringResource(id = R.string.see_all),
                     color = Green,
-                    style = MaterialTheme.typography.body2
+                    style = MaterialTheme.typography.body2,
+                    modifier = Modifier.noRippleClickable { navController.navigate(NavigationRoute.Home.Wallet.route) }
                 )
             }
             Spacer(modifier = Modifier.height(10.dp))

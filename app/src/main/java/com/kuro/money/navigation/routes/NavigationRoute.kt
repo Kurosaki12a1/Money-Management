@@ -76,6 +76,16 @@ sealed class NavigationRoute(val route: String) {
 
     sealed class Home(route: String) : NavigationRoute(route) {
 
+        sealed class Wallet(route: String) : Home(route) {
+            sealed class Add(route: String) : Wallet(route) {
+                data object SelectCurrency : Add("home_add_wallet_currency")
+                data object SelectIcon : Add("home_add_wallet_icon")
+                companion object : Add("home_add_wallet")
+            }
+
+            companion object : Wallet("home_wallet")
+        }
+
         sealed class TransactionDetails(route: String) : Home(route) {
 
             sealed class Edit(route: String) : TransactionDetails(route) {
