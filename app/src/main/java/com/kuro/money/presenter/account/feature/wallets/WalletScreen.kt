@@ -57,6 +57,7 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
 import androidx.navigation.NavController
 import com.kuro.money.R
 import com.kuro.money.data.AppCache
@@ -67,6 +68,7 @@ import com.kuro.money.extension.noRippleClickable
 import com.kuro.money.navigation.routes.NavigationGraphRoute
 import com.kuro.money.navigation.routes.NavigationRoute
 import com.kuro.money.presenter.home.MyWalletViewModel
+import com.kuro.money.presenter.utils.popBackStackWithLifeCycle
 import com.kuro.money.presenter.utils.string
 import com.kuro.money.presenter.utils.toPainterResource
 import com.kuro.money.ui.theme.Gray
@@ -110,7 +112,7 @@ fun WalletScreen(
             listWallet.addAll(fullListWallet)
             return@BackHandler
         }
-        navController.popBackStack()
+        navController.popBackStackWithLifeCycle()
     }
 
     LaunchedEffect(isSearching.value) {
@@ -175,7 +177,7 @@ fun WalletScreen(
                 imageVector = Icons.Default.ArrowBack,
                 contentDescription = "Back",
                 modifier = Modifier.clickable {
-                    navController.popBackStack()
+                    navController.popBackStackWithLifeCycle()
                 })
             if (isSearching.value) {
                 Box(modifier = Modifier.fillMaxWidth()) {
@@ -315,7 +317,7 @@ fun WalletScreen(
     navController: NavController,
     myWalletViewModel: MyWalletViewModel
 ) {
-    BackHandler { navController.popBackStack() }
+    BackHandler { navController.popBackStackWithLifeCycle() }
 
     if (navController.currentDestination?.route == NavigationRoute.Home.Wallet.route) {
         myWalletViewModel.getAllWallets()
@@ -356,7 +358,7 @@ fun WalletScreen(
                 imageVector = Icons.Default.ArrowBack,
                 contentDescription = "Back",
                 modifier = Modifier.clickable {
-                    navController.popBackStack()
+                    navController.popBackStackWithLifeCycle()
                 })
 
             Text(
@@ -548,14 +550,12 @@ fun AddWalletScreen(
     navController: NavController,
     addWalletViewModel: AddWalletViewModel
 ) {
-    BackHandler {
-        navController.popBackStack()
-    }
+    BackHandler { navController.popBackStackWithLifeCycle() }
 
     LaunchedEffect(Unit) {
         addWalletViewModel.insertWallet.collectLatest {
             if (it is Resource.Success) {
-                navController.popBackStack()
+                navController.popBackStackWithLifeCycle()
             }
         }
     }
@@ -584,7 +584,7 @@ fun AddWalletScreen(
                 imageVector = Icons.Default.Close,
                 contentDescription = "Close",
                 modifier = Modifier.noRippleClickable {
-                    navController.popBackStack()
+                    navController.popBackStackWithLifeCycle()
                 }
             )
             Text(
@@ -619,7 +619,9 @@ fun AddWalletScreen(
             ) {
                 Image(painter = iconSelected.toPainterResource(), contentDescription = "Icon",
                     modifier = Modifier.noRippleClickable {
-                        navController.navigate(NavigationRoute.Account.Wallet.AddWallet.SelectIcon.route)
+                        if (navController.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
+                            navController.navigate(NavigationRoute.Account.Wallet.AddWallet.SelectIcon.route)
+                        }
                     })
                 Box(modifier = Modifier.fillMaxWidth()) {
                     if (nameWallet.isEmpty()) {

@@ -47,6 +47,7 @@ import com.kuro.money.presenter.add_transaction.feature.select_category.feature.
 import com.kuro.money.presenter.add_transaction.feature.select_category.feature.IncomeScreen
 import com.kuro.money.presenter.home.feature.EditTransactionDetailViewModel
 import com.kuro.money.presenter.utils.CrossSlide
+import com.kuro.money.presenter.utils.popBackStackWithLifeCycle
 import com.kuro.money.ui.theme.Gray
 import kotlinx.coroutines.flow.collectLatest
 
@@ -57,7 +58,7 @@ fun SelectCategoryScreen(
     selectCategoryViewModel: SelectCategoryViewModel
 ) {
     BackHandler {
-        navController.popBackStack()
+        navController.popBackStackWithLifeCycle()
     }
 
     val selectedTabIndexed = remember { mutableStateOf(0) }
@@ -73,7 +74,7 @@ fun SelectCategoryScreen(
             if (it.name != "" && it.icon != "" && it.type != "") {
                 addTransactionViewModel.setSelectedCategory(it)
                 selectCategoryViewModel.setSelectedCategories(SelectedCategory())
-                navController.popBackStack()
+                navController.popBackStackWithLifeCycle()
             }
         }
     }
@@ -158,7 +159,7 @@ fun SelectCategoryScreen(
     selectCategoryViewModel: SelectCategoryViewModel
 ) {
     BackHandler {
-        navController.popBackStack()
+        navController.popBackStackWithLifeCycle()
     }
 
     val selectedTabIndexed = remember { mutableStateOf(0) }
@@ -174,7 +175,7 @@ fun SelectCategoryScreen(
             if (it.name != "" && it.icon != "" && it.type != "") {
                 editTransactionDetailViewModel.setSelectedCategory(it)
                 selectCategoryViewModel.setSelectedCategories(SelectedCategory())
-                navController.popBackStack()
+                navController.popBackStackWithLifeCycle()
             }
         }
     }
@@ -297,7 +298,7 @@ private fun ToolbarSelectCategory(
             contentDescription = "Close",
             tint = Color.Black,
             modifier = Modifier.clickable {
-                navController.popBackStack()
+                navController.popBackStackWithLifeCycle()
             })
         Text(
             text = stringResource(id = R.string.select_category),

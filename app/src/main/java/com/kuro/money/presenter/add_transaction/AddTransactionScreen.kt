@@ -78,6 +78,7 @@ import com.kuro.money.extension.noRippleClickable
 import com.kuro.money.navigation.routes.NavigationRoute.AddTransaction
 import com.kuro.money.presenter.utils.DecimalFormatter
 import com.kuro.money.presenter.utils.DecimalInputVisualTransformation
+import com.kuro.money.presenter.utils.popBackStackWithLifeCycle
 import com.kuro.money.presenter.utils.string
 import com.kuro.money.presenter.utils.toPainterResource
 import com.kuro.money.ui.theme.Gray
@@ -92,7 +93,7 @@ fun AddTransactionScreen(
     navController: NavController,
     addTransactionViewModel: AddTransactionViewModel
 ) {
-    BackHandler { navController.popBackStack() }
+    BackHandler { navController.popBackStackWithLifeCycle() }
 
     val selectedCategory = addTransactionViewModel.selectedCategory.collectAsState().value
     val selectedCurrency = addTransactionViewModel.currencySelected.collectAsState().value
@@ -119,7 +120,7 @@ fun AddTransactionScreen(
     LaunchedEffect(Unit) {
         addTransactionViewModel.insertTransaction.collectLatest {
             if (it is Resource.Success) {
-                navController.popBackStack()
+                navController.popBackStackWithLifeCycle()
             }
         }
     }
@@ -559,7 +560,7 @@ fun ToolbarAddTransaction(
             Icon(imageVector = Icons.Filled.Close,
                 contentDescription = "Close",
                 tint = Color.Black,
-                modifier = Modifier.clickable { navController.popBackStack() })
+                modifier = Modifier.clickable { navController.popBackStackWithLifeCycle() })
             Text(
                 text = stringResource(id = R.string.add_transaction),
                 style = MaterialTheme.typography.h6,

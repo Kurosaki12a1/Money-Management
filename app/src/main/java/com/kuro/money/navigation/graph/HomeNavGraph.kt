@@ -39,6 +39,7 @@ import com.kuro.money.presenter.home.feature.EditTransactionDetailViewModel
 import com.kuro.money.presenter.home.feature.EditTransactionsDetailsScreen
 import com.kuro.money.presenter.home.feature.TransactionDetailsScreen
 import com.kuro.money.presenter.home.feature.TransactionDetailsViewModel
+import com.kuro.money.presenter.utils.horizontalComposable
 
 fun NavGraphBuilder.homeNavGraph(
     navHostController: NavHostController,
@@ -67,7 +68,7 @@ fun NavGraphBuilder.homeNavGraph(
                     recentTransactionViewModel
                 )
             }
-            composable(route = Home.Wallet.route) {
+            horizontalComposable(route = Home.Wallet.route) {
                 val parentEntry = remember(it) {
                     navHostController.getBackStackEntry(Home.Wallet.route)
                 }

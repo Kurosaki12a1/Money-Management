@@ -40,6 +40,7 @@ import com.kuro.money.data.utils.Resource
 import com.kuro.money.presenter.add_transaction.AddTransactionViewModel
 import com.kuro.money.presenter.add_transaction.feature.event.feature.add_event.AddEventScreenViewModel
 import com.kuro.money.presenter.home.feature.EditTransactionDetailViewModel
+import com.kuro.money.presenter.utils.popBackStackWithLifeCycle
 import com.kuro.money.presenter.utils.toPainterResource
 import com.kuro.money.ui.theme.Gray
 import kotlinx.coroutines.flow.collectLatest
@@ -50,7 +51,7 @@ fun SelectWalletScreen(
     addTransactionViewModel: AddTransactionViewModel,
     selectWalletViewModel: SelectWalletViewModel = hiltViewModel()
 ) {
-    BackHandler { navController.popBackStack() }
+    BackHandler { navController.popBackStackWithLifeCycle() }
 
     val listWallet = remember { mutableStateListOf<AccountEntity>() }
 
@@ -85,7 +86,7 @@ fun SelectWalletScreen(
                     imageVector = Icons.Default.ArrowBack,
                     contentDescription = "Back",
                     modifier = Modifier.clickable {
-                        navController.popBackStack()
+                        navController.popBackStackWithLifeCycle()
                     })
                 Text(
                     text = stringResource(id = R.string.select_wallet),
@@ -116,7 +117,7 @@ fun SelectWalletScreen(
                 items(listWallet) {
                     WalletItem(item = it, isSelected = it == selectedWallet.value) { entity ->
                         addTransactionViewModel.setWallet(entity)
-                        navController.popBackStack()
+                        navController.popBackStackWithLifeCycle()
                     }
                 }
             }
@@ -130,7 +131,7 @@ fun SelectWalletScreen(
     addEventScreenViewModel: AddEventScreenViewModel,
     selectWalletViewModel: SelectWalletViewModel = hiltViewModel()
 ) {
-    BackHandler { navController.popBackStack() }
+    BackHandler { navController.popBackStackWithLifeCycle() }
 
     val listWallet = remember { mutableStateListOf<AccountEntity>() }
 
@@ -165,7 +166,7 @@ fun SelectWalletScreen(
                     imageVector = Icons.Default.ArrowBack,
                     contentDescription = "Back",
                     modifier = Modifier.clickable {
-                        navController.popBackStack()
+                        navController.popBackStackWithLifeCycle()
                     })
                 Text(
                     text = stringResource(id = R.string.select_wallet),
@@ -196,7 +197,7 @@ fun SelectWalletScreen(
                 items(listWallet) {
                     WalletItem(item = it, isSelected = it == selectedWallet.value) { item ->
                         addEventScreenViewModel.setWallet(item)
-                        navController.popBackStack()
+                        navController.popBackStackWithLifeCycle()
                     }
                 }
             }
@@ -210,7 +211,7 @@ fun SelectWalletScreen(
     editTransactionDetailViewModel: EditTransactionDetailViewModel,
     selectWalletViewModel: SelectWalletViewModel = hiltViewModel()
 ) {
-    BackHandler { navController.popBackStack() }
+    BackHandler { navController.popBackStackWithLifeCycle() }
 
     val listWallet = remember { mutableStateListOf<AccountEntity>() }
 
@@ -245,7 +246,7 @@ fun SelectWalletScreen(
                     imageVector = Icons.Default.ArrowBack,
                     contentDescription = "Back",
                     modifier = Modifier.clickable {
-                        navController.popBackStack()
+                        navController.popBackStackWithLifeCycle()
                     })
                 Text(
                     text = stringResource(id = R.string.select_wallet),
@@ -276,7 +277,7 @@ fun SelectWalletScreen(
                 items(listWallet) {
                     WalletItem(item = it, isSelected = it == selectedWallet.value) { entity ->
                         editTransactionDetailViewModel.setWallet(entity)
-                        navController.popBackStack()
+                        navController.popBackStackWithLifeCycle()
                     }
                 }
             }

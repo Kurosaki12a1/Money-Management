@@ -17,6 +17,8 @@ import com.kuro.money.presenter.account.feature.wallets.WalletScreen
 import com.kuro.money.presenter.account.feature.wallets.WalletViewModel
 import com.kuro.money.presenter.add_transaction.feature.event.feature.select_currency.SelectCurrencyScreen
 import com.kuro.money.presenter.add_transaction.feature.event.feature.select_icon.SelectIconScreen
+import com.kuro.money.presenter.utils.horizontalComposable
+import com.kuro.money.presenter.utils.verticalComposable
 
 fun NavGraphBuilder.accountNavGraph(navHostController: NavHostController) {
     navigation(
@@ -77,21 +79,21 @@ fun NavGraphBuilder.accountNavGraph(navHostController: NavHostController) {
                 navigation(
                     startDestination = Account.Wallet.AddWallet.route,
                     route = AccountGraph.AddWalletGraph.route, builder = {
-                        composable(route = Account.Wallet.AddWallet.route) {
+                        horizontalComposable(route = Account.Wallet.AddWallet.route) {
                             val parentEntry = remember(it) {
                                 navHostController.getBackStackEntry(AccountGraph.AddWalletGraph.route)
                             }
                             val viewModel = hiltViewModel<AddWalletViewModel>(parentEntry)
                             AddWalletScreen(navHostController, viewModel)
                         }
-                        composable(route = Account.Wallet.AddWallet.SelectCurrency.route) {
+                        verticalComposable(route = Account.Wallet.AddWallet.SelectCurrency.route) {
                             val parentEntry = remember(it) {
                                 navHostController.getBackStackEntry(AccountGraph.AddWalletGraph.route)
                             }
                             val viewModel = hiltViewModel<AddWalletViewModel>(parentEntry)
                             SelectCurrencyScreen(navHostController, viewModel)
                         }
-                        composable(route = Account.Wallet.AddWallet.SelectIcon.route) {
+                        verticalComposable(route = Account.Wallet.AddWallet.SelectIcon.route) {
                             val parentEntry = remember(it) {
                                 navHostController.getBackStackEntry(AccountGraph.AddWalletGraph.route)
                             }

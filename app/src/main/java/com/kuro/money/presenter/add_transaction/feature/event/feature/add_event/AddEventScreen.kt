@@ -46,6 +46,7 @@ import com.kuro.money.extension.noRippleClickable
 import com.kuro.money.navigation.routes.NavigationRoute
 import com.kuro.money.presenter.add_transaction.showDatePicker
 import com.kuro.money.presenter.utils.SlideUpContent
+import com.kuro.money.presenter.utils.popBackStackWithLifeCycle
 import com.kuro.money.presenter.utils.string
 import com.kuro.money.presenter.utils.toPainterResource
 import com.kuro.money.ui.theme.Gray
@@ -56,7 +57,7 @@ fun AddEventScreen(
     navController: NavController,
     addEventScreenViewModel: AddEventScreenViewModel
 ) {
-    BackHandler { navController.popBackStack() }
+    BackHandler { navController.popBackStackWithLifeCycle() }
 
     val iconSelected = addEventScreenViewModel.iconSelected.collectAsState().value
     val walletSelected = addEventScreenViewModel.wallet.collectAsState().value
@@ -69,7 +70,7 @@ fun AddEventScreen(
     LaunchedEffect(Unit) {
         addEventScreenViewModel.insertEvent.collectLatest {
             if (it is Resource.Success) {
-                navController.popBackStack()
+                navController.popBackStackWithLifeCycle()
             }
         }
     }
@@ -91,7 +92,7 @@ fun AddEventScreen(
                     imageVector = Icons.Default.Close,
                     contentDescription = "Close",
                     modifier = Modifier.clickable {
-                        navController.popBackStack()
+                        navController.popBackStackWithLifeCycle()
                     })
                 Text(
                     text = stringResource(id = R.string.add_event),

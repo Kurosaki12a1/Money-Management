@@ -20,19 +20,21 @@ import com.kuro.money.presenter.add_transaction.feature.people.SelectPeopleScree
 import com.kuro.money.presenter.add_transaction.feature.select_category.SelectCategoryScreen
 import com.kuro.money.presenter.add_transaction.feature.select_category.SelectCategoryViewModel
 import com.kuro.money.presenter.add_transaction.feature.wallet.SelectWalletScreen
+import com.kuro.money.presenter.utils.horizontalComposable
+import com.kuro.money.presenter.utils.verticalComposable
 
 fun NavGraphBuilder.addTransactionNavGraph(navHostController: NavHostController) {
     navigation(
         startDestination = AddTransaction.route,
         route = AddTransactionGraph.route, builder = {
-            composable(route = AddTransaction.route) {
+            verticalComposable(route = AddTransaction.route) {
                 val parentEntry = remember(it) {
                     navHostController.getBackStackEntry(AddTransactionGraph.route)
                 }
                 val transactionViewModel = hiltViewModel<AddTransactionViewModel>(parentEntry)
                 AddTransactionScreen(navHostController, transactionViewModel)
             }
-            composable(route = AddTransaction.SelectCategory.route) {
+            verticalComposable(route = AddTransaction.SelectCategory.route) {
                 val parentEntry = remember(it) {
                     navHostController.getBackStackEntry(AddTransactionGraph.route)
                 }
@@ -44,35 +46,35 @@ fun NavGraphBuilder.addTransactionNavGraph(navHostController: NavHostController)
                     selectedCategoryViewModel
                 )
             }
-            composable(route = AddTransaction.Note.route) {
+            horizontalComposable(route = AddTransaction.Note.route) {
                 val parentEntry = remember(it) {
                     navHostController.getBackStackEntry(AddTransactionGraph.route)
                 }
                 val transactionViewModel = hiltViewModel<AddTransactionViewModel>(parentEntry)
                 NoteScreen(navHostController, transactionViewModel)
             }
-            composable(route = AddTransaction.SelectWallet.route) {
+            verticalComposable(route = AddTransaction.SelectWallet.route) {
                 val parentEntry = remember(it) {
                     navHostController.getBackStackEntry(AddTransactionGraph.route)
                 }
                 val transactionViewModel = hiltViewModel<AddTransactionViewModel>(parentEntry)
                 SelectWalletScreen(navHostController, transactionViewModel)
             }
-            composable(route = AddTransaction.SelectEvent.route) {
+            horizontalComposable(route = AddTransaction.SelectEvent.route) {
                 val parentEntry = remember(it) {
                     navHostController.getBackStackEntry(AddTransactionGraph.route)
                 }
                 val transactionViewModel = hiltViewModel<AddTransactionViewModel>(parentEntry)
                 SelectEventScreen(navHostController, transactionViewModel)
             }
-            composable(route = AddTransaction.With.route) {
+            horizontalComposable(route = AddTransaction.With.route) {
                 val parentEntry = remember(it) {
                     navHostController.getBackStackEntry(AddTransactionGraph.route)
                 }
                 val transactionViewModel = hiltViewModel<AddTransactionViewModel>(parentEntry)
                 SelectPeopleScreen(navHostController, transactionViewModel)
             }
-            composable(route = AddTransaction.SelectCurrency.route) {
+            horizontalComposable(route = AddTransaction.SelectCurrency.route) {
                 val parentEntry = remember(it) {
                     navHostController.getBackStackEntry(AddTransactionGraph.route)
                 }

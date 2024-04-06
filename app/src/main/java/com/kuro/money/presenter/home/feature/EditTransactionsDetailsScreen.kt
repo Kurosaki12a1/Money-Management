@@ -54,6 +54,7 @@ import com.kuro.money.presenter.add_transaction.ToolbarAddTransaction
 import com.kuro.money.presenter.add_transaction.showDatePicker
 import com.kuro.money.presenter.utils.DecimalFormatter
 import com.kuro.money.presenter.utils.DecimalInputVisualTransformation
+import com.kuro.money.presenter.utils.popBackStackWithLifeCycle
 import com.kuro.money.presenter.utils.toPainterResource
 import com.kuro.money.ui.theme.Gray
 import com.kuro.money.ui.theme.Green
@@ -67,7 +68,7 @@ fun EditTransactionsDetailsScreen(
     transactionId: Long,
     editTransactionDetailViewModel: EditTransactionDetailViewModel
 ) {
-    BackHandler { navController.popBackStack() }
+    BackHandler { navController.popBackStackWithLifeCycle() }
 
     if (navController.currentDestination?.route?.contains(NavigationRoute.Home.TransactionDetails.Edit.route) == true) {
         editTransactionDetailViewModel.getTransaction(transactionId)
@@ -98,7 +99,7 @@ fun EditTransactionsDetailsScreen(
     LaunchedEffect(Unit) {
         editTransactionDetailViewModel.updateTransaction.collectLatest {
             if (it is Resource.Success) {
-                navController.popBackStack()
+                navController.popBackStackWithLifeCycle()
             }
         }
     }

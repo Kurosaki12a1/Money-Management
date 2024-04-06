@@ -59,6 +59,7 @@ import com.kuro.money.presenter.account.feature.wallets.EditWalletViewModel
 import com.kuro.money.presenter.add_transaction.AddTransactionViewModel
 import com.kuro.money.presenter.add_transaction.feature.event.feature.add_event.AddEventScreenViewModel
 import com.kuro.money.presenter.home.feature.EditTransactionDetailViewModel
+import com.kuro.money.presenter.utils.popBackStackWithLifeCycle
 import com.kuro.money.presenter.utils.toPainterResource
 import com.kuro.money.ui.theme.Gray
 import kotlinx.coroutines.FlowPreview
@@ -83,7 +84,7 @@ fun SelectCurrencyScreen(
             listCurrency.addAll(fullListCurrency)
             return@BackHandler
         }
-        navController.popBackStack()
+        navController.popBackStackWithLifeCycle()
     }
 
     val currentFocus = LocalFocusManager.current
@@ -130,7 +131,7 @@ fun SelectCurrencyScreen(
                         listCurrency.clear()
                         listCurrency.addAll(fullListCurrency)
                     } else {
-                        navController.popBackStack()
+                        navController.popBackStackWithLifeCycle()
                     }
                 },
                 onSearchDone = { str ->
@@ -144,7 +145,7 @@ fun SelectCurrencyScreen(
             )
             ListCurrencies(listCurrency, selectedCurrency) {
                 addEventScreenViewModel.setCurrencySelected(it)
-                navController.popBackStack()
+                navController.popBackStackWithLifeCycle()
             }
         }
     }
@@ -167,7 +168,7 @@ fun SelectCurrencyScreen(
             listCurrency.addAll(fullListCurrency)
             return@BackHandler
         }
-        navController.popBackStack()
+        navController.popBackStackWithLifeCycle()
     }
 
     val currentFocus = LocalFocusManager.current
@@ -214,7 +215,7 @@ fun SelectCurrencyScreen(
                         listCurrency.clear()
                         listCurrency.addAll(fullListCurrency)
                     } else {
-                        navController.popBackStack()
+                        navController.popBackStackWithLifeCycle()
                     }
                 },
                 onSearchDone = { str ->
@@ -228,7 +229,7 @@ fun SelectCurrencyScreen(
             )
             ListCurrencies(listCurrency, selectedCurrency) {
                 addWalletViewModel.setCurrency(it)
-                navController.popBackStack()
+                navController.popBackStackWithLifeCycle()
             }
         }
     }
@@ -251,7 +252,7 @@ fun SelectCurrencyScreen(
             listCurrency.addAll(fullListCurrency)
             return@BackHandler
         }
-        navController.popBackStack()
+        navController.popBackStackWithLifeCycle()
     }
 
     val currentFocus = LocalFocusManager.current
@@ -298,7 +299,7 @@ fun SelectCurrencyScreen(
                         listCurrency.clear()
                         listCurrency.addAll(fullListCurrency)
                     } else {
-                        navController.popBackStack()
+                        navController.popBackStackWithLifeCycle()
                     }
                 },
                 onSearchDone = { str ->
@@ -312,7 +313,7 @@ fun SelectCurrencyScreen(
             )
             ListCurrencies(listCurrency, selectedCurrency) {
                 editWalletViewModel.setCurrency(it)
-                navController.popBackStack()
+                navController.popBackStackWithLifeCycle()
             }
         }
     }
@@ -335,7 +336,7 @@ fun SelectCurrencyScreen(
             listCurrency.addAll(fullListCurrency)
             return@BackHandler
         }
-        navController.popBackStack()
+        navController.popBackStackWithLifeCycle()
     }
 
     val currentFocus = LocalFocusManager.current
@@ -382,7 +383,7 @@ fun SelectCurrencyScreen(
                         listCurrency.clear()
                         listCurrency.addAll(fullListCurrency)
                     } else {
-                        navController.popBackStack()
+                        navController.popBackStackWithLifeCycle()
                     }
                 },
                 onSearchDone = { str ->
@@ -396,7 +397,7 @@ fun SelectCurrencyScreen(
             )
             ListCurrencies(listCurrency, selectedCurrency) {
                 addTransactionViewModel.setCurrencySelected(it)
-                navController.popBackStack()
+                navController.popBackStackWithLifeCycle()
             }
         }
     }
@@ -419,7 +420,7 @@ fun SelectCurrencyScreen(
             listCurrency.addAll(fullListCurrency)
             return@BackHandler
         }
-        navController.popBackStack()
+        navController.popBackStackWithLifeCycle()
     }
 
     val currentFocus = LocalFocusManager.current
@@ -466,7 +467,7 @@ fun SelectCurrencyScreen(
                         listCurrency.clear()
                         listCurrency.addAll(fullListCurrency)
                     } else {
-                        navController.popBackStack()
+                        navController.popBackStackWithLifeCycle()
                     }
                 },
                 onSearchDone = { str ->
@@ -480,7 +481,7 @@ fun SelectCurrencyScreen(
             )
             ListCurrencies(listCurrency, selectedCurrency) {
                 editTransactionDetailViewModel.setCurrencySelected(it)
-                navController.popBackStack()
+                navController.popBackStackWithLifeCycle()
             }
         }
     }

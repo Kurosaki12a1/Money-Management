@@ -43,6 +43,7 @@ import com.kuro.money.data.model.TransactionEntity
 import com.kuro.money.data.utils.Resource
 import com.kuro.money.extension.noRippleClickable
 import com.kuro.money.navigation.routes.NavigationRoute
+import com.kuro.money.presenter.utils.DecimalFormatter
 import com.kuro.money.presenter.utils.string
 import com.kuro.money.presenter.utils.toPainterResource
 import com.kuro.money.ui.theme.Gray
@@ -67,6 +68,7 @@ fun HomeScreen(
 
     val balance = homeViewModel.balance.collectAsState().value
     val isHide = remember { mutableStateOf(true) }
+    val decimalFormatter = DecimalFormatter()
 
 
     LazyColumn(
@@ -102,7 +104,7 @@ fun HomeScreen(
                         contentDescription = "Approximation"
                     )
                     Text(
-                        text = "${balance.string()} ${AppCache.defaultCurrencyEntity.value?.symbol ?: ""}",
+                        text = "${decimalFormatter.formatForVisual(balance.string())} ${AppCache.defaultCurrencyEntity.value?.symbol ?: ""}",
                         style = MaterialTheme.typography.h6
                     )
                     Image(
@@ -220,6 +222,7 @@ fun RecentTransaction(
 
 @Composable
 private fun ItemRecentTransactions(item: TransactionEntity, onClick: (TransactionEntity) -> Unit) {
+    val decimalFormatter = DecimalFormatter()
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -242,7 +245,7 @@ private fun ItemRecentTransactions(item: TransactionEntity, onClick: (Transactio
         }
         Spacer(modifier = Modifier.weight(1f))
         Text(
-            text = "${item.amount.string()} ${item.currency.symbol}",
+            text = "${decimalFormatter.formatForVisual(item.amount.string())} ${item.currency.symbol}",
             maxLines = 1,
             overflow = TextOverflow.Ellipsis,
             color = if (item.category.type == "income") Color.Cyan else Color.Red,
@@ -321,6 +324,7 @@ private fun WalletItem(
     isLastIndex: Boolean,
     onClick: (AccountEntity) -> Unit
 ) {
+    val decimalFormatter = DecimalFormatter()
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -338,7 +342,7 @@ private fun WalletItem(
         )
         Spacer(modifier = Modifier.weight(1f))
         Text(
-            text = "${item.balance.string()} ${item.currencyEntity.symbol}",
+            text = "${decimalFormatter.formatForVisual(item.balance.string())} ${item.currencyEntity.symbol}",
             color = Color.Black,
             style = MaterialTheme.typography.body1,
             textAlign = TextAlign.Center

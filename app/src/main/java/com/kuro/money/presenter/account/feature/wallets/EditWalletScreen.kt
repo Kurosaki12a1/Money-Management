@@ -41,6 +41,7 @@ import com.kuro.money.R
 import com.kuro.money.data.utils.Resource
 import com.kuro.money.extension.noRippleClickable
 import com.kuro.money.navigation.routes.NavigationRoute
+import com.kuro.money.presenter.utils.popBackStackWithLifeCycle
 import com.kuro.money.presenter.utils.toPainterResource
 import com.kuro.money.ui.theme.Gray
 import kotlinx.coroutines.flow.collectLatest
@@ -50,13 +51,13 @@ fun EditWalletScreen(
     navController: NavController,
     viewModel: EditWalletViewModel
 ) {
-    BackHandler { navController.popBackStack() }
+    BackHandler { navController.popBackStackWithLifeCycle() }
 
     LaunchedEffect(Unit) {
         viewModel.deleteWallet.collectLatest {
             if (it is Resource.Success) {
                 viewModel.clearData()
-                navController.popBackStack()
+                navController.popBackStackWithLifeCycle()
             }
         }
     }
@@ -65,7 +66,7 @@ fun EditWalletScreen(
         viewModel.updateWallet.collectLatest {
             if (it is Resource.Success) {
                 viewModel.clearData()
-                navController.popBackStack()
+                navController.popBackStackWithLifeCycle()
             }
         }
     }
@@ -94,7 +95,7 @@ fun EditWalletScreen(
                 imageVector = Icons.Default.Close,
                 contentDescription = "Close",
                 modifier = Modifier.noRippleClickable {
-                    navController.popBackStack()
+                    navController.popBackStackWithLifeCycle()
                 }
             )
             Text(

@@ -26,12 +26,13 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.kuro.money.R
 import com.kuro.money.extension.noRippleClickable
+import com.kuro.money.presenter.utils.popBackStackWithLifeCycle
 
 @Composable
 fun AboutScreen(
     navController: NavController
 ) {
-    BackHandler { navController.popBackStack() }
+    BackHandler { navController.popBackStackWithLifeCycle() }
 
     Surface(
         modifier = Modifier
@@ -56,7 +57,7 @@ private fun Toolbar(
             contentDescription = "Back",
             modifier = Modifier
                 .align(Alignment.TopStart)
-                .noRippleClickable { navController.popBackStack() }
+                .noRippleClickable { navController.popBackStackWithLifeCycle() }
         )
         Column(
             modifier = Modifier

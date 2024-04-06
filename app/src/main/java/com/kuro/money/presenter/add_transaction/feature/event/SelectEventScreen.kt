@@ -50,6 +50,7 @@ import com.kuro.money.navigation.routes.NavigationRoute
 import com.kuro.money.presenter.add_transaction.AddTransactionViewModel
 import com.kuro.money.presenter.home.feature.EditTransactionDetailViewModel
 import com.kuro.money.presenter.utils.CrossSlide
+import com.kuro.money.presenter.utils.popBackStackWithLifeCycle
 import com.kuro.money.presenter.utils.toPainterResource
 import com.kuro.money.ui.theme.Gray
 import com.kuro.money.ui.theme.Green
@@ -62,7 +63,7 @@ fun SelectEventScreen(
     addTransactionViewModel: AddTransactionViewModel,
     selectEventViewModel: SelectEventViewModel = hiltViewModel()
 ) {
-    BackHandler { navController.popBackStack() }
+    BackHandler { navController.popBackStackWithLifeCycle() }
 
     if (navController.currentDestination?.route == NavigationRoute.AddTransaction.SelectEvent.route) {
         selectEventViewModel.getAllEvents()
@@ -159,7 +160,7 @@ fun SelectEventScreen(
     editTransactionDetailViewModel: EditTransactionDetailViewModel,
     selectEventViewModel: SelectEventViewModel = hiltViewModel()
 ) {
-    BackHandler { navController.popBackStack() }
+    BackHandler { navController.popBackStackWithLifeCycle() }
 
     if (navController.currentDestination?.route == NavigationRoute.Home.TransactionDetails.Edit.SelectEvent.route) {
         selectEventViewModel.getAllEvents()
@@ -272,7 +273,7 @@ private fun ListEventScreen(
                     .padding(horizontal = 10.dp)
                     .clickable {
                         addTransactionViewModel.setEventSelected(it)
-                        navController.popBackStack()
+                        navController.popBackStackWithLifeCycle()
                     },
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(15.dp)
@@ -326,7 +327,7 @@ private fun ListEventScreen(
                     .padding(horizontal = 10.dp)
                     .clickable {
                         editTransactionDetailViewModel.setEventSelected(it)
-                        navController.popBackStack()
+                        navController.popBackStackWithLifeCycle()
                     },
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(15.dp)
@@ -369,7 +370,7 @@ private fun ToolbarSelectEventScreen(
         horizontalArrangement = Arrangement.spacedBy(20.dp)
     ) {
         Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back",
-            modifier = Modifier.clickable { navController.popBackStack() })
+            modifier = Modifier.clickable { navController.popBackStackWithLifeCycle() })
 
         Text(
             text = stringResource(id = R.string.select_event),

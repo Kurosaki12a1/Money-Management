@@ -1,6 +1,7 @@
 package com.kuro.money.navigation.utils
 
 import androidx.navigation.NavController
+import com.kuro.money.presenter.utils.popBackStackWithLifeCycle
 
 fun NavController.navigate(event: UiEvent) {
     when (event) {
@@ -28,7 +29,7 @@ fun NavController.navigate(event: UiEvent) {
                 }
             }
 
-            this.popBackStack()
+            this.popBackStackWithLifeCycle()
         }
     }
 }

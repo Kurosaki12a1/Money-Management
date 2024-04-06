@@ -36,6 +36,7 @@ import com.kuro.money.extension.noRippleClickable
 import com.kuro.money.presenter.account.feature.wallets.AddWalletViewModel
 import com.kuro.money.presenter.account.feature.wallets.EditWalletViewModel
 import com.kuro.money.presenter.add_transaction.feature.event.feature.add_event.AddEventScreenViewModel
+import com.kuro.money.presenter.utils.popBackStackWithLifeCycle
 import com.kuro.money.presenter.utils.toPainterResource
 import com.kuro.money.ui.theme.Gray
 import kotlinx.coroutines.delay
@@ -48,9 +49,7 @@ fun SelectIconScreen(
     addEventScreenViewModel: AddEventScreenViewModel,
     selectIconScreenViewModel: SelectIconScreenViewModel = hiltViewModel()
 ) {
-    BackHandler {
-        navController.popBackStack()
-    }
+    BackHandler { navController.popBackStackWithLifeCycle() }
 
     val listIcons = selectIconScreenViewModel.getListIcon.collectAsState().value
     val scope = rememberCoroutineScope()
@@ -70,7 +69,7 @@ fun SelectIconScreen(
             ) {
                 Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back",
                     modifier = Modifier.noRippleClickable {
-                        navController.popBackStack()
+                        navController.popBackStackWithLifeCycle()
                     })
                 Text(
                     text = stringResource(id = R.string.select_icon),
@@ -99,7 +98,7 @@ fun SelectIconScreen(
                                     .noRippleClickable {
                                         if (isClickedAllow.getAndSet(false)) {
                                             addEventScreenViewModel.setIconSelected(it)
-                                            navController.popBackStack()
+                                            navController.popBackStackWithLifeCycle()
                                             scope.launch {
                                                 delay(200)
                                                 isClickedAllow.set(true)
@@ -124,7 +123,7 @@ fun SelectIconScreen(
     selectIconScreenViewModel: SelectIconScreenViewModel = hiltViewModel()
 ) {
     BackHandler {
-        navController.popBackStack()
+        navController.popBackStackWithLifeCycle()
     }
 
     val listIcons = selectIconScreenViewModel.getListIcon.collectAsState().value
@@ -144,7 +143,7 @@ fun SelectIconScreen(
             ) {
                 Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back",
                     modifier = Modifier.noRippleClickable {
-                        navController.popBackStack()
+                        navController.popBackStackWithLifeCycle()
                     })
                 Text(
                     text = stringResource(id = R.string.select_icon),
@@ -173,7 +172,7 @@ fun SelectIconScreen(
                                     .noRippleClickable {
                                         if (isClickedAllow.getAndSet(false)) {
                                             addWalletViewModel.setIcon(it)
-                                            navController.popBackStack()
+                                            navController.popBackStackWithLifeCycle()
                                             scope.launch {
                                                 delay(200)
                                                 isClickedAllow.set(true)
@@ -198,7 +197,7 @@ fun SelectIconScreen(
     selectIconScreenViewModel: SelectIconScreenViewModel = hiltViewModel()
 ) {
     BackHandler {
-        navController.popBackStack()
+        navController.popBackStackWithLifeCycle()
     }
 
     val listIcons = selectIconScreenViewModel.getListIcon.collectAsState().value
@@ -218,7 +217,7 @@ fun SelectIconScreen(
             ) {
                 Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back",
                     modifier = Modifier.noRippleClickable {
-                        navController.popBackStack()
+                        navController.popBackStackWithLifeCycle()
                     })
                 Text(
                     text = stringResource(id = R.string.select_icon),
@@ -247,7 +246,7 @@ fun SelectIconScreen(
                                     .noRippleClickable {
                                         if (isClickedAllow.getAndSet(false)) {
                                             editWalletViewModel.setIcon(it)
-                                            navController.popBackStack()
+                                            navController.popBackStackWithLifeCycle()
                                             scope.launch {
                                                 delay(200)
                                                 isClickedAllow.set(true)

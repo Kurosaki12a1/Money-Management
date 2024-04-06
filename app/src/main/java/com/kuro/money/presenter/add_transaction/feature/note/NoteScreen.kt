@@ -40,6 +40,7 @@ import androidx.navigation.NavController
 import com.kuro.money.R
 import com.kuro.money.presenter.add_transaction.AddTransactionViewModel
 import com.kuro.money.presenter.home.feature.EditTransactionDetailViewModel
+import com.kuro.money.presenter.utils.popBackStackWithLifeCycle
 import com.kuro.money.ui.theme.Gray
 
 @Composable
@@ -47,7 +48,7 @@ fun NoteScreen(
     navController: NavController,
     addTransactionViewModel: AddTransactionViewModel
 ) {
-    BackHandler { navController.popBackStack() }
+    BackHandler { navController.popBackStackWithLifeCycle() }
 
     val noteValue = addTransactionViewModel.note.collectAsState().value
     val note = remember { mutableStateOf(noteValue) }
@@ -75,7 +76,7 @@ fun NoteScreen(
                 Icon(imageVector = Icons.Default.ArrowBack,
                     contentDescription = "Back",
                     modifier = Modifier.clickable {
-                        navController.popBackStack()
+                        navController.popBackStackWithLifeCycle()
                     })
                 Text(
                     text = stringResource(id = R.string.note),
@@ -90,7 +91,7 @@ fun NoteScreen(
                     textAlign = TextAlign.Center,
                     modifier = Modifier.clickable {
                         addTransactionViewModel.setNote(note.value)
-                        navController.popBackStack()
+                        navController.popBackStackWithLifeCycle()
                     })
             }
             Divider(
@@ -118,7 +119,7 @@ fun NoteScreen(
     navController: NavController,
     editTransactionDetailViewModel: EditTransactionDetailViewModel
 ) {
-    BackHandler { navController.popBackStack() }
+    BackHandler { navController.popBackStackWithLifeCycle() }
 
     val noteValue = editTransactionDetailViewModel.note.collectAsState().value
     val note = remember { mutableStateOf(noteValue) }
@@ -146,7 +147,7 @@ fun NoteScreen(
                 Icon(imageVector = Icons.Default.ArrowBack,
                     contentDescription = "Back",
                     modifier = Modifier.clickable {
-                        navController.popBackStack()
+                        navController.popBackStackWithLifeCycle()
                     })
                 Text(
                     text = stringResource(id = R.string.note),
@@ -161,7 +162,7 @@ fun NoteScreen(
                     textAlign = TextAlign.Center,
                     modifier = Modifier.clickable {
                         editTransactionDetailViewModel.setNote(note.value)
-                        navController.popBackStack()
+                        navController.popBackStackWithLifeCycle()
                     })
             }
             Divider(

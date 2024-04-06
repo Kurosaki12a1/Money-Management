@@ -57,6 +57,7 @@ import com.kuro.money.data.utils.Resource
 import com.kuro.money.domain.model.LetterColor
 import com.kuro.money.extension.noRippleClickable
 import com.kuro.money.navigation.routes.NavigationRoute
+import com.kuro.money.presenter.utils.popBackStackWithLifeCycle
 import com.kuro.money.presenter.utils.string
 import com.kuro.money.presenter.utils.toPainterResource
 import com.kuro.money.ui.theme.Gray
@@ -68,7 +69,7 @@ fun TransactionDetailsScreen(
     transactionID: Long,
     transactionDetailsViewModel: TransactionDetailsViewModel
 ) {
-    BackHandler { navController.popBackStack() }
+    BackHandler { navController.popBackStackWithLifeCycle() }
     if (navController.currentDestination?.route?.contains(NavigationRoute.Home.TransactionDetails.route) == true) {
         transactionDetailsViewModel.getTransactionById(transactionID)
     }
@@ -91,7 +92,7 @@ fun TransactionDetailsScreen(
     LaunchedEffect(Unit) {
         transactionDetailsViewModel.deleteTransaction.collectLatest {
             if (it is Resource.Success) {
-                navController.popBackStack()
+                navController.popBackStackWithLifeCycle()
                 transactionDetailsViewModel.setDefault()
             }
         }
@@ -118,7 +119,7 @@ fun TransactionDetailsScreen(
                     imageVector = Icons.Default.Close,
                     contentDescription = "Close",
                     modifier = Modifier.noRippleClickable {
-                        navController.popBackStack()
+                        navController.popBackStackWithLifeCycle()
                     })
                 Spacer(modifier = Modifier.weight(1f))
                 Icon(imageVector = Icons.Default.Share, contentDescription = "Share")

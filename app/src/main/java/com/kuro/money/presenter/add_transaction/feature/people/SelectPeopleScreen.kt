@@ -41,6 +41,7 @@ import androidx.navigation.NavController
 import com.kuro.money.R
 import com.kuro.money.presenter.add_transaction.AddTransactionViewModel
 import com.kuro.money.presenter.home.feature.EditTransactionDetailViewModel
+import com.kuro.money.presenter.utils.popBackStackWithLifeCycle
 import com.kuro.money.ui.theme.Gray
 import com.kuro.money.ui.theme.Green
 
@@ -49,7 +50,7 @@ fun SelectPeopleScreen(
     navController: NavController,
     addTransactionViewModel: AddTransactionViewModel
 ) {
-    BackHandler { navController.popBackStack() }
+    BackHandler { navController.popBackStackWithLifeCycle() }
 
     val focusRequester = remember { FocusRequester() }
 
@@ -84,7 +85,7 @@ fun SelectPeopleScreen(
             ) {
                 Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back",
                     modifier = Modifier.clickable {
-                        navController.popBackStack()
+                        navController.popBackStackWithLifeCycle()
                     })
                 Text(
                     text = stringResource(id = R.string.with),
@@ -100,7 +101,7 @@ fun SelectPeopleScreen(
                     textAlign = TextAlign.Center,
                     modifier = Modifier.clickable {
                         name.value.let { addTransactionViewModel.setNamePeople(it.text) }
-                        navController.popBackStack()
+                        navController.popBackStackWithLifeCycle()
                     }
                 )
             }
@@ -133,7 +134,7 @@ fun SelectPeopleScreen(
     navController: NavController,
     editTransactionDetailViewModel: EditTransactionDetailViewModel
 ) {
-    BackHandler { navController.popBackStack() }
+    BackHandler { navController.popBackStackWithLifeCycle() }
 
     val focusRequester = remember { FocusRequester() }
 
@@ -168,7 +169,7 @@ fun SelectPeopleScreen(
             ) {
                 Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back",
                     modifier = Modifier.clickable {
-                        navController.popBackStack()
+                        navController.popBackStackWithLifeCycle()
                     })
                 Text(
                     text = stringResource(id = R.string.with),
@@ -184,7 +185,7 @@ fun SelectPeopleScreen(
                     textAlign = TextAlign.Center,
                     modifier = Modifier.clickable {
                         name.value.let { editTransactionDetailViewModel.setNamePeople(it.text) }
-                        navController.popBackStack()
+                        navController.popBackStackWithLifeCycle()
                     }
                 )
             }
