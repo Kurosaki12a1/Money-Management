@@ -60,11 +60,10 @@ fun HomeScreen(
     recentTransactionViewModel: RecentTransactionViewModel
 ) {
 
-    LaunchedEffect(navController.currentDestination?.route) {
-        if (navController.currentDestination?.route == NavigationRoute.Home.route) {
-            homeViewModel.getBalance()
-        }
+    LaunchedEffect(true) {
+        homeViewModel.getBalance()
     }
+
 
     val balance = homeViewModel.balance.collectAsState().value
     val isHide = remember { mutableStateOf(true) }
@@ -186,9 +185,11 @@ fun RecentTransaction(
 ) {
 
     val listRecentTransactions = remember { mutableStateListOf<TransactionEntity>() }
-    if (navController.currentDestination?.route == NavigationRoute.Home.route) {
+
+    LaunchedEffect(true) {
         recentTransactionViewModel.getAllTransactions()
     }
+
 
     LaunchedEffect(Unit) {
         recentTransactionViewModel.allTransactions.collectLatest {
@@ -259,9 +260,8 @@ fun MyWalletScreen(
     navController: NavController,
     myWalletViewModel: MyWalletViewModel
 ) {
-    if (navController.currentDestination?.route == NavigationRoute.Home.route) {
-        myWalletViewModel.getAllWallets()
-    }
+
+    LaunchedEffect(true) { myWalletViewModel.getAllWallets() }
 
     val listWallets = remember { mutableStateListOf<AccountEntity>() }
     LaunchedEffect(Unit) {

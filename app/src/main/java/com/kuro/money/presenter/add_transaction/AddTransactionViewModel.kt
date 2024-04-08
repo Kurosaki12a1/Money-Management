@@ -2,8 +2,10 @@ package com.kuro.money.presenter.add_transaction
 
 import android.graphics.Bitmap
 import android.net.Uri
+import androidx.compose.ui.unit.Constraints
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.kuro.money.constants.Constants
 import com.kuro.money.data.AppCache
 import com.kuro.money.data.model.AccountEntity
 import com.kuro.money.data.model.CurrencyEntity
@@ -11,9 +13,11 @@ import com.kuro.money.data.model.EventEntity
 import com.kuro.money.data.model.TransactionEntity
 import com.kuro.money.data.utils.Resource
 import com.kuro.money.domain.model.SelectedCategory
+import com.kuro.money.domain.usecase.AccountsUseCase
 import com.kuro.money.domain.usecase.CurrenciesUseCase
 import com.kuro.money.domain.usecase.PreferencesUseCase
 import com.kuro.money.domain.usecase.TransactionUseCase
+import com.kuro.money.presenter.utils.calculateBalanceBetweenTransaction
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -27,6 +31,7 @@ import javax.inject.Inject
 @HiltViewModel
 class AddTransactionViewModel @Inject constructor(
     private val transactionUseCase: TransactionUseCase,
+    private val accountsUseCase: AccountsUseCase,
     private val currenciesUseCase: CurrenciesUseCase,
     private val preferencesUseCase: PreferencesUseCase,
 ) : ViewModel() {
@@ -136,6 +141,24 @@ class AddTransactionViewModel @Inject constructor(
             )
             transactionUseCase(transactionEntity).collectLatest {
                 _insertTransaction.value = it
+                if (it is Resource.Success && _wallet.value != null) {
+                    accountsUseCase.update(
+                        AccountEntity(
+                            id = _wallet.value!!.id,
+                            name = _wallet.value!!.name,
+                            currencyEntity = _wallet.value!!.currencyEntity,
+                            icon = _wallet.value!!.icon,
+                            uuid = _wallet.value!! .uuid,
+                            balance = calculateBalanceBetweenTransaction(
+                                _wallet.value!!.currencyEntity,
+                                _wallet.value!!.balance,
+                                _currencySelected.value!!,
+                                _amount.value?.toDouble() ?: 0.0,
+                                _selectedCategory.value.type == Constants.INCOME
+                            )
+                        )
+                    )
+                }
             }
         }
     }

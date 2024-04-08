@@ -14,4 +14,6 @@ class TransactionUseCase @Inject constructor(
 
     operator fun invoke(id: Long) = repo.deleteTransactionById(id)
     operator fun invoke() = repo.getListTransactions()
+
+    fun getTransactionByMonth(monthYear : String) = repo.getTransactionByMonthYear(monthYear)
 }

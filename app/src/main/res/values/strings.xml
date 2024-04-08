@@ -67,6 +67,7 @@
     <string name="edit">Edit</string>
 
     <string name="total_balance">Total Balance</string>
+    <string name="balance">Balance</string>
     <string name="total">Total</string>
     <string name="spending_report">Spending report</string>
     <string name="see_reports">See reports</string>
@@ -78,4 +79,10 @@
     <string name="no">NO</string>
 
     <string name="my_wallet_hint">You will soon be able to view transactions for each wallet here.</string>
+    <string name="this_month">THIS MONTH</string>
+    <string name="prev_month">LAST MONTH</string>
+    <string name="inflow">Inflow</string>
+    <string name="outflow">Outflow</string>
+    <string name="view_report_this_period">View report for this period</string>
+    <string name="tap_plus_to_add">Tap + to add one</string>
 </resources>

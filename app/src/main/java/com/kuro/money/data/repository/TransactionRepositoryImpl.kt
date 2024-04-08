@@ -70,4 +70,15 @@ class TransactionRepositoryImpl @Inject constructor(
         }
     }.flowOn(dispatcher)
 
+    override fun getTransactionByMonthYear(monthYear: String) = flow {
+        emit(Resource.Loading)
+        try {
+            val listData = appDatabase.transactionDao().getTransactionsByDate(monthYear)
+            emit(Resource.Success(listData))
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emit(Resource.failure(e, e.message))
+        }
+    }.flowOn(dispatcher)
+
 }

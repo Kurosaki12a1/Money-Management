@@ -17,4 +17,6 @@ interface TransactionRepository {
 
     fun getTransactionById(id : Long) : Flow<Resource<TransactionEntity>>
 
+    fun getTransactionByMonthYear(monthYear: String) : Flow<Resource<List<TransactionEntity>>>
+
 }

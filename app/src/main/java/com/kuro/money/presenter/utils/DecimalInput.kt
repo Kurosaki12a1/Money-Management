@@ -118,15 +118,17 @@ class DecimalFormatter(
      * @return Formatted numeric string.
      */
     fun formatForVisual(input: String): String {
-
-        val split = input.split(decimalSeparator)
+        val isNegative = input.startsWith("-")
+        val positiveInput = if (isNegative) input.substring(1) else input
+        val split = positiveInput.split(decimalSeparator)
         //Format the integer part with thousands separator
-        val intPart = split[0]
+        val intPartFormatted = split[0]
             .reversed()
             .chunked(3) // Divide the integer part into groups of 3 digits
             .joinToString(separator = thousandsSeparator.toString()) // Join groups using thousands separators
             .reversed()
 
+        val intPart = if (isNegative) "-$intPartFormatted" else intPartFormatted
 
         // Get the decimal part if there is one
         val fractionPart = split.getOrNull(1)

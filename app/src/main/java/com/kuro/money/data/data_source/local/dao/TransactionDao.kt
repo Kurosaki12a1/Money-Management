@@ -24,4 +24,10 @@ interface TransactionDao {
 
     @Query("DELETE FROM transactions WHERE id=:id")
     fun deleteTransactionById(id: Long): Int
+
+    /**
+     * Input must be mm/YYYY (ex: 04/2024)
+     */
+    @Query("SELECT * FROM transactions WHERE  strftime('%m', displayDate) || '/' || strftime('%Y', displayDate) = :yearMonth")
+    fun getTransactionsByDate(yearMonth: String): List<TransactionEntity>
 }

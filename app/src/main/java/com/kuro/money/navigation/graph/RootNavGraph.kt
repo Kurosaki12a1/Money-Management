@@ -19,7 +19,7 @@ fun RootNavGraph(
         startDestination = startGraphDestination.route,
         builder = {
             homeNavGraph(navHostController, paddingValues)
-            transactionGraph(navHostController)
+            transactionGraph(navHostController, paddingValues)
             addTransactionNavGraph(navHostController)
             budgetsGraph(navHostController)
             accountNavGraph(navHostController)

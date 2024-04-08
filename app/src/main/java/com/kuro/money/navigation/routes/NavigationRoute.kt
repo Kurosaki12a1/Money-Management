@@ -27,6 +27,8 @@ sealed class NavigationRoute(val route: String) {
 
     sealed class Transaction(route: String) : NavigationRoute(route) {
 
+        data object SelectWallet : Transaction("transaction_select_wallet")
+
         companion object : Transaction("transaction")
     }
 
