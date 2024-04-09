@@ -64,6 +64,7 @@ import com.kuro.money.extension.noRippleClickable
 import com.kuro.money.navigation.routes.NavigationRoute
 import com.kuro.money.presenter.utils.CrossSlide
 import com.kuro.money.presenter.utils.DecimalFormatter
+import com.kuro.money.presenter.utils.getBalance
 import com.kuro.money.presenter.utils.string
 import com.kuro.money.presenter.utils.toPainterResource
 import com.kuro.money.ui.theme.Gray
@@ -80,11 +81,6 @@ fun TransactionScreen(
     paddingValues: PaddingValues,
     transactionViewModel: TransactionViewModel
 ) {
-    LaunchedEffect(key1 = true) {
-        transactionViewModel.getBalance()
-        transactionViewModel.getAllWallets()
-    }
-
     val listState = rememberLazyListState()
     val listWallet = remember { mutableStateListOf<AccountEntity>() }
     val selectedWallet = transactionViewModel.selectedWallet.collectAsState().value
@@ -95,6 +91,12 @@ fun TransactionScreen(
     val prevIndexSelected = remember { mutableIntStateOf(17) }
     val indexSelected =
         remember(monthSelected) { mutableIntStateOf(monthList.indexOf(monthSelected)) }
+
+    LaunchedEffect(true) {
+        transactionViewModel.getBalance()
+        transactionViewModel.getAllWallets()
+        transactionViewModel.setMonthSelected(monthSelected)
+    }
 
     LaunchedEffect(indexSelected.intValue) {
         listState.scrollToItem(indexSelected.intValue)
@@ -138,9 +140,17 @@ fun TransactionScreen(
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             if (!listWallet.isEmpty()) {
-                ToolBarTransactions(selectedWallet) {
-                    navController.navigate(NavigationRoute.Transaction.SelectWallet.route)
-                }
+                ToolBarTransactions(
+                    selectedWallet,
+                    onSearchClick = {
+                        navController.navigate(NavigationRoute.Transaction.SearchTransaction.route) {
+                            popUpTo(NavigationRoute.Transaction.route)
+                        }
+                    },
+                    onWalletClick = {
+                        navController.navigate(NavigationRoute.Transaction.SelectWallet.route)
+                    }
+                )
             }
             LazyRow(
                 modifier = Modifier
@@ -163,7 +173,6 @@ fun TransactionScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .detectHorizontalWithDelay(onSwipeLeft = {
-                        println("On Swipe Left")
                         if (indexSelected.intValue != prevIndexSelected.intValue) {
                             prevIndexSelected.intValue = indexSelected.intValue
                         }
@@ -171,7 +180,6 @@ fun TransactionScreen(
                             transactionViewModel.setMonthSelected(monthList[indexSelected.intValue + 1])
                         }
                     }, onSwipeRight = {
-                        println("On Swipe Right")
                         if (indexSelected.intValue != prevIndexSelected.intValue) {
                             prevIndexSelected.intValue = indexSelected.intValue
                         }
@@ -398,13 +406,6 @@ private fun ReportSpendingOfMonth(
     }
 }
 
-private fun getBalance(transactionEntity: TransactionEntity): Double {
-    val rates = AppCache.listRates.value[AppCache.defaultCurrency.value]?.find { rate ->
-        rate.currencyCode.lowercase() == transactionEntity.currency.code.lowercase()
-    }?.rate
-    return if (rates != null) 1 / rates * transactionEntity.amount else transactionEntity.amount
-}
-
 @Composable
 private fun TabOfMonth(
     date: String,
@@ -454,7 +455,8 @@ private fun TabOfMonth(
 @Composable
 private fun ToolBarTransactions(
     wallet: AccountEntity?,
-    onClick: () -> Unit
+    onSearchClick: () -> Unit,
+    onWalletClick: () -> Unit
 ) {
     if (wallet == null) return
     val decimalFormatter = DecimalFormatter()
@@ -475,7 +477,10 @@ private fun ToolBarTransactions(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(20.dp)
             ) {
-                Icon(imageVector = Icons.Default.Search, contentDescription = "Search")
+                Icon(
+                    imageVector = Icons.Default.Search,
+                    contentDescription = "Search",
+                    modifier = Modifier.noRippleClickable { onSearchClick() })
                 Icon(imageVector = Icons.Default.MoreVert, contentDescription = "More")
             }
         }
@@ -501,7 +506,7 @@ private fun ToolBarTransactions(
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(5.dp),
-                modifier = Modifier.noRippleClickable { onClick() }
+                modifier = Modifier.noRippleClickable { onWalletClick() }
             ) {
                 Image(painter = wallet.icon.toPainterResource(), contentDescription = "Icon")
                 Text(text = wallet.name)

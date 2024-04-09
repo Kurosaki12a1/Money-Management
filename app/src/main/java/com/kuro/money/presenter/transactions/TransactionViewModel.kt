@@ -64,7 +64,6 @@ class TransactionViewModel @Inject constructor(
         viewModelScope.launch {
             transactionUseCase.getTransactionByMonth(monthYear).collectLatest {
                 _transactionByDate.value = it
-                println(it)
             }
         }
     }

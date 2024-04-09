@@ -85,4 +85,8 @@
     <string name="outflow">Outflow</string>
     <string name="view_report_this_period">View report for this period</string>
     <string name="tap_plus_to_add">Tap + to add one</string>
+
+    <string name="transaction_search_hint">Search by #tag, category, etc..</string>
+    <string name="no_result">No result</string>
+    <string name="no_result_search_hint">There is no transaction involving to this keyword.</string>
 </resources>

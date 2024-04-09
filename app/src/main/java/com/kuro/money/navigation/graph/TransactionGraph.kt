@@ -13,7 +13,9 @@ import com.kuro.money.presenter.account.feature.wallets.WalletScreen
 import com.kuro.money.presenter.add_transaction.feature.wallet.SelectWalletScreen
 import com.kuro.money.presenter.transactions.TransactionScreen
 import com.kuro.money.presenter.transactions.TransactionViewModel
+import com.kuro.money.presenter.transactions.feature.SearchTransactionScreen
 import com.kuro.money.presenter.utils.horizontalComposable
+import com.kuro.money.presenter.utils.verticalComposable
 
 fun NavGraphBuilder.transactionGraph(
     navHostController: NavHostController,
@@ -38,6 +40,12 @@ fun NavGraphBuilder.transactionGraph(
                 }
                 val transactionViewModel = hiltViewModel<TransactionViewModel>(parentEntry)
                 WalletScreen(navHostController, transactionViewModel)
+            }
+            verticalComposable(route = NavigationRoute.Transaction.SearchTransaction.route) {
+                SearchTransactionScreen(navController = navHostController)
+            }
+            horizontalComposable(route = NavigationRoute.Transaction.AdvancedSearchTransaction.route) {
+
             }
         }
     )

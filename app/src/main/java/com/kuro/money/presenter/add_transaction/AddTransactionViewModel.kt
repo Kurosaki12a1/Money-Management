@@ -2,7 +2,6 @@ package com.kuro.money.presenter.add_transaction
 
 import android.graphics.Bitmap
 import android.net.Uri
-import androidx.compose.ui.unit.Constraints
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kuro.money.constants.Constants
@@ -17,7 +16,7 @@ import com.kuro.money.domain.usecase.AccountsUseCase
 import com.kuro.money.domain.usecase.CurrenciesUseCase
 import com.kuro.money.domain.usecase.PreferencesUseCase
 import com.kuro.money.domain.usecase.TransactionUseCase
-import com.kuro.money.presenter.utils.calculateBalanceBetweenTransaction
+import com.kuro.money.presenter.utils.calculateWalletAfterTransaction
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -148,8 +147,8 @@ class AddTransactionViewModel @Inject constructor(
                             name = _wallet.value!!.name,
                             currencyEntity = _wallet.value!!.currencyEntity,
                             icon = _wallet.value!!.icon,
-                            uuid = _wallet.value!! .uuid,
-                            balance = calculateBalanceBetweenTransaction(
+                            uuid = _wallet.value!!.uuid,
+                            balance = calculateWalletAfterTransaction(
                                 _wallet.value!!.currencyEntity,
                                 _wallet.value!!.balance,
                                 _currencySelected.value!!,
@@ -157,7 +156,9 @@ class AddTransactionViewModel @Inject constructor(
                                 _selectedCategory.value.type == Constants.INCOME
                             )
                         )
-                    )
+                    ).collectLatest {
+
+                    }
                 }
             }
         }
