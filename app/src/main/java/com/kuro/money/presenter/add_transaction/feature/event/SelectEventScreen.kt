@@ -32,7 +32,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -70,7 +70,7 @@ fun SelectEventScreen(
     }
 
     val listEvent = remember { mutableListOf<EventEntity>() }
-    val selectedTabIndexed = remember { mutableStateOf(0) }
+    val selectedTabIndexed = remember { mutableIntStateOf(0) }
 
     LaunchedEffect(Unit) {
         selectEventViewModel.getAllEvents.collectLatest {
@@ -94,24 +94,24 @@ fun SelectEventScreen(
                     .align(Alignment.TopCenter)
             ) {
                 ToolbarSelectEventScreen(navController)
-                TabSelectionEvent(selectedTabIndexed.value) {
-                    selectedTabIndexed.value = it
+                TabSelectionEvent(selectedTabIndexed.intValue) {
+                    selectedTabIndexed.intValue = it
                 }
                 CrossSlide(
                     modifier = Modifier.detectHorizontalWithDelay(
                         onSwipeLeft = {
-                            if (selectedTabIndexed.value < 1) {
-                                selectedTabIndexed.value += 1
+                            if (selectedTabIndexed.intValue < 1) {
+                                selectedTabIndexed.intValue += 1
                             }
                         },
                         onSwipeRight = {
-                            if (selectedTabIndexed.value > 0) {
-                                selectedTabIndexed.value -= 1
+                            if (selectedTabIndexed.intValue > 0) {
+                                selectedTabIndexed.intValue -= 1
                             }
                         }
                     ),
                     currentState = 0,
-                    targetState = selectedTabIndexed.value,
+                    targetState = selectedTabIndexed.intValue,
                     orderedContent = listOf(0, 1)
                 ) {
                     when (it) {
@@ -167,7 +167,7 @@ fun SelectEventScreen(
     }
 
     val listEvent = remember { mutableListOf<EventEntity>() }
-    val selectedTabIndexed = remember { mutableStateOf(0) }
+    val selectedTabIndexed = remember { mutableIntStateOf(0) }
 
     LaunchedEffect(Unit) {
         selectEventViewModel.getAllEvents.collectLatest {
@@ -191,24 +191,24 @@ fun SelectEventScreen(
                     .align(Alignment.TopCenter)
             ) {
                 ToolbarSelectEventScreen(navController)
-                TabSelectionEvent(selectedTabIndexed.value) {
-                    selectedTabIndexed.value = it
+                TabSelectionEvent(selectedTabIndexed.intValue) {
+                    selectedTabIndexed.intValue = it
                 }
                 CrossSlide(
                     modifier = Modifier.detectHorizontalWithDelay(
                         onSwipeLeft = {
-                            if (selectedTabIndexed.value < 1) {
-                                selectedTabIndexed.value += 1
+                            if (selectedTabIndexed.intValue < 1) {
+                                selectedTabIndexed.intValue += 1
                             }
                         },
                         onSwipeRight = {
-                            if (selectedTabIndexed.value > 0) {
-                                selectedTabIndexed.value -= 1
+                            if (selectedTabIndexed.intValue > 0) {
+                                selectedTabIndexed.intValue -= 1
                             }
                         }
                     ),
                     currentState = 0,
-                    targetState = selectedTabIndexed.value,
+                    targetState = selectedTabIndexed.intValue,
                     orderedContent = listOf(0, 1)
                 ) {
                     when (it) {
@@ -267,12 +267,12 @@ private fun ListEventScreen(
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         items(event) {
-            val isSelected = selectedEvent == it
+            val isSelected = selectedEvent?.id == it.id
             Row(
                 modifier = Modifier
                     .padding(horizontal = 10.dp)
                     .clickable {
-                        addTransactionViewModel.setEventSelected(it)
+                        addTransactionViewModel.setEventSelected(it.event)
                         navController.popBackStackWithLifeCycle()
                     },
                 verticalAlignment = Alignment.CenterVertically,
@@ -321,12 +321,12 @@ private fun ListEventScreen(
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         items(event) {
-            val isSelected = selectedEvent == it
+            val isSelected = selectedEvent?.id == it.id
             Row(
                 modifier = Modifier
                     .padding(horizontal = 10.dp)
                     .clickable {
-                        editTransactionDetailViewModel.setEventSelected(it)
+                        editTransactionDetailViewModel.setEventSelected(it.event)
                         navController.popBackStackWithLifeCycle()
                     },
                 verticalAlignment = Alignment.CenterVertically,

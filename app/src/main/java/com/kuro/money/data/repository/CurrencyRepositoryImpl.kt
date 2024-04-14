@@ -2,8 +2,8 @@ package com.kuro.money.data.repository
 
 import android.content.Context
 import com.kuro.money.data.data_source.local.AppDatabase
-import com.kuro.money.data.mapper.toCurrencyEntity
-import com.kuro.money.data.model.CurrencyEntity
+import com.kuro.money.data.mapper.toCurrency
+import com.kuro.money.data.model.Currency
 import com.kuro.money.data.utils.FileUtils
 import com.kuro.money.data.utils.Resource
 import com.kuro.money.domain.model.Currencies
@@ -20,7 +20,7 @@ class CurrencyRepositoryImpl @Inject constructor(
     private val appDatabase: AppDatabase,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : CurrencyRepository {
-    override fun insert(list: List<CurrencyEntity>): Flow<Resource<Unit>> = flow {
+    override fun insert(list: List<Currency>): Flow<Resource<Unit>> = flow {
         emit(Resource.Loading)
         try {
             appDatabase.currencyDao().insert(list)
@@ -31,7 +31,7 @@ class CurrencyRepositoryImpl @Inject constructor(
         }
     }.flowOn(dispatcher)
 
-    override fun getAllCurrencies(): Flow<Resource<List<CurrencyEntity>>> = flow {
+    override fun getAllCurrencies(): Flow<Resource<List<Currency>>> = flow {
         emit(Resource.Loading)
         try {
             val data = appDatabase.currencyDao().getAllCurrencies()
@@ -42,12 +42,12 @@ class CurrencyRepositoryImpl @Inject constructor(
         }
     }.flowOn(dispatcher)
 
-    override fun getListCurrenciesFromJSON(): Flow<Resource<List<CurrencyEntity>>> = flow {
+    override fun getListCurrenciesFromJSON(): Flow<Resource<List<Currency>>> = flow {
         emit(Resource.Loading)
         try {
             val data = FileUtils.loadJsonFromAsset<Currencies>(context, "currency.json")
-            val result = mutableListOf<CurrencyEntity>()
-            data?.data?.forEach { result.add(it.toCurrencyEntity()) }
+            val result = mutableListOf<Currency>()
+            data?.data?.forEach { result.add(it.toCurrency()) }
             emit(Resource.success(result))
         } catch (e: Exception) {
             e.printStackTrace()
@@ -55,7 +55,7 @@ class CurrencyRepositoryImpl @Inject constructor(
         }
     }.flowOn(dispatcher)
 
-    override fun getCurrencyByCode(code: String): Flow<Resource<CurrencyEntity?>> = flow {
+    override fun getCurrencyByCode(code: String): Flow<Resource<Currency?>> = flow {
         emit(Resource.Loading)
         try {
             val data = appDatabase.currencyDao().getCurrencyByCode(code.uppercase())

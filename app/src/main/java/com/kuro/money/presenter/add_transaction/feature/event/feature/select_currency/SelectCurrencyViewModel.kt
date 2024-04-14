@@ -2,7 +2,7 @@ package com.kuro.money.presenter.add_transaction.feature.event.feature.select_cu
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.kuro.money.data.model.CurrencyEntity
+import com.kuro.money.data.model.Currency
 import com.kuro.money.data.utils.Resource
 import com.kuro.money.domain.usecase.CurrenciesUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -17,7 +17,7 @@ class SelectCurrencyViewModel @Inject constructor(
     private val currenciesUseCase: CurrenciesUseCase
 ) : ViewModel() {
     private val _getListCurrencies =
-        MutableStateFlow<Resource<List<CurrencyEntity>>>(Resource.Default)
+        MutableStateFlow<Resource<List<Currency>>>(Resource.Default)
     val getListCurrencies = _getListCurrencies.asStateFlow()
 
     init {

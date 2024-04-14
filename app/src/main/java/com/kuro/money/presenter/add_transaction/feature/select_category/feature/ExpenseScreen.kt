@@ -37,7 +37,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.kuro.money.R
 import com.kuro.money.data.model.CategoryEntity
-import com.kuro.money.domain.model.SelectedCategory
 import com.kuro.money.presenter.add_transaction.AddTransactionViewModel
 import com.kuro.money.presenter.add_transaction.feature.select_category.SelectCategoryViewModel
 import com.kuro.money.presenter.home.feature.EditTransactionDetailViewModel
@@ -161,15 +160,15 @@ fun ExpenseScreen(
 private fun CategoryItem(
     entity: CategoryEntity,
     isLastIndexCategory: Boolean,
-    categorySelected: SelectedCategory,
-    onClick: (SelectedCategory) -> Unit
+    categorySelected: CategoryEntity?,
+    onClick: (CategoryEntity) -> Unit
 ) {
     Column {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(10.dp)
-                .clickable { onClick(SelectedCategory(entity.name, entity.icon, entity.type)) },
+                .clickable { onClick(entity) },
             horizontalArrangement = Arrangement.spacedBy(10.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -180,7 +179,7 @@ private fun CategoryItem(
             Text(
                 text = entity.name, style = MaterialTheme.typography.body1, color = Color.Black
             )
-            if (categorySelected.name == entity.name) {
+            if (categorySelected?.name == entity.name) {
                 Spacer(modifier = Modifier.weight(1f))
                 Image(
                     painter = painterResource(id = R.drawable.ic_check_green),
@@ -197,11 +196,7 @@ private fun CategoryItem(
                     .fillMaxWidth()
                     .padding(horizontal = 10.dp)
                     .clickable {
-                        onClick(
-                            SelectedCategory(
-                                subCategoryEntity.name, subCategoryEntity.icon, subCategoryEntity.type
-                            )
-                        )
+                        onClick(subCategoryEntity)
                     }) {
                 Canvas(modifier = Modifier.fillMaxHeight(), onDraw = {
                     drawLine(
@@ -230,7 +225,7 @@ private fun CategoryItem(
                     color = Color.Black,
                     modifier = Modifier.offset(10.dp)
                 )
-                if (categorySelected.name == subCategoryEntity.name) {
+                if (categorySelected?.name == subCategoryEntity.name) {
                     Spacer(modifier = Modifier.weight(1f))
                     Image(
                         painter = painterResource(id = R.drawable.ic_check_green),

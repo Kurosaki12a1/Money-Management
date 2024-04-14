@@ -1,6 +1,7 @@
 package com.kuro.money.data.repository
 
 import com.kuro.money.data.data_source.local.AppDatabase
+import com.kuro.money.data.model.Transaction
 import com.kuro.money.data.model.TransactionEntity
 import com.kuro.money.data.utils.Resource
 import com.kuro.money.domain.repository.TransactionRepository
@@ -15,7 +16,7 @@ class TransactionRepositoryImpl @Inject constructor(
     private val appDatabase: AppDatabase,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : TransactionRepository {
-    override fun insert(entity: TransactionEntity): Flow<Resource<Long>> = flow {
+    override fun insert(entity: Transaction): Flow<Resource<Long>> = flow {
         emit(Resource.Loading)
         try {
             val id = appDatabase.transactionDao().insert(entity)
@@ -26,7 +27,7 @@ class TransactionRepositoryImpl @Inject constructor(
         }
     }.flowOn(dispatcher)
 
-    override fun update(entity: TransactionEntity): Flow<Resource<Int>> = flow {
+    override fun update(entity: Transaction): Flow<Resource<Int>> = flow {
         emit(Resource.Loading)
         try {
             val rowEdited = appDatabase.transactionDao().update(entity)

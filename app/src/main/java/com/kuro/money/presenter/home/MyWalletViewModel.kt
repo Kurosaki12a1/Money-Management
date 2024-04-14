@@ -40,7 +40,7 @@ class MyWalletViewModel @Inject constructor(
                         _balance.value = 0.0
                         data.value.forEach { wallet ->
                             val rates = listRates[AppCache.defaultCurrency.value]?.find { rates ->
-                                rates.currencyCode.lowercase() == wallet.currencyEntity.code.lowercase()
+                                rates.currencyCode.lowercase() == wallet.currency.code.lowercase()
                             }?.rate
                             // rates is 1 unit of base code equal certain value of currency code
                             // So we must use 1/ rates.

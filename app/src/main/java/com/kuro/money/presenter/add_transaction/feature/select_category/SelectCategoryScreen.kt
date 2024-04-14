@@ -26,8 +26,8 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -37,9 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.kuro.money.R
 import com.kuro.money.data.model.CategoryEntity
-import com.kuro.money.data.model.SubCategoryEntity
 import com.kuro.money.data.utils.Resource
-import com.kuro.money.domain.model.SelectedCategory
 import com.kuro.money.extension.detectHorizontalWithDelay
 import com.kuro.money.presenter.add_transaction.AddTransactionViewModel
 import com.kuro.money.presenter.add_transaction.feature.select_category.feature.DebtScreen
@@ -61,19 +59,18 @@ fun SelectCategoryScreen(
         navController.popBackStackWithLifeCycle()
     }
 
-    val selectedTabIndexed = remember { mutableStateOf(0) }
-    val prevSelectedTabIndex = remember { mutableStateOf(0) }
+    val selectedTabIndexed = remember { mutableIntStateOf(0) }
+    val prevSelectedTabIndex = remember { mutableIntStateOf(0) }
     val listCategories = remember { mutableStateListOf<CategoryEntity>() }
-    val listSubCategories = remember { mutableStateListOf<SubCategoryEntity>() }
     val listSpecialCategories = listOf(
         "Debt", "Debt Collection", "Loan", "Repayment"
     )
 
     LaunchedEffect(Unit) {
         selectCategoryViewModel.selectedCategory.collectLatest {
-            if (it.name != "" && it.icon != "" && it.type != "") {
+            if (it != null) {
                 addTransactionViewModel.setSelectedCategory(it)
-                selectCategoryViewModel.setSelectedCategories(SelectedCategory())
+                selectCategoryViewModel.setSelectedCategories(null)
                 navController.popBackStackWithLifeCycle()
             }
         }
@@ -84,23 +81,13 @@ fun SelectCategoryScreen(
             if (it is Resource.Success) {
                 listCategories.clear()
                 listCategories.addAll(it.value)
-            }
-        }
-    }
 
-    LaunchedEffect(Unit) {
-        selectCategoryViewModel.getSubCategoryResponse.collectLatest {
-            if (it is Resource.Success) {
-                listSubCategories.clear()
-                listSubCategories.addAll(it.value)
+                val subCategoryMap =
+                    listCategories.filter { i -> i.parentId != i.id }.groupBy { g -> g.parentId }
+                listCategories.forEach { category ->
+                    category.subCategories = subCategoryMap[category.parentId] ?: emptyList()
+                }
             }
-        }
-    }
-
-    LaunchedEffect(listCategories.size, listSubCategories.size) {
-        val subCategoryMap = listSubCategories.groupBy { it.parentId }
-        listCategories.forEach { category ->
-            category.subCategories = subCategoryMap[category.id] ?: emptyList()
         }
     }
 
@@ -111,26 +98,26 @@ fun SelectCategoryScreen(
     ) {
         Column {
             ToolbarSelectCategory(navController)
-            TabSelectionCategory(selectedTabIndexed.value) {
-                if (prevSelectedTabIndex.value != selectedTabIndexed.value) {
-                    prevSelectedTabIndex.value = selectedTabIndexed.value
+            TabSelectionCategory(selectedTabIndexed.intValue) {
+                if (prevSelectedTabIndex.intValue != selectedTabIndexed.intValue) {
+                    prevSelectedTabIndex.intValue = selectedTabIndexed.intValue
                 }
-                selectedTabIndexed.value = it
+                selectedTabIndexed.intValue = it
             }
             CrossSlide(
                 modifier = Modifier.detectHorizontalWithDelay(onSwipeLeft = {
-                    if (selectedTabIndexed.value < 2) {
-                        prevSelectedTabIndex.value = selectedTabIndexed.value
-                        selectedTabIndexed.value += 1
+                    if (selectedTabIndexed.intValue < 2) {
+                        prevSelectedTabIndex.intValue = selectedTabIndexed.intValue
+                        selectedTabIndexed.intValue += 1
                     }
                 }, onSwipeRight = {
-                    if (selectedTabIndexed.value > 0) {
-                        prevSelectedTabIndex.value = selectedTabIndexed.value
-                        selectedTabIndexed.value -= 1
+                    if (selectedTabIndexed.intValue > 0) {
+                        prevSelectedTabIndex.intValue = selectedTabIndexed.intValue
+                        selectedTabIndexed.intValue -= 1
                     }
                 }),
-                currentState = prevSelectedTabIndex.value,
-                targetState = selectedTabIndexed.value,
+                currentState = prevSelectedTabIndex.intValue,
+                targetState = selectedTabIndexed.intValue,
                 orderedContent = listOf(0, 1, 2)
             ) {
                 when (it) {
@@ -162,19 +149,18 @@ fun SelectCategoryScreen(
         navController.popBackStackWithLifeCycle()
     }
 
-    val selectedTabIndexed = remember { mutableStateOf(0) }
-    val prevSelectedTabIndex = remember { mutableStateOf(0) }
+    val selectedTabIndexed = remember { mutableIntStateOf(0) }
+    val prevSelectedTabIndex = remember { mutableIntStateOf(0) }
     val listCategories = remember { mutableStateListOf<CategoryEntity>() }
-    val listSubCategories = remember { mutableStateListOf<SubCategoryEntity>() }
     val listSpecialCategories = listOf(
         "Debt", "Debt Collection", "Loan", "Repayment"
     )
 
     LaunchedEffect(Unit) {
         selectCategoryViewModel.selectedCategory.collectLatest {
-            if (it.name != "" && it.icon != "" && it.type != "") {
+            if (it != null) {
                 editTransactionDetailViewModel.setSelectedCategory(it)
-                selectCategoryViewModel.setSelectedCategories(SelectedCategory())
+                selectCategoryViewModel.setSelectedCategories(null)
                 navController.popBackStackWithLifeCycle()
             }
         }
@@ -185,23 +171,13 @@ fun SelectCategoryScreen(
             if (it is Resource.Success) {
                 listCategories.clear()
                 listCategories.addAll(it.value)
-            }
-        }
-    }
 
-    LaunchedEffect(Unit) {
-        selectCategoryViewModel.getSubCategoryResponse.collectLatest {
-            if (it is Resource.Success) {
-                listSubCategories.clear()
-                listSubCategories.addAll(it.value)
+                val subCategoryMap =
+                    listCategories.filter { f -> f.parentId != f.id }.groupBy { g -> g.parentId }
+                listCategories.forEach { category ->
+                    category.subCategories = subCategoryMap[category.parentId] ?: emptyList()
+                }
             }
-        }
-    }
-
-    LaunchedEffect(listCategories.size, listSubCategories.size) {
-        val subCategoryMap = listSubCategories.groupBy { it.parentId }
-        listCategories.forEach { category ->
-            category.subCategories = subCategoryMap[category.id] ?: emptyList()
         }
     }
 
@@ -212,26 +188,26 @@ fun SelectCategoryScreen(
     ) {
         Column {
             ToolbarSelectCategory(navController)
-            TabSelectionCategory(selectedTabIndexed.value) {
-                if (prevSelectedTabIndex.value != selectedTabIndexed.value) {
-                    prevSelectedTabIndex.value = selectedTabIndexed.value
+            TabSelectionCategory(selectedTabIndexed.intValue) {
+                if (prevSelectedTabIndex.intValue != selectedTabIndexed.intValue) {
+                    prevSelectedTabIndex.intValue = selectedTabIndexed.intValue
                 }
-                selectedTabIndexed.value = it
+                selectedTabIndexed.intValue = it
             }
             CrossSlide(
                 modifier = Modifier.detectHorizontalWithDelay(onSwipeLeft = {
-                    if (selectedTabIndexed.value < 2) {
-                        prevSelectedTabIndex.value = selectedTabIndexed.value
-                        selectedTabIndexed.value += 1
+                    if (selectedTabIndexed.intValue < 2) {
+                        prevSelectedTabIndex.intValue = selectedTabIndexed.intValue
+                        selectedTabIndexed.intValue += 1
                     }
                 }, onSwipeRight = {
-                    if (selectedTabIndexed.value > 0) {
-                        prevSelectedTabIndex.value = selectedTabIndexed.value
-                        selectedTabIndexed.value -= 1
+                    if (selectedTabIndexed.intValue > 0) {
+                        prevSelectedTabIndex.intValue = selectedTabIndexed.intValue
+                        selectedTabIndexed.intValue -= 1
                     }
                 }),
-                currentState = prevSelectedTabIndex.value,
-                targetState = selectedTabIndexed.value,
+                currentState = prevSelectedTabIndex.intValue,
+                targetState = selectedTabIndexed.intValue,
                 orderedContent = listOf(0, 1, 2)
             ) {
                 when (it) {

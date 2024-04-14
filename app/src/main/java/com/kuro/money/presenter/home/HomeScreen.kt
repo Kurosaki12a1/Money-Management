@@ -342,7 +342,7 @@ private fun WalletItem(
         )
         Spacer(modifier = Modifier.weight(1f))
         Text(
-            text = "${decimalFormatter.formatForVisual(item.balance.string())} ${item.currencyEntity.symbol}",
+            text = "${decimalFormatter.formatForVisual(item.balance.string())} ${item.currency.symbol}",
             color = Color.Black,
             style = MaterialTheme.typography.body1,
             textAlign = TextAlign.Center

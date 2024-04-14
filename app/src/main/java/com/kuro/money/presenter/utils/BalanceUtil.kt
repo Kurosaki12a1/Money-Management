@@ -1,13 +1,13 @@
 package com.kuro.money.presenter.utils
 
 import com.kuro.money.data.AppCache
-import com.kuro.money.data.model.CurrencyEntity
+import com.kuro.money.data.model.Currency
 import com.kuro.money.data.model.TransactionEntity
 
 fun calculateBalanceBetweenTransaction(
-    currency: CurrencyEntity,
+    currency: Currency,
     balance: Double,
-    otherCurrency: CurrencyEntity,
+    otherCurrency: Currency,
     otherBalance: Double,
     isPlus: Boolean
 ): Double {
@@ -25,9 +25,9 @@ fun calculateBalanceBetweenTransaction(
 }
 
 fun calculateWalletAfterTransaction(
-    walletCurrency: CurrencyEntity,
+    walletCurrency: Currency,
     walletBalance: Double,
-    transactionCurrency: CurrencyEntity,
+    transactionCurrency: Currency,
     transactionBalance: Double,
     isPlus: Boolean // Salary = true
 ): Double {

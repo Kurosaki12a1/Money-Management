@@ -1,6 +1,7 @@
 package com.kuro.money.data.repository
 
 import com.kuro.money.data.data_source.local.AppDatabase
+import com.kuro.money.data.model.Event
 import com.kuro.money.data.model.EventEntity
 import com.kuro.money.data.utils.Resource
 import com.kuro.money.domain.repository.EventRepository
@@ -15,7 +16,7 @@ class EventRepositoryImpl @Inject constructor(
     private val appDatabase: AppDatabase,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : EventRepository {
-    override fun insert(event: EventEntity): Flow<Resource<Long>> = flow {
+    override fun insert(event: Event): Flow<Resource<Long>> = flow {
         emit(Resource.Loading)
         try {
             val id = appDatabase.eventDao().insert(event)

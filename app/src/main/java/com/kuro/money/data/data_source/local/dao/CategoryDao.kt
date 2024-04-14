@@ -12,7 +12,7 @@ interface CategoryDao {
     fun insert(category: CategoryEntity) : Long
 
     @Query("SELECT COUNT(*) FROM categories Where name =:name")
-    fun countByName(name: String) : Int
+    fun countByName(name: String): Int
 
     @Query("SELECT * FROM categories")
     fun loadAll(): List<CategoryEntity>

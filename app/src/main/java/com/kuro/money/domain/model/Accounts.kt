@@ -7,5 +7,5 @@ data class Accounts(
     @SerializedName("icon") val icon: String?,
     @SerializedName("uuid") val uuid: String?,
     @SerializedName("balance") val balance: Double?,
-    @SerializedName("currency") val currency: Currency?,
+    @SerializedName("currencyId") val currencyId: Long?,
 )

@@ -9,7 +9,6 @@ import com.kuro.money.data.data_source.local.dao.CategoryDao
 import com.kuro.money.data.data_source.local.dao.CurrencyDao
 import com.kuro.money.data.data_source.local.dao.EventDao
 import com.kuro.money.data.data_source.local.dao.ExchangeRatesDao
-import com.kuro.money.data.data_source.local.dao.SubCategoryDao
 import com.kuro.money.data.data_source.local.dao.TransactionDao
 import dagger.Module
 import dagger.Provides
@@ -54,8 +53,4 @@ class DatabaseModule {
     @Provides
     fun provideTransactionsDao(appDatabase: AppDatabase): TransactionDao =
         appDatabase.transactionDao()
-
-    @Provides
-    fun provideSubCategoryDao(appDatabase: AppDatabase): SubCategoryDao =
-        appDatabase.subCategoryDao()
 }

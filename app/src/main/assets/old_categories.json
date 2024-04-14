@@ -1,7 +1,6 @@
 [
   {
     "id": 1,
-    "parentId": 1,
     "name": "Food & Beverage",
     "title": "cate_food",
     "icon": "ic_category_foodndrink",
@@ -9,7 +8,7 @@
     "metadata": "foodndrink0",
     "subcategories": [
       {
-        "id": 2,
+        "id": 1,
         "parentId": 1,
         "name": "Restaurants",
         "title": "cate_restaurants",
@@ -18,7 +17,7 @@
         "metadata": "restaurants0"
       },
       {
-        "id": 3,
+        "id": 2,
         "parentId": 1,
         "name": "Cafe",
         "title": "cate_cafe",
@@ -29,8 +28,7 @@
     ]
   },
   {
-    "id": 4,
-    "parentId": 4,
+    "id": 2,
     "name": "Bills & Utilities",
     "title": "cate_utilities",
     "icon": "icon_135",
@@ -38,8 +36,8 @@
     "metadata": "utilities0",
     "subcategories": [
       {
-        "id": 5,
-        "parentId": 4,
+        "id": 3,
+        "parentId": 2,
         "name": "Phone Bill",
         "title": "cate_phone",
         "icon": "icon_134",
@@ -47,8 +45,8 @@
         "metadata": "phone0"
       },
       {
-        "id": 6,
-        "parentId": 4,
+        "id": 4,
+        "parentId": 2,
         "name": "Water Bill",
         "title": "cate_water",
         "icon": "icon_124",
@@ -56,8 +54,8 @@
         "metadata": "water0"
       },
       {
-        "id": 7,
-        "parentId": 4,
+        "id": 5,
+        "parentId": 2,
         "name": "Electricity Bill",
         "title": "cate_electricity",
         "icon": "icon_125",
@@ -65,8 +63,8 @@
         "metadata": "electricity0"
       },
       {
-        "id": 8,
-        "parentId": 4,
+        "id": 6,
+        "parentId": 2,
         "name": "Gas Bill",
         "title": "cate_gas",
         "icon": "icon_139",
@@ -74,8 +72,8 @@
         "metadata": "gas0"
       },
       {
-        "id": 9,
-        "parentId": 4,
+        "id": 7,
+        "parentId": 2,
         "name": "Television Bill",
         "title": "cate_television",
         "icon": "icon_84",
@@ -83,8 +81,8 @@
         "metadata": "television0"
       },
       {
-        "id": 10,
-        "parentId": 4,
+        "id": 8,
+        "parentId": 2,
         "name": "Internet Bill",
         "title": "cate_internet",
         "icon": "icon_126",
@@ -92,8 +90,8 @@
         "metadata": "internet0"
       },
       {
-        "id": 11,
-        "parentId": 4,
+        "id": 9,
+        "parentId": 2,
         "name": "Rentals",
         "title": "cate_rentals",
         "icon": "icon_136",
@@ -101,8 +99,8 @@
         "metadata": "rentals0"
       },
       {
-        "id": 12,
-        "parentId": 4,
+        "id": 10,
+        "parentId": 2,
         "name": "Other Utility Bills",
         "title": "cate_other_utility_bill",
         "icon": "icon_138",
@@ -112,8 +110,7 @@
     ]
   },
   {
-    "id": 13,
-    "parentId": 13,
+    "id": 3,
     "name": "Transportation",
     "title": "cate_transport",
     "icon": "ic_category_transport",
@@ -121,8 +118,8 @@
     "metadata": "transport0",
     "subcategories": [
       {
-        "id": 14,
-        "parentId": 13,
+        "id": 11,
+        "parentId": 3,
         "name": "Taxi",
         "title": "cate_taxi",
         "icon": "icon_127",
@@ -130,8 +127,8 @@
         "metadata": "taxi0"
       },
       {
-        "id": 15,
-        "parentId": 13,
+        "id": 12,
+        "parentId": 3,
         "name": "Parking Fees",
         "title": "cate_parking_fees",
         "icon": "icon_128",
@@ -139,8 +136,8 @@
         "metadata": "parking0"
       },
       {
-        "id": 16,
-        "parentId": 13,
+        "id": 13,
+        "parentId": 3,
         "name": "Petrol",
         "title": "cate_petrol",
         "icon": "icon_129",
@@ -148,8 +145,8 @@
         "metadata": "petrol0"
       },
       {
-        "id": 17,
-        "parentId": 13,
+        "id": 14,
+        "parentId": 3,
         "name": "Maintenance",
         "title": "cate_maintenance",
         "icon": "icon_130",
@@ -159,8 +156,7 @@
     ]
   },
   {
-    "id": 18,
-    "parentId": 18,
+    "id": 4,
     "name": "Shopping",
     "title": "cate_shopping",
     "icon": "ic_category_shopping",
@@ -168,8 +164,8 @@
     "metadata": "shopping0",
     "subcategories": [
       {
-        "id": 19,
-        "parentId": 18,
+        "id": 15,
+        "parentId": 4,
         "name": "Personal Items",
         "title": "cate_personal_items",
         "icon": "icon_41",
@@ -177,8 +173,8 @@
         "metadata": "personal_items0"
       },
       {
-        "id": 20,
-        "parentId": 18,
+        "id": 16,
+        "parentId": 4,
         "name": "Houseware",
         "title": "cate_houseware",
         "icon": "icon_107",
@@ -186,8 +182,8 @@
         "metadata": "houseware0"
       },
       {
-        "id": 21,
-        "parentId": 18,
+        "id": 17,
+        "parentId": 4,
         "name": "Makeup",
         "title": "cate_makeup",
         "icon": "icon_63",
@@ -197,8 +193,7 @@
     ]
   },
   {
-    "id": 22,
-    "parentId": 22,
+    "id": 5,
     "name": "Friend",
     "title": "cate_friend",
     "icon": "ic_category_friendnlover",
@@ -206,8 +201,7 @@
     "metadata": "friendnlover0"
   },
   {
-    "id": 23,
-    "parentId": 23,
+    "id": 6,
     "name": "Entertainment",
     "title": "cate_entertainment",
     "icon": "ic_category_entertainment",
@@ -215,8 +209,8 @@
     "metadata": "entertainment0",
     "subcategories": [
       {
-        "id": 24,
-        "parentId": 23,
+        "id": 18,
+        "parentId": 6,
         "name": "Movies",
         "title": "cate_movies",
         "icon": "icon_6",
@@ -224,8 +218,8 @@
         "metadata": "movies0"
       },
       {
-        "id": 25,
-        "parentId": 23,
+        "id": 19,
+        "parentId": 6,
         "name": "Games",
         "title": "cate_games",
         "icon": "icon_33",
@@ -235,8 +229,7 @@
     ]
   },
   {
-    "id": 26,
-    "parentId": 26,
+    "id": 7,
     "name": "Travel",
     "title": "cate_travel",
     "icon": "ic_category_travel",
@@ -244,8 +237,7 @@
     "metadata": "travel0"
   },
   {
-    "id": 27,
-    "parentId": 27,
+    "id": 8,
     "name": "Health & Fitness",
     "title": "cate_medical",
     "icon": "ic_category_medical",
@@ -253,8 +245,8 @@
     "metadata": "medical0",
     "subcategories": [
       {
-        "id": 28,
-        "parentId": 27,
+        "id": 20,
+        "parentId": 8,
         "name": "Sports",
         "title": "cate_sports",
         "icon": "icon_70",
@@ -262,8 +254,8 @@
         "metadata": "sports0"
       },
       {
-        "id": 29,
-        "parentId": 27,
+        "id": 21,
+        "parentId": 8,
         "name": "Doctor",
         "title": "cate_doctor",
         "icon": "ic_category_doctor",
@@ -271,8 +263,8 @@
         "metadata": "doctor0"
       },
       {
-        "id": 30,
-        "parentId": 27,
+        "id": 22,
+        "parentId": 8,
         "name": "Pharmacy",
         "title": "cate_pharmacy",
         "icon": "ic_category_pharmacy",
@@ -280,8 +272,8 @@
         "metadata": "pharmacy0"
       },
       {
-        "id": 31,
-        "parentId": 27,
+        "id": 23,
+        "parentId": 8,
         "name": "Personal Care",
         "title": "cate_personal_care",
         "icon": "icon_132",
@@ -289,8 +281,8 @@
         "metadata": "personal_care0"
       },
       {
-        "id": 32,
-        "parentId": 27,
+        "id": 24,
+        "parentId": 8,
         "name": "Medical Check Up",
         "title": "cate_medical_check_up",
         "icon": "ic_category_doctor",
@@ -300,8 +292,7 @@
     ]
   },
   {
-    "id": 33,
-    "parentId": 33,
+    "id": 9,
     "name": "Gifts & Donations",
     "title": "cate_donation",
     "icon": "ic_category_donations",
@@ -309,8 +300,8 @@
     "metadata": "gifts_donations0",
     "subcategories": [
       {
-        "id": 34,
-        "parentId": 33,
+        "id": 25,
+        "parentId": 9,
         "name": "Marriage",
         "title": "cate_marriage",
         "icon": "icon_10",
@@ -318,8 +309,8 @@
         "metadata": "marriage0"
       },
       {
-        "id": 35,
-        "parentId": 33,
+        "id": 26,
+        "parentId": 9,
         "name": "Funeral",
         "title": "cate_funeral",
         "icon": "icon_11",
@@ -327,8 +318,8 @@
         "metadata": "funeral0"
       },
       {
-        "id": 36,
-        "parentId": 33,
+        "id": 27,
+        "parentId": 9,
         "name": "Charity",
         "title": "cate_charity",
         "icon": "ic_category_give",
@@ -338,8 +329,7 @@
     ]
   },
   {
-    "id": 37,
-    "parentId": 37,
+    "id": 10,
     "name": "Family",
     "title": "cate_family",
     "icon": "ic_category_family",
@@ -347,8 +337,8 @@
     "metadata": "family0",
     "subcategories": [
       {
-        "id": 38,
-        "parentId": 37,
+        "id": 28,
+        "parentId": 10,
         "name": "Children Babies",
         "title": "cate_children_babies",
         "icon": "icon_38",
@@ -356,8 +346,8 @@
         "metadata": "children0"
       },
       {
-        "id": 39,
-        "parentId": 37,
+        "id": 29,
+        "parentId": 10,
         "name": "Home Maintenance",
         "title": "cate_home_improvement",
         "icon": "icon_8",
@@ -365,8 +355,8 @@
         "metadata": "home_improvement0"
       },
       {
-        "id": 40,
-        "parentId": 37,
+        "id": 30,
+        "parentId": 10,
         "name": "Home Services",
         "title": "cate_home_services",
         "icon": "icon_54",
@@ -374,8 +364,8 @@
         "metadata": "home_services0"
       },
       {
-        "id": 41,
-        "parentId": 37,
+        "id": 31,
+        "parentId": 10,
         "name": "Pets",
         "title": "cate_pets",
         "icon": "icon_53",
@@ -385,8 +375,7 @@
     ]
   },
   {
-    "id": 42,
-    "parentId": 42,
+    "id": 11,
     "name": "Education",
     "title": "cate_education",
     "icon": "ic_category_education",
@@ -394,8 +383,8 @@
     "metadata": "education0",
     "subcategories": [
       {
-        "id": 43,
-        "parentId": 42,
+        "id": 32,
+        "parentId": 11,
         "name": "Books",
         "title": "cate_books",
         "icon": "icon_35",
@@ -405,8 +394,7 @@
     ]
   },
   {
-    "id": 44,
-    "parentId": 44,
+    "id": 12,
     "name": "Investment",
     "title": "cate_invest",
     "icon": "ic_category_invest",
@@ -414,8 +402,7 @@
     "metadata": "invest0"
   },
   {
-    "id": 45,
-    "parentId": 45,
+    "id": 13,
     "name": "Business",
     "title": "cate_business",
     "icon": "icon_59",
@@ -423,8 +410,7 @@
     "metadata": "business0"
   },
   {
-    "id": 46,
-    "parentId": 46,
+    "id": 14,
     "name": "Insurance",
     "title": "cate_insurance",
     "icon": "icon_137",
@@ -432,8 +418,7 @@
     "metadata": "insurance0"
   },
   {
-    "id": 47,
-    "parentId": 47,
+    "id": 15,
     "name": "Loan",
     "title": "cate_loan",
     "icon": "ic_category_loan",
@@ -441,8 +426,7 @@
     "metadata": "IS_LOAN"
   },
   {
-    "id": 48,
-    "parentId": 48,
+    "id": 16,
     "name": "Fees Charges",
     "title": "cate_fees",
     "icon": "icon_138",
@@ -450,8 +434,7 @@
     "metadata": "fees_charges0"
   },
   {
-    "id": 49,
-    "parentId": 49,
+    "id": 17,
     "name": "Withdrawal",
     "title": "cate_withdrawal",
     "icon": "icon_withdrawal",
@@ -459,8 +442,7 @@
     "metadata": "IS_WITHDRAWAL"
   },
   {
-    "id": 50,
-    "parentId": 50,
+    "id": 18,
     "name": "Repayment",
     "title": "cate_repayment",
     "icon": "icon_141",
@@ -468,8 +450,7 @@
     "metadata": "IS_REPAYMENT"
   },
   {
-    "id": 51,
-    "parentId": 51,
+    "id": 19,
     "name": "Expense Other",
     "title": "cate_expense_other",
     "icon": "ic_category_other_expense",
@@ -477,8 +458,7 @@
     "metadata": "IS_OTHER_EXPENSE"
   },
   {
-    "id": 52,
-    "parentId": 52,
+    "id": 20,
     "name": "Award",
     "title": "cate_award",
     "icon": "ic_category_award",
@@ -486,8 +466,7 @@
     "metadata": "award0"
   },
   {
-    "id": 53,
-    "parentId": 53,
+    "id": 21,
     "name": "Interest",
     "title": "cate_interest",
     "icon": "ic_category_interestmoney",
@@ -495,8 +474,7 @@
     "metadata": "interestmoney0"
   },
   {
-    "id": 54,
-    "parentId": 54,
+    "id" : 22,
     "name": "Salary",
     "title": "cate_salary",
     "icon": "ic_category_salary",
@@ -504,8 +482,6 @@
     "metadata": "salary0"
   },
   {
-    "id": 55,
-    "parentId": 55,
     "name": "Debt",
     "title": "cate_debt",
     "icon": "ic_category_debt",
@@ -513,8 +489,6 @@
     "metadata": "IS_DEBT"
   },
   {
-    "id": 56,
-    "parentId": 56,
     "name": "Gift",
     "title": "cate_give",
     "icon": "ic_category_give",
@@ -522,8 +496,6 @@
     "metadata": "IS_GIVE"
   },
   {
-    "id": 57,
-    "parentId": 57,
     "name": "Selling",
     "title": "cate_selling",
     "icon": "ic_category_selling",
@@ -531,8 +503,6 @@
     "metadata": "selling0"
   },
   {
-    "id": 58,
-    "parentId": 58,
     "name": "Debt Collection",
     "title": "cate_debt_collection",
     "icon": "icon_140",
@@ -540,8 +510,6 @@
     "metadata": "IS_DEBT_COLLECTION"
   },
   {
-    "id": 59,
-    "parentId": 59,
     "name": "Other Income",
     "title": "cate_income_other",
     "icon": "ic_category_other_income",

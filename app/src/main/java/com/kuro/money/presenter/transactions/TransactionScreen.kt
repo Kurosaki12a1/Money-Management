@@ -489,7 +489,7 @@ private fun ToolBarTransactions(
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = "${decimalFormatter.formatForVisual(wallet.balance.string())} ${wallet.currencyEntity.symbol}",
+                text = "${decimalFormatter.formatForVisual(wallet.balance.string())} ${wallet.currency.symbol}",
                 color = Color.Black,
                 style = MaterialTheme.typography.body1,
                 fontWeight = FontWeight.Bold,

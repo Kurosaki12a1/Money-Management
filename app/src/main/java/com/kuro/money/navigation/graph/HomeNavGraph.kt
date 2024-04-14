@@ -178,7 +178,19 @@ fun NavGraphBuilder.homeNavGraph(
                                         }
                                         val addEventScreenViewModel =
                                             hiltViewModel<AddEventScreenViewModel>(parentEntry)
-                                        AddEventScreen(navHostController, addEventScreenViewModel)
+                                        AddEventScreen(
+                                            navHostController,
+                                            addEventScreenViewModel,
+                                            onSelectIcon = {
+                                                navHostController.navigate(AddEvent.SelectIcon.route)
+                                            },
+                                            onSelectWallet = {
+                                                navHostController.navigate(AddEvent.SelectWallet.route)
+                                            },
+                                            onSelectCurrency = {
+                                                navHostController.navigate(AddEvent.SelectCurrency.route)
+                                            }
+                                        )
                                     }
                                     composable(route = AddEvent.SelectIcon.route) {
                                         val parentEntry = remember(it) {

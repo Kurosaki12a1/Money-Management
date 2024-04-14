@@ -36,6 +36,7 @@ import androidx.compose.material.icons.filled.Undo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -57,6 +58,7 @@ import com.kuro.money.data.utils.Resource
 import com.kuro.money.domain.model.LetterColor
 import com.kuro.money.extension.noRippleClickable
 import com.kuro.money.navigation.routes.NavigationRoute
+import com.kuro.money.presenter.utils.DecimalFormatter
 import com.kuro.money.presenter.utils.popBackStackWithLifeCycle
 import com.kuro.money.presenter.utils.string
 import com.kuro.money.presenter.utils.toPainterResource
@@ -75,6 +77,7 @@ fun TransactionDetailsScreen(
     }
 
     var transactionEntity by remember { mutableStateOf<TransactionEntity?>(null) }
+    val decimalFormatter = DecimalFormatter()
 
     LaunchedEffect(Unit) {
         transactionDetailsViewModel.detailTransaction.collectLatest {
@@ -174,7 +177,7 @@ fun TransactionDetailsScreen(
                     ) {
                         Spacer(modifier = Modifier.weight(0.2f))
                         Text(
-                            text = "${transactionEntity!!.amount.string()} ${transactionEntity!!.currency.symbol}",
+                            text = "${decimalFormatter.formatForVisual(transactionEntity!!.amount.string())} ${transactionEntity!!.currency.symbol}",
                             style = MaterialTheme.typography.body1,
                             color = if (transactionEntity!!.category.type == "expense") Color.Red else Color.Cyan,
                             modifier = Modifier
@@ -411,8 +414,8 @@ private fun DialogDeleteTransaction(
 private fun ZoomInImage(isVisible: Boolean, image: Uri?, onDismissRequest: () -> Unit) {
     if (!isVisible || image == null) return
     BackHandler { onDismissRequest() }
-    var scale by remember { mutableStateOf(1f) }
-    var rotation by remember { mutableStateOf(0f) }
+    var scale by remember { mutableFloatStateOf(1f) }
+    var rotation by remember { mutableFloatStateOf(0f) }
     var offset by remember { mutableStateOf(Offset.Zero) }
     Box(
         modifier = Modifier

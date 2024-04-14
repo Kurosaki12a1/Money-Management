@@ -639,7 +639,7 @@ private fun WalletItem(
                 color = Color.Black
             )
             Text(
-                text = "${item.balance} ${item.currencyEntity.symbol}",
+                text = "${item.balance} ${item.currency.symbol}",
                 style = MaterialTheme.typography.body2,
                 color = Color.Black.copy(alpha = 0.3f)
             )
@@ -680,7 +680,7 @@ private fun WalletItem(
                 color = Color.Black
             )
             Text(
-                text = "${item.balance} ${item.currencyEntity.symbol}",
+                text = "${item.balance} ${item.currency.symbol}",
                 style = MaterialTheme.typography.body2,
                 color = Color.Black.copy(alpha = 0.3f)
             )

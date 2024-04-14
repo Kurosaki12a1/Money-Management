@@ -90,7 +90,20 @@ fun NavGraphBuilder.addTransactionNavGraph(navHostController: NavHostController)
                         }
                         val addEventScreenViewModel =
                             hiltViewModel<AddEventScreenViewModel>(parentEntry)
-                        AddEventScreen(navHostController, addEventScreenViewModel)
+                        println("Vào đâu?")
+                        AddEventScreen(
+                            navHostController,
+                            addEventScreenViewModel,
+                            onSelectIcon = {
+                                navHostController.navigate(AddTransaction.AddEvent.SelectIcon.route)
+                            },
+                            onSelectCurrency = {
+                                navHostController.navigate(AddTransaction.AddEvent.SelectCurrency.route)
+                            },
+                            onSelectWallet =  {
+                                navHostController.navigate(AddTransaction.AddEvent.SelectWallet.route)
+                            }
+                        )
                     }
                     composable(route = AddTransaction.AddEvent.SelectIcon.route) {
                         val parentEntry = remember(it) {
@@ -98,6 +111,8 @@ fun NavGraphBuilder.addTransactionNavGraph(navHostController: NavHostController)
                         }
                         val addEventScreenViewModel =
                             hiltViewModel<AddEventScreenViewModel>(parentEntry)
+                        println("Vào Icon này?")
+
                         SelectIconScreen(navHostController, addEventScreenViewModel)
                     }
                     composable(route = AddTransaction.AddEvent.SelectCurrency.route) {

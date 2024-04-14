@@ -7,7 +7,6 @@ import androidx.room.Query
 import androidx.room.Update
 import com.kuro.money.data.model.ExchangeRateEntity
 import com.kuro.money.data.model.UpdateTimeInfo
-import com.kuro.money.domain.model.Currency
 
 @Dao
 interface ExchangeRatesDao {

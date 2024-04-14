@@ -51,7 +51,7 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.kuro.money.R
-import com.kuro.money.data.model.CurrencyEntity
+import com.kuro.money.data.model.Currency
 import com.kuro.money.data.utils.Resource
 import com.kuro.money.extension.noRippleClickable
 import com.kuro.money.presenter.account.feature.wallets.AddWalletViewModel
@@ -74,8 +74,8 @@ fun SelectCurrencyScreen(
     selectCurrencyViewModel: SelectCurrencyViewModel = hiltViewModel()
 ) {
     val isSearching = remember { mutableStateOf(false) }
-    val listCurrency = remember { mutableStateListOf<CurrencyEntity>() }
-    val fullListCurrency = remember { mutableStateListOf<CurrencyEntity>() }
+    val listCurrency = remember { mutableStateListOf<Currency>() }
+    val fullListCurrency = remember { mutableStateListOf<Currency>() }
 
     BackHandler {
         if (isSearching.value) {
@@ -158,8 +158,8 @@ fun SelectCurrencyScreen(
     selectCurrencyViewModel: SelectCurrencyViewModel = hiltViewModel()
 ) {
     val isSearching = remember { mutableStateOf(false) }
-    val listCurrency = remember { mutableStateListOf<CurrencyEntity>() }
-    val fullListCurrency = remember { mutableStateListOf<CurrencyEntity>() }
+    val listCurrency = remember { mutableStateListOf<Currency>() }
+    val fullListCurrency = remember { mutableStateListOf<Currency>() }
 
     BackHandler {
         if (isSearching.value) {
@@ -242,8 +242,8 @@ fun SelectCurrencyScreen(
     selectCurrencyViewModel: SelectCurrencyViewModel = hiltViewModel()
 ) {
     val isSearching = remember { mutableStateOf(false) }
-    val listCurrency = remember { mutableStateListOf<CurrencyEntity>() }
-    val fullListCurrency = remember { mutableStateListOf<CurrencyEntity>() }
+    val listCurrency = remember { mutableStateListOf<Currency>() }
+    val fullListCurrency = remember { mutableStateListOf<Currency>() }
 
     BackHandler {
         if (isSearching.value) {
@@ -326,8 +326,8 @@ fun SelectCurrencyScreen(
     selectCurrencyViewModel: SelectCurrencyViewModel = hiltViewModel()
 ) {
     val isSearching = remember { mutableStateOf(false) }
-    val listCurrency = remember { mutableStateListOf<CurrencyEntity>() }
-    val fullListCurrency = remember { mutableStateListOf<CurrencyEntity>() }
+    val listCurrency = remember { mutableStateListOf<Currency>() }
+    val fullListCurrency = remember { mutableStateListOf<Currency>() }
 
     BackHandler {
         if (isSearching.value) {
@@ -410,8 +410,8 @@ fun SelectCurrencyScreen(
     selectCurrencyViewModel: SelectCurrencyViewModel = hiltViewModel()
 ) {
     val isSearching = remember { mutableStateOf(false) }
-    val listCurrency = remember { mutableStateListOf<CurrencyEntity>() }
-    val fullListCurrency = remember { mutableStateListOf<CurrencyEntity>() }
+    val listCurrency = remember { mutableStateListOf<Currency>() }
+    val fullListCurrency = remember { mutableStateListOf<Currency>() }
 
     BackHandler {
         if (isSearching.value) {
@@ -580,9 +580,9 @@ private fun ToolBarCurrencyScreen(
 
 @Composable
 private fun ListCurrencies(
-    list: List<CurrencyEntity>?,
-    selectedCurrency: CurrencyEntity?,
-    onClick: (CurrencyEntity) -> Unit
+    list: List<Currency>?,
+    selectedCurrency: Currency?,
+    onClick: (Currency) -> Unit
 ) {
     if (list == null) return
     LazyColumn(
@@ -598,9 +598,9 @@ private fun ListCurrencies(
 
 @Composable
 private fun ItemCurrency(
-    item: CurrencyEntity,
-    itemSelected: CurrencyEntity?,
-    onClick: (CurrencyEntity) -> Unit
+    item: Currency,
+    itemSelected: Currency?,
+    onClick: (Currency) -> Unit
 ) {
     val isSelected = item == itemSelected
     Row(

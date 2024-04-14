@@ -69,11 +69,10 @@ import androidx.navigation.NavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.kuro.money.R
-import com.kuro.money.data.model.EventEntity
+import com.kuro.money.data.model.Event
 import com.kuro.money.data.utils.FileUtils
 import com.kuro.money.data.utils.Resource
 import com.kuro.money.domain.model.LetterColor
-import com.kuro.money.domain.model.SelectedCategory
 import com.kuro.money.extension.noRippleClickable
 import com.kuro.money.navigation.routes.NavigationRoute.AddTransaction
 import com.kuro.money.presenter.utils.DecimalFormatter
@@ -114,7 +113,7 @@ fun AddTransactionScreen(
         shouldSubmitTransaction.value = !(amount == null
                 || wallet == null
                 || selectedCurrency == null
-                || selectedCategory == SelectedCategory())
+                || selectedCategory == null)
     }
 
     LaunchedEffect(Unit) {
@@ -125,9 +124,11 @@ fun AddTransactionScreen(
         }
     }
 
-    BoxWithConstraints(modifier = Modifier
-        .fillMaxSize()
-        .background(Gray)) {
+    BoxWithConstraints(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Gray)
+    ) {
         val maxHeight = this.maxHeight
         Column(
             modifier = Modifier
@@ -242,7 +243,7 @@ fun showDatePicker(
 @Composable
 fun MoreDetailsTransaction(
     peopleSelected: String?,
-    eventSelected: EventEntity?,
+    eventSelected: Event?,
     dateRemind: LocalDate?,
     uriSelected: Uri?,
     imageFromCamera: Bitmap?,
@@ -633,7 +634,10 @@ private fun BodyAddTransaction(
                 horizontalArrangement = Arrangement.spacedBy(20.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                if (selectedCategory.name != "" && selectedCategory.icon != "") {
+                if (selectedCategory != null
+                    && selectedCategory.name != ""
+                    && selectedCategory.icon != ""
+                ) {
                     Image(
                         painter = selectedCategory.icon.toPainterResource(),
                         contentDescription = selectedCategory.name

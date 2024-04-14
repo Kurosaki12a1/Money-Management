@@ -4,10 +4,10 @@ import com.google.gson.annotations.SerializedName
 
 data class Currencies (
     @SerializedName("t") val time : Long?,
-    @SerializedName("data") val data : List<Currency>
+    @SerializedName("data") val data : List<CurrencyData>
 )
 
-data class Currency(
+data class CurrencyData(
     @SerializedName("c") val code: String?,
     @SerializedName("s") val symbol : String?,
     @SerializedName("n") val name : String?,

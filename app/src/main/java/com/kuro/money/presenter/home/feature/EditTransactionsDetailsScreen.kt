@@ -46,7 +46,6 @@ import androidx.navigation.NavController
 import com.kuro.money.R
 import com.kuro.money.data.utils.FileUtils
 import com.kuro.money.data.utils.Resource
-import com.kuro.money.domain.model.SelectedCategory
 import com.kuro.money.extension.noRippleClickable
 import com.kuro.money.navigation.routes.NavigationRoute
 import com.kuro.money.presenter.add_transaction.MoreDetailsTransaction
@@ -93,7 +92,7 @@ fun EditTransactionsDetailsScreen(
         shouldSubmitTransaction.value = !(amount == null
                 || wallet == null
                 || selectedCurrency == null
-                || selectedCategory == SelectedCategory())
+                || selectedCategory == null)
     }
 
     LaunchedEffect(Unit) {
@@ -266,7 +265,7 @@ private fun BodyAddTransaction(
                 horizontalArrangement = Arrangement.spacedBy(20.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                if (selectedCategory.name != "" && selectedCategory.icon != "") {
+                if (selectedCategory != null) {
                     Image(
                         painter = selectedCategory.icon.toPainterResource(),
                         contentDescription = selectedCategory.name

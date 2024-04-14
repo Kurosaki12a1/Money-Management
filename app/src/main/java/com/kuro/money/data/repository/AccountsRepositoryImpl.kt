@@ -2,8 +2,9 @@ package com.kuro.money.data.repository
 
 import android.content.Context
 import com.kuro.money.data.data_source.local.AppDatabase
-import com.kuro.money.data.mapper.toAccountsEntity
+import com.kuro.money.data.mapper.toWallet
 import com.kuro.money.data.model.AccountEntity
+import com.kuro.money.data.model.Wallet
 import com.kuro.money.data.utils.FileUtils
 import com.kuro.money.data.utils.Resource
 import com.kuro.money.domain.model.Accounts
@@ -20,10 +21,10 @@ class AccountsRepositoryImpl @Inject constructor(
     private val appDatabase: AppDatabase,
     private val dispatcher: CoroutineDispatcher = Dispatchers.IO
 ) : AccountsRepository {
-    override fun insertAccount(accountEntity: AccountEntity): Flow<Resource<Long>> = flow {
+    override fun insertAccount(wallet: Wallet): Flow<Resource<Long>> = flow {
         emit(Resource.Loading)
         try {
-            val data = appDatabase.accountsDao().insertWallet(accountEntity)
+            val data = appDatabase.accountsDao().insertWallet(wallet)
             emit(Resource.success(data))
         } catch (e: Exception) {
             e.printStackTrace()
@@ -31,11 +32,11 @@ class AccountsRepositoryImpl @Inject constructor(
         }
     }.flowOn(dispatcher)
 
-    override fun insertAccounts(list: List<AccountEntity>): Flow<Resource<Long>> = flow {
+    override fun insertAccounts(listWallet: List<Wallet>): Flow<Resource<Long>> = flow {
         emit(Resource.Loading)
         var id = 0L
         try {
-            list.forEach {
+            listWallet.forEach {
                 id = appDatabase.accountsDao().insertWallet(it)
             }
             emit(Resource.success(id))
@@ -45,10 +46,10 @@ class AccountsRepositoryImpl @Inject constructor(
         }
     }.flowOn(dispatcher)
 
-    override fun updateAccount(accountEntity: AccountEntity): Flow<Resource<Int>> = flow {
+    override fun updateAccount(wallet: Wallet): Flow<Resource<Int>> = flow {
         emit(Resource.Loading)
         try {
-            val data = appDatabase.accountsDao().updateWallet(accountEntity)
+            val data = appDatabase.accountsDao().updateWallet(wallet)
             emit(Resource.success(data))
         } catch (e: Exception) {
             e.printStackTrace()
@@ -67,11 +68,11 @@ class AccountsRepositoryImpl @Inject constructor(
         }
     }.flowOn(dispatcher)
 
-    override fun readFileFromJson(jsonName: String): Flow<Resource<List<AccountEntity>?>> = flow {
+    override fun readFileFromJson(jsonName: String): Flow<Resource<List<Wallet>?>> = flow {
         emit(Resource.Loading)
         try {
             val data = FileUtils.loadJsonFromAsset<List<Accounts>>(context, jsonName)
-            emit(Resource.success(data?.map { it.toAccountsEntity() }))
+            emit(Resource.success(data?.map { it.toWallet() }))
         } catch (e: Exception) {
             e.printStackTrace()
             emit(Resource.failure(e, e.message))

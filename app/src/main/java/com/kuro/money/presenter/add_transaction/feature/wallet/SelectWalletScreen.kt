@@ -275,8 +275,11 @@ fun SelectWalletScreen(
                 verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 items(listWallet) {
-                    WalletItem(item = it, isSelected = it == selectedWallet.value) { entity ->
-                        editTransactionDetailViewModel.setWallet(entity)
+                    WalletItem(
+                        item = it,
+                        isSelected = it.id == selectedWallet.value?.id
+                    ) { entity ->
+                        editTransactionDetailViewModel.setWallet(entity.account)
                         navController.popBackStackWithLifeCycle()
                     }
                 }
@@ -309,7 +312,7 @@ private fun WalletItem(
                 color = Color.Black
             )
             Text(
-                text = "${item.balance} ${item.currencyEntity.symbol}",
+                text = "${item.balance} ${item.currency.symbol}",
                 style = MaterialTheme.typography.body2,
                 color = Color.Black.copy(alpha = 0.3f)
             )

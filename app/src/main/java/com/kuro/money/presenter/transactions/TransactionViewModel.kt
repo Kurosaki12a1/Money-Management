@@ -6,6 +6,7 @@ import com.kuro.money.constants.Constants
 import com.kuro.money.data.AppCache
 import com.kuro.money.data.model.AccountEntity
 import com.kuro.money.data.model.TransactionEntity
+import com.kuro.money.data.model.Wallet
 import com.kuro.money.data.utils.Resource
 import com.kuro.money.domain.usecase.AccountsUseCase
 import com.kuro.money.domain.usecase.TransactionUseCase
@@ -90,7 +91,7 @@ class TransactionViewModel @Inject constructor(
                         _balance.value = 0.0
                         data.value.forEach { wallet ->
                             val rates = listRates[AppCache.defaultCurrency.value]?.find { rates ->
-                                rates.currencyCode.lowercase() == wallet.currencyEntity.code.lowercase()
+                                rates.currencyCode.lowercase() == wallet.currency.code.lowercase()
                             }?.rate
                             // rates is 1 unit of base code equal certain value of currency code
                             // So we must use 1/ rates.
@@ -108,14 +109,18 @@ class TransactionViewModel @Inject constructor(
         viewModelScope.launch {
             AppCache.defaultCurrencyEntity.collectLatest {
                 if (it != null) {
+                    val wallet = Wallet(
+                        id = Constants.GLOBAL_WALLET_ID,
+                        name = Constants.GLOBAL_WALLET_NAME,
+                        icon = Constants.GLOBAL_WALLET_ICON,
+                        uuid = Constants.GLOBAL_WALLET_UUID,
+                        balance = _balance.value,
+                        currencyId = it.id
+                    )
                     _globalWallet.value =
                         AccountEntity(
-                            id = Constants.GLOBAL_WALLET_ID,
-                            name = Constants.GLOBAL_WALLET_NAME,
-                            icon = Constants.GLOBAL_WALLET_ICON,
-                            uuid = Constants.GLOBAL_WALLET_UUID,
-                            balance = _balance.value,
-                            currencyEntity = it
+                            account = wallet,
+                            currency = it
                         )
                 }
             }

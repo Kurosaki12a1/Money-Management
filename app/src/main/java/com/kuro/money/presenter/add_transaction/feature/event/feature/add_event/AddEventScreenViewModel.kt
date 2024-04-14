@@ -3,8 +3,8 @@ package com.kuro.money.presenter.add_transaction.feature.event.feature.add_event
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.kuro.money.data.model.AccountEntity
-import com.kuro.money.data.model.CurrencyEntity
-import com.kuro.money.data.model.EventEntity
+import com.kuro.money.data.model.Currency
+import com.kuro.money.data.model.Event
 import com.kuro.money.data.utils.Resource
 import com.kuro.money.domain.usecase.EventUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -35,19 +35,19 @@ class AddEventScreenViewModel @Inject constructor(
     private val _endingDate = MutableStateFlow<LocalDate>(LocalDate.now())
     val endingDate = _endingDate.asStateFlow()
 
-    private val _currencySelected = MutableStateFlow<CurrencyEntity?>(null)
+    private val _currencySelected = MutableStateFlow<Currency?>(null)
     val currencySelected = _currencySelected.asStateFlow()
 
     fun insertEvent() {
         if (name.value.isEmpty() || wallet.value == null || iconSelected.value == null || currencySelected.value == null) return
-        val event = EventEntity(
+        val event = Event(
             0L,
             iconSelected.value!!,
             name.value,
             startDate = LocalDate.now(),
             endDate = endingDate.value,
-            currency = currencySelected.value!!,
-            wallet = _wallet.value!!
+            currencyId = currencySelected.value!!.id,
+            walletId = _wallet.value!!.id
         )
         viewModelScope.launch {
             eventUseCase(event).collectLatest {
@@ -64,11 +64,12 @@ class AddEventScreenViewModel @Inject constructor(
         _endingDate.value = date
     }
 
-    fun setCurrencySelected(value: CurrencyEntity) {
+    fun setCurrencySelected(value: Currency) {
         _currencySelected.value = value
     }
 
     fun setIconSelected(value: String) {
+        println("Set Icon value: $value")
         _iconSelected.value = value
     }
 

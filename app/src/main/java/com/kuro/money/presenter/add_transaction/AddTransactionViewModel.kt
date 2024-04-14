@@ -7,11 +7,12 @@ import androidx.lifecycle.viewModelScope
 import com.kuro.money.constants.Constants
 import com.kuro.money.data.AppCache
 import com.kuro.money.data.model.AccountEntity
-import com.kuro.money.data.model.CurrencyEntity
-import com.kuro.money.data.model.EventEntity
-import com.kuro.money.data.model.TransactionEntity
+import com.kuro.money.data.model.CategoryEntity
+import com.kuro.money.data.model.Currency
+import com.kuro.money.data.model.Event
+import com.kuro.money.data.model.Transaction
+import com.kuro.money.data.model.Wallet
 import com.kuro.money.data.utils.Resource
-import com.kuro.money.domain.model.SelectedCategory
 import com.kuro.money.domain.usecase.AccountsUseCase
 import com.kuro.money.domain.usecase.CurrenciesUseCase
 import com.kuro.money.domain.usecase.PreferencesUseCase
@@ -34,7 +35,7 @@ class AddTransactionViewModel @Inject constructor(
     private val currenciesUseCase: CurrenciesUseCase,
     private val preferencesUseCase: PreferencesUseCase,
 ) : ViewModel() {
-    private val _selectedCategory = MutableStateFlow(SelectedCategory())
+    private val _selectedCategory = MutableStateFlow<CategoryEntity?>(null)
     val selectedCategory = _selectedCategory.asStateFlow()
 
     private val _wallet = MutableStateFlow<AccountEntity?>(null)
@@ -43,7 +44,7 @@ class AddTransactionViewModel @Inject constructor(
     private val _nameOfPeople = MutableStateFlow<String?>(null)
     val nameOfPeople = _nameOfPeople.asStateFlow()
 
-    private val _eventSelected = MutableStateFlow<EventEntity?>(null)
+    private val _eventSelected = MutableStateFlow<Event?>(null)
     val eventSelected = _eventSelected.asStateFlow()
 
     private val _dateTransaction = MutableStateFlow<LocalDate>(LocalDate.now())
@@ -58,7 +59,7 @@ class AddTransactionViewModel @Inject constructor(
     private val _uriSelected = MutableStateFlow<Uri?>(null)
     val uriSelected = _uriSelected.asStateFlow()
 
-    private val _currencySelected = MutableStateFlow<CurrencyEntity?>(null)
+    private val _currencySelected = MutableStateFlow<Currency?>(null)
     val currencySelected = _currencySelected.asStateFlow()
 
     private val _amount = MutableStateFlow<String?>(null)
@@ -102,7 +103,7 @@ class AddTransactionViewModel @Inject constructor(
         }
     }
 
-    fun setCurrencySelected(value: CurrencyEntity) {
+    fun setCurrencySelected(value: Currency) {
         _currencySelected.value = value
     }
 
@@ -124,16 +125,16 @@ class AddTransactionViewModel @Inject constructor(
 
     fun submitData() {
         viewModelScope.launch {
-            val transactionEntity = TransactionEntity(
-                currency = currencySelected.value!!,
+            val transactionEntity = Transaction(
+                currencyId = currencySelected.value!!.id,
                 amount = amount.value?.toDouble() ?: 0.0,
                 createdDate = LocalDate.now(),
                 displayDate = dateTransaction.value,
-                category = selectedCategory.value,
+                categoryId = selectedCategory.value!!.id,
                 note = note.value,
-                wallet = wallet.value!!,
+                walletId = wallet.value!!.id,
                 people = nameOfPeople.value,
-                event = eventSelected.value,
+                eventId = eventSelected.value!!.id,
                 remindDate = dateRemind.value,
                 image = uriSelected.value,
                 isExcludedReport = false // TODO
@@ -142,18 +143,18 @@ class AddTransactionViewModel @Inject constructor(
                 _insertTransaction.value = it
                 if (it is Resource.Success && _wallet.value != null) {
                     accountsUseCase.update(
-                        AccountEntity(
+                        Wallet(
                             id = _wallet.value!!.id,
                             name = _wallet.value!!.name,
-                            currencyEntity = _wallet.value!!.currencyEntity,
+                            currencyId = _wallet.value!!.currency.id,
                             icon = _wallet.value!!.icon,
                             uuid = _wallet.value!!.uuid,
                             balance = calculateWalletAfterTransaction(
-                                _wallet.value!!.currencyEntity,
+                                _wallet.value!!.currency,
                                 _wallet.value!!.balance,
                                 _currencySelected.value!!,
                                 _amount.value?.toDouble() ?: 0.0,
-                                _selectedCategory.value.type == Constants.INCOME
+                                _selectedCategory.value!!.type == Constants.INCOME
                             )
                         )
                     ).collectLatest {
@@ -165,11 +166,11 @@ class AddTransactionViewModel @Inject constructor(
     }
 
 
-    fun setEventSelected(value: EventEntity) {
+    fun setEventSelected(value: Event?) {
         _eventSelected.value = value
     }
 
-    fun setSelectedCategory(value: SelectedCategory) {
+    fun setSelectedCategory(value: CategoryEntity?) {
         _selectedCategory.value = value
     }
 

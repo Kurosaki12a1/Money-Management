@@ -43,7 +43,6 @@ import androidx.navigation.NavController
 import com.kuro.money.R
 import com.kuro.money.data.utils.Resource
 import com.kuro.money.extension.noRippleClickable
-import com.kuro.money.navigation.routes.NavigationRoute
 import com.kuro.money.presenter.add_transaction.showDatePicker
 import com.kuro.money.presenter.utils.SlideUpContent
 import com.kuro.money.presenter.utils.popBackStackWithLifeCycle
@@ -55,11 +54,15 @@ import kotlinx.coroutines.flow.collectLatest
 @Composable
 fun AddEventScreen(
     navController: NavController,
-    addEventScreenViewModel: AddEventScreenViewModel
+    addEventScreenViewModel: AddEventScreenViewModel,
+    onSelectIcon: () -> Unit,
+    onSelectCurrency: () -> Unit,
+    onSelectWallet: () -> Unit
 ) {
     BackHandler { navController.popBackStackWithLifeCycle() }
 
     val iconSelected = addEventScreenViewModel.iconSelected.collectAsState().value
+    println("IconSelected from AddEvent: $iconSelected")
     val walletSelected = addEventScreenViewModel.wallet.collectAsState().value
     val currencySelected = addEventScreenViewModel.currencySelected.collectAsState().value
 
@@ -134,9 +137,7 @@ fun AddEventScreen(
                             Box(
                                 modifier = Modifier
                                     .noRippleClickable {
-                                        navController.navigate(
-                                           NavigationRoute.Home.TransactionDetails.Edit.AddEvent.SelectIcon.route
-                                        )
+                                        onSelectIcon()
                                     }
                                     .background(Gray, CircleShape)
                                     .size(30.dp),
@@ -151,9 +152,8 @@ fun AddEventScreen(
                         } else {
                             Image(
                                 modifier = Modifier.noRippleClickable {
-                                    navController.navigate(
-                                       NavigationRoute.Home.TransactionDetails.Edit.AddEvent.SelectIcon.route
-                                    )
+                                    onSelectIcon()
+
                                 },
                                 painter = iconSelected.toPainterResource(),
                                 contentDescription = iconSelected
@@ -213,9 +213,7 @@ fun AddEventScreen(
                         modifier = Modifier
                             .fillMaxWidth()
                             .noRippleClickable {
-                                navController.navigate(
-                                   NavigationRoute.Home.TransactionDetails.Edit.AddEvent.SelectCurrency.route
-                                )
+                                onSelectCurrency()
                             },
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(20.dp)
@@ -256,11 +254,7 @@ fun AddEventScreen(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .noRippleClickable {
-                                navController.navigate(
-                                   NavigationRoute.Home.TransactionDetails.Edit.AddEvent.SelectWallet.route
-                                )
-                            },
+                            .noRippleClickable { onSelectWallet() },
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(20.dp)
                     ) {

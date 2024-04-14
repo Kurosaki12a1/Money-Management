@@ -2,8 +2,8 @@ package com.kuro.money.presenter.account.feature.wallets
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.kuro.money.data.model.AccountEntity
-import com.kuro.money.data.model.CurrencyEntity
+import com.kuro.money.data.model.Currency
+import com.kuro.money.data.model.Wallet
 import com.kuro.money.data.utils.Resource
 import com.kuro.money.domain.usecase.AccountsUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -27,7 +27,7 @@ class AddWalletViewModel @Inject constructor(
     private val _balance = MutableStateFlow<Long?>(null)
     val balance = _balance.asStateFlow()
 
-    private val _currencySelected = MutableStateFlow<CurrencyEntity?>(null)
+    private val _currencySelected = MutableStateFlow<Currency?>(null)
     val currencySelected = _currencySelected.asStateFlow()
 
     private val _insertWallet = MutableStateFlow<Resource<Long>>(Resource.Default)
@@ -35,9 +35,9 @@ class AddWalletViewModel @Inject constructor(
 
     fun submit() {
         if (name.value.isEmpty() || balance.value == null || currencySelected.value == null) return
-        val entity = AccountEntity(
+        val entity = Wallet(
             name.value,
-            currencySelected.value!!,
+            currencySelected.value!!.id,
             iconSelected.value,
             UUID.randomUUID().toString(),
             balance.value!!.toDouble()
@@ -61,7 +61,7 @@ class AddWalletViewModel @Inject constructor(
         _iconSelected.value = value
     }
 
-    fun setCurrency(entity: CurrencyEntity?) {
+    fun setCurrency(entity: Currency?) {
         _currencySelected.value = entity
     }
 }
