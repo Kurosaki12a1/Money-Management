@@ -530,10 +530,11 @@ private fun ToolBarCurrencyScreen(
                 }
             )
         } else {
+            val text = searchTextFlow.collectAsState().value
             Box(
                 modifier = Modifier.weight(1f)
             ) {
-                if (searchTextFlow.value == "") {
+                if (text == "") {
                     Text(
                         text = stringResource(id = R.string.currency_hint),
                         color = Color.Black.copy(alpha = 0.5f),
@@ -541,7 +542,7 @@ private fun ToolBarCurrencyScreen(
                     )
                 }
                 BasicTextField(
-                    value = searchTextFlow.collectAsState().value,
+                    value = text,
                     onValueChange = { searchTextFlow.value = it },
                     modifier = Modifier
                         .fillMaxWidth()
