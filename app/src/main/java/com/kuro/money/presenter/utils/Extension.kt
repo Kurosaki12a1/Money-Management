@@ -1,9 +1,6 @@
 package com.kuro.money.presenter.utils
 
 import androidx.compose.animation.AnimatedContentScope
-import androidx.compose.animation.AnimatedContentTransitionScope
-import androidx.compose.animation.EnterTransition
-import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideInVertically
@@ -22,8 +19,8 @@ import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 import java.util.Locale
 
-fun LocalDate.string(pattern: String = "dd/MM/yyyy"): String {
-    if (this == LocalDate.now()) return "Today"
+fun LocalDate.string(pattern: String = "dd/MM/yyyy", enableToday: Boolean = true): String {
+    if (this == LocalDate.now() && enableToday) return "Today"
     return DateTimeFormatter.ofPattern(pattern).format(this)
 }
 

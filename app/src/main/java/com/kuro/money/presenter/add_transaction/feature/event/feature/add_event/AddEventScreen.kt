@@ -62,7 +62,6 @@ fun AddEventScreen(
     BackHandler { navController.popBackStackWithLifeCycle() }
 
     val iconSelected = addEventScreenViewModel.iconSelected.collectAsState().value
-    println("IconSelected from AddEvent: $iconSelected")
     val walletSelected = addEventScreenViewModel.wallet.collectAsState().value
     val currencySelected = addEventScreenViewModel.currencySelected.collectAsState().value
 

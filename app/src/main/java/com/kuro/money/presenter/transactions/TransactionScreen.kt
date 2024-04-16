@@ -118,7 +118,7 @@ fun TransactionScreen(
             if (it.second is Resource.Success && it.first != null) {
                 listWallet.clear()
                 listWallet.add(it.first!!)
-                listWallet.addAll(listWallet)
+                listWallet.addAll((it.second as Resource.Success).value)
                 if (selectedWallet == null) {
                     transactionViewModel.setSelectedWallet(it.first!!)
                 }

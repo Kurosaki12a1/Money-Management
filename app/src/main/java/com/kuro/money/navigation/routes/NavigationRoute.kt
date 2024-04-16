@@ -29,7 +29,13 @@ sealed class NavigationRoute(val route: String) {
 
         data object SelectWallet : Transaction("transaction_select_wallet")
 
-        data object AdvancedSearchTransaction : Transaction("transaction_advanced_search")
+        sealed class AdvancedSearchTransaction(route: String) : Transaction(route) {
+
+            data object SelectWallet :
+                AdvancedSearchTransaction("transaction_advanced_search_select_wallet")
+
+            companion object : AdvancedSearchTransaction("transaction_advanced_search")
+        }
 
         data object SearchTransaction : Transaction("transaction_search")
 
@@ -96,27 +102,37 @@ sealed class NavigationRoute(val route: String) {
 
             sealed class Edit(route: String) : TransactionDetails(route) {
 
-                data object SelectCategory : AddTransaction(route = "home_transaction_edit_select_category")
+                data object SelectCategory :
+                    AddTransaction(route = "home_transaction_edit_select_category")
 
-                data object SelectWallet : AddTransaction(route = "home_transaction_edits_select_wallet")
+                data object SelectWallet :
+                    AddTransaction(route = "home_transaction_edits_select_wallet")
 
-                data object SelectCurrency : AddTransaction(route = "home_transaction_edit_select_currency")
+                data object SelectCurrency :
+                    AddTransaction(route = "home_transaction_edit_select_currency")
 
                 data object Note : AddTransaction(route = "home_transaction_edit_note")
 
-                data object SelectEvent : AddTransaction(route = "home_transaction_edits_select_event")
+                data object SelectEvent :
+                    AddTransaction(route = "home_transaction_edits_select_event")
 
                 data object With : AddTransaction(route = "home_transaction_edits_with")
 
                 sealed class AddEvent(route: String) : Edit(route) {
 
-                    data object SelectWallet : AddEvent("home_transaction_edit_add_event_select_wallet")
-                    data object SelectCurrency : AddEvent("home_transaction_edit_add_event_select_currency")
+                    data object SelectWallet :
+                        AddEvent("home_transaction_edit_add_event_select_wallet")
+
+                    data object SelectCurrency :
+                        AddEvent("home_transaction_edit_add_event_select_currency")
+
                     data object SelectIcon : AddEvent("home_transaction_edit_add_event_select_icon")
                     companion object : AddEvent("home_transaction_edit_add_event")
                 }
+
                 companion object : Edit("home_transaction_edit")
             }
+
             companion object : TransactionDetails("home_transaction_details")
         }
 

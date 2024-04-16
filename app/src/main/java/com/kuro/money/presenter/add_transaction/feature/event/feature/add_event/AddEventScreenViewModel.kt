@@ -69,7 +69,6 @@ class AddEventScreenViewModel @Inject constructor(
     }
 
     fun setIconSelected(value: String) {
-        println("Set Icon value: $value")
         _iconSelected.value = value
     }
 

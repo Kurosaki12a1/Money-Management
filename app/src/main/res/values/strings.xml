@@ -89,4 +89,28 @@
     <string name="transaction_search_hint">Search by #tag, category, etc..</string>
     <string name="no_result">No result</string>
     <string name="no_result_search_hint">There is no transaction involving to this keyword.</string>
+
+    <string name="amount_tv">AMOUNT</string>
+    <string name="wallet_tv">WALLET</string>
+    <string name="time_tv">TIME</string>
+    <string name="note_tv">NOTE</string>
+    <string name="category_tv">CATEGORY</string>
+    <string name="tag_tv">TAG</string>
+    <string name="with_tv">WITH</string>
+
+    <string name="all">All</string>
+    <string name="all_wallets">All wallets</string>
+    <string name="all_categories">All categories</string>
+    <string name="over">Over</string>
+    <string name="under">Under</string>
+    <string name="between">Between</string>
+    <string name="exact">Exact</string>
+    <string name="all_income">All Income</string>
+    <string name="all_expense">All Expense</string>
+    <string name="enter_amount">Enter amount</string>
+    <string name="select_time">Select Time</string>
+
+    <string name="from">From</string>
+    <string name="to">To</string>
+    <string name="simple">Simple</string>
 </resources>

@@ -14,7 +14,11 @@ sealed class NavigationGraphRoute(val route: String) {
         companion object : HomeGraph("home_graph")
     }
 
-    data object TransactionGraph : NavigationGraphRoute(route = "transaction_graph")
+    sealed class TransactionGraph(route: String) : NavigationGraphRoute(route) {
+
+        data object AdvancedSearch : TransactionGraph("transaction_graph_advanced_search")
+        companion object : TransactionGraph("transaction_graph")
+    }
 
     sealed class AddTransactionGraph(route: String) : NavigationGraphRoute(route) {
         data object AddEvent : AddTransactionGraph(route = "sub_graph_add_transaction_add_event")
