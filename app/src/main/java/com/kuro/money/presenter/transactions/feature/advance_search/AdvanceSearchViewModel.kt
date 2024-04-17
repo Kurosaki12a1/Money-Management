@@ -1,4 +1,4 @@
-package com.kuro.money.presenter.transactions.feature
+package com.kuro.money.presenter.transactions.feature.advance_search
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -31,9 +31,9 @@ class AdvanceSearchViewModel @Inject constructor(
     private val _allWallets = MutableStateFlow<Resource<List<AccountEntity>>>(Resource.Default)
     val allWallets = _allWallets.asStateFlow()
 
-    private val _searchedWallets =
+    private val _searchedTransaction =
         MutableStateFlow<Resource<List<TransactionEntity>>>(Resource.Default)
-    val searchedWallet = _searchedWallets.asStateFlow()
+    val searchTransaction = _searchedTransaction.asStateFlow()
 
     private val _balance = MutableStateFlow(0.0)
     val balance = _balance.asStateFlow()
@@ -105,7 +105,7 @@ class AdvanceSearchViewModel @Inject constructor(
                 category,
                 with
             ).collectLatest {
-                _searchedWallets.value = it
+                _searchedTransaction.value = it
             }
         }
     }

@@ -110,7 +110,7 @@ class TransactionRepositoryImpl @Inject constructor(
             buildCategoryCondition(category)
         ).filter { it.isNotEmpty() }
         val query = buildString {
-            append("SELECT * FROM transactions t JOIN accounts w ON w.id = t.walletId " + "JOIN categories c ON c.id = t.categoryId ")
+            append("SELECT t.* FROM transactions t JOIN accounts w ON w.id = t.walletId JOIN categories c ON c.id = t.categoryId ")
             if (conditions.isNotEmpty()) {
                 append(" WHERE ")
                 append(conditions.joinToString(" AND "))

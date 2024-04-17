@@ -1,4 +1,4 @@
-package com.kuro.money.presenter.transactions.feature
+package com.kuro.money.presenter.transactions.feature.advance_search
 
 import android.app.DatePickerDialog
 import android.content.Context
@@ -121,6 +121,8 @@ fun AdvancedSearchTransactionScreen(
                         note = noteText.value,
                         time = timeText.value,
                     )
+                    //TODO need wait data load done first then navigate
+                    navController.navigate(NavigationRoute.Transaction.AdvancedSearchTransaction.SearchResult.route)
                 }
             )
         }
@@ -299,6 +301,7 @@ fun AdvancedSearchTransactionScreen(
                         }
 
                         else -> {
+                            /** Who care **/
                             /** Who care **/
                         }
                     }

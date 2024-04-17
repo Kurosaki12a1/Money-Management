@@ -59,9 +59,10 @@ fun String.format(): String {
     return result
 }
 
-fun NavController.popBackStackWithLifeCycle() {
+fun NavController.popBackStackWithLifeCycle(route : String? = null, inclusive : Boolean = false) {
     if (this.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
-        this.popBackStack()
+        if (route != null) this.popBackStack(route, inclusive)
+        else this.popBackStack()
     }
 }
 

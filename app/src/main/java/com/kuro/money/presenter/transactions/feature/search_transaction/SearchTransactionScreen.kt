@@ -1,6 +1,6 @@
 @file:OptIn(FlowPreview::class)
 
-package com.kuro.money.presenter.transactions.feature
+package com.kuro.money.presenter.transactions.feature.search_transaction
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.Image
@@ -86,13 +86,15 @@ fun SearchTransactionScreen(
             resultSearch.clear()
             return@BackHandler
         }
-        navController.popBackStackWithLifeCycle()
+        navController.popBackStackWithLifeCycle(NavigationRoute.Transaction.route)
     }
 
     LaunchedEffect(Unit) {
         searchTextFlow.debounce(300).collectLatest {
-            isSearching.value = true
-            searchTransactionViewModel.getListSearchTransaction(it)
+            if (isSearching.value) {
+                searchTransactionViewModel.getListSearchTransaction(it)
+            }
+            //    isSearching.value = true
         }
     }
 
@@ -123,7 +125,11 @@ fun SearchTransactionScreen(
             Icon(
                 imageVector = Icons.Default.Close,
                 contentDescription = "Close",
-                modifier = Modifier.noRippleClickable { navController.popBackStackWithLifeCycle() })
+                modifier = Modifier.noRippleClickable {
+                    navController.popBackStackWithLifeCycle(
+                        NavigationRoute.Transaction.route
+                    )
+                })
             Box(
                 modifier = Modifier.weight(1f),
                 contentAlignment = Alignment.CenterStart
@@ -139,7 +145,10 @@ fun SearchTransactionScreen(
                 BasicTextField(
                     modifier = Modifier.fillMaxWidth(),
                     value = searchText,
-                    onValueChange = { searchTextFlow.value = it },
+                    onValueChange = {
+                        searchTextFlow.value = it
+                        isSearching.value = true
+                    },
                     textStyle = TextStyle(
                         color = Color.Black
                     ),

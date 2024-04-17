@@ -134,7 +134,7 @@ class AddTransactionViewModel @Inject constructor(
                 note = note.value,
                 walletId = wallet.value!!.id,
                 people = nameOfPeople.value,
-                eventId = eventSelected.value!!.id,
+                eventId = eventSelected.value?.id,
                 remindDate = dateRemind.value,
                 image = uriSelected.value,
                 isExcludedReport = false // TODO

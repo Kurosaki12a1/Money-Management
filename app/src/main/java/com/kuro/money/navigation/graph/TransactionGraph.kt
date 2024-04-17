@@ -13,10 +13,11 @@ import com.kuro.money.navigation.routes.NavigationRoute.Transaction
 import com.kuro.money.presenter.account.feature.wallets.WalletScreen
 import com.kuro.money.presenter.transactions.TransactionScreen
 import com.kuro.money.presenter.transactions.TransactionViewModel
-import com.kuro.money.presenter.transactions.feature.AdvanceSearchViewModel
-import com.kuro.money.presenter.transactions.feature.AdvancedSearchTransactionScreen
-import com.kuro.money.presenter.transactions.feature.SearchTransactionScreen
 import com.kuro.money.presenter.transactions.feature.SelectWalletScreen
+import com.kuro.money.presenter.transactions.feature.advance_search.AdvanceSearchViewModel
+import com.kuro.money.presenter.transactions.feature.advance_search.AdvancedSearchTransactionScreen
+import com.kuro.money.presenter.transactions.feature.advance_search.SearchResultScreen
+import com.kuro.money.presenter.transactions.feature.search_transaction.SearchTransactionScreen
 import com.kuro.money.presenter.utils.horizontalComposable
 
 fun NavGraphBuilder.transactionGraph(
@@ -65,6 +66,14 @@ fun NavGraphBuilder.transactionGraph(
                         }
                         val advanceSearch = hiltViewModel<AdvanceSearchViewModel>(parentEntry)
                         SelectWalletScreen(navHostController, advanceSearch)
+                    }
+                    horizontalComposable(route = Transaction.AdvancedSearchTransaction.SearchResult.route) {
+                        val parentEntry = remember(it) {
+                            // Lifecycle through lifecycle of backStab
+                            navHostController.getBackStackEntry(TransactionGraph.AdvancedSearch.route)
+                        }
+                        val advanceSearch = hiltViewModel<AdvanceSearchViewModel>(parentEntry)
+                        SearchResultScreen(navHostController, advanceSearch)
                     }
                 }
             )

@@ -17,8 +17,7 @@ import java.time.LocalDate
     UriConverter::class,
 )
 data class Transaction(
-    @PrimaryKey(autoGenerate = true)
-    var id: Long = 0L,
+    @PrimaryKey(autoGenerate = true) var id: Long = 0L,
     val currencyId: Long,
     val amount: Double,
     val createdDate: LocalDate,
@@ -37,29 +36,32 @@ data class TransactionEntity(
 
     @Embedded val transaction: Transaction,
 
-
     @Relation(
         parentColumn = "currencyId",
-        entityColumn = "id"
+        entityColumn = "id",
+        entity = Currency::class
     )
     val currency: Currency,
 
 
     @Relation(
         parentColumn = "categoryId",
-        entityColumn = "id"
+        entityColumn = "id",
+        entity = CategoryEntity::class
     )
     val category: CategoryEntity,
 
     @Relation(
         parentColumn = "walletId",
-        entityColumn = "id"
+        entityColumn = "id",
+        entity = Wallet::class
     )
     val wallet: Wallet,
 
     @Relation(
         parentColumn = "eventId",
-        entityColumn = "id"
+        entityColumn = "id",
+        entity = Event::class
     )
     val event: Event? = null
 ) {

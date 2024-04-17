@@ -1,4 +1,4 @@
-package com.kuro.money.presenter.transactions.feature
+package com.kuro.money.presenter.transactions.feature.search_transaction
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
