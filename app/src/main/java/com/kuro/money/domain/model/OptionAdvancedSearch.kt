@@ -1,6 +1,7 @@
 package com.kuro.money.domain.model
 
 import com.kuro.money.constants.Constants
+import com.kuro.money.presenter.utils.DecimalFormatter
 import com.kuro.money.presenter.utils.string
 import java.time.LocalDate
 
@@ -19,13 +20,13 @@ enum class AdvancedSearchCategory(val value: String) {
 
 sealed class AdvancedSearchAmount {
     data object All : AdvancedSearchAmount()
-    data class Over(val value: String = "") : AdvancedSearchAmount()
+    data class Over(val value: Double = 0.0) : AdvancedSearchAmount()
 
-    data class Under(val value: String = "") : AdvancedSearchAmount()
+    data class Under(val value: Double = 0.0) : AdvancedSearchAmount()
 
-    data class Between(val value1: String = "", val value2: String = "") : AdvancedSearchAmount()
+    data class Between(val value1: Double = 0.0, val value2: Double = 0.0) : AdvancedSearchAmount()
 
-    data class Exact(val value: String = "") : AdvancedSearchAmount()
+    data class Exact(val value: Double = 0.0) : AdvancedSearchAmount()
 
     // Enable Search
     data object Enabled : AdvancedSearchAmount()
@@ -44,13 +45,14 @@ sealed class AdvancedSearchAmount {
         }
     }
 
-    fun string(): String {
+    fun string(decimalFormatter: DecimalFormatter = DecimalFormatter()): String {
         return when (this) {
             is All -> "All"
-            is Over -> "Over $value"
-            is Under -> "Under $value"
-            is Between -> "Between $value1 - $value2"
-            is Exact -> "Exact $value"
+            is Over -> "Over ${decimalFormatter.formatForVisual(value.string())}"
+            is Under -> "Under ${decimalFormatter.formatForVisual(value.string())}"
+            is Between -> "Between ${decimalFormatter.formatForVisual(value1.string())} - ${
+                decimalFormatter.formatForVisual(value2.string())}"
+            is Exact -> "Exact ${decimalFormatter.formatForVisual(value.string())}"
             else -> ""
         }
     }
@@ -97,3 +99,49 @@ sealed class AdvancedSearchTime {
         }
     }
 }
+
+fun buildTimeCondition(time: AdvancedSearchTime): String {
+    return when (time) {
+        is AdvancedSearchTime.All -> ""
+        is AdvancedSearchTime.After -> "  t.displayDate >= ${time.time}"
+        is AdvancedSearchTime.Before -> "  t.displayDate < ${time.time}"
+        is AdvancedSearchTime.Between -> "  t.displayDate BETWEEN ${time.from} AND ${time.to}"
+        is AdvancedSearchTime.Exact -> "  t.displayDate = ${time.time}"
+        else -> ""
+    }
+}
+
+fun buildAmountCondition(amount: AdvancedSearchAmount): String {
+    return when (amount) {
+        is AdvancedSearchAmount.All -> ""
+        is AdvancedSearchAmount.Exact -> " t.amount = ${amount.value}"
+        is AdvancedSearchAmount.Under -> " t.amount < ${amount.value}"
+        is AdvancedSearchAmount.Over -> " t.amount > ${amount.value}"
+        is AdvancedSearchAmount.Between -> " t.amount BETWEEN ${amount.value1} AND ${amount.value2} "
+        else -> ""
+    }
+}
+
+fun buildCategoryCondition(category: AdvancedSearchCategory): String {
+    return when (category) {
+        AdvancedSearchCategory.ALL_CATEGORIES -> ""
+        AdvancedSearchCategory.ALL_INCOME -> " c.type = 'income'"
+        else -> " c.type = 'expense'"
+    }
+}
+
+fun buildWalletCondition(wallet: String): String {
+    return if (wallet == Constants.GLOBAL_WALLET_NAME || wallet == Constants.ALL_WALLETS) {
+        ""
+    } else
+        " w.name = '$wallet' "
+}
+
+fun buildWithCondition(with: String): String {
+    return if (with.isBlank()) "" else " t.people LIKE '$with%  "
+}
+
+fun buildNoteCondition(note: String): String {
+    return if (note.isBlank()) "" else " t.note LIKE '$note%  "
+}
+

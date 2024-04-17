@@ -1,6 +1,9 @@
 package com.kuro.money.domain.usecase
 
 import com.kuro.money.data.model.Transaction
+import com.kuro.money.domain.model.AdvancedSearchAmount
+import com.kuro.money.domain.model.AdvancedSearchCategory
+import com.kuro.money.domain.model.AdvancedSearchTime
 import com.kuro.money.domain.repository.TransactionRepository
 import javax.inject.Inject
 
@@ -16,4 +19,13 @@ class TransactionUseCase @Inject constructor(
     operator fun invoke() = repo.getListTransactions()
 
     fun getTransactionByMonth(monthYear: String) = repo.getTransactionByMonthYear(monthYear)
+
+    operator fun invoke(
+        amount: AdvancedSearchAmount,
+        walletName: String,
+        time: AdvancedSearchTime,
+        note: String,
+        category: AdvancedSearchCategory,
+        with: String
+    ) = repo.queryTransaction(amount, walletName, time, note, category, with)
 }

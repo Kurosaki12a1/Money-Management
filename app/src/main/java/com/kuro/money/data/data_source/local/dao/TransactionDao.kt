@@ -4,7 +4,9 @@ import androidx.room.Dao
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
+import androidx.room.RawQuery
 import androidx.room.Update
+import androidx.sqlite.db.SupportSQLiteQuery
 import com.kuro.money.data.model.Transaction
 import com.kuro.money.data.model.TransactionEntity
 
@@ -34,4 +36,8 @@ interface TransactionDao {
     @androidx.room.Transaction
     @Query("SELECT * FROM transactions WHERE  strftime('%m', displayDate) || '/' || strftime('%Y', displayDate) = :yearMonth")
     fun getTransactionsByDate(yearMonth: String): List<TransactionEntity>
+
+    @androidx.room.Transaction
+    @RawQuery
+    fun queryTransactions(query: SupportSQLiteQuery): List<TransactionEntity>
 }

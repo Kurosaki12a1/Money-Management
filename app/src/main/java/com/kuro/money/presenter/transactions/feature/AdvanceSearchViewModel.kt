@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import com.kuro.money.constants.Constants
 import com.kuro.money.data.AppCache
 import com.kuro.money.data.model.AccountEntity
+import com.kuro.money.data.model.TransactionEntity
 import com.kuro.money.data.model.Wallet
 import com.kuro.money.data.utils.Resource
 import com.kuro.money.domain.model.AdvancedSearchAmount
@@ -30,20 +31,9 @@ class AdvanceSearchViewModel @Inject constructor(
     private val _allWallets = MutableStateFlow<Resource<List<AccountEntity>>>(Resource.Default)
     val allWallets = _allWallets.asStateFlow()
 
-    private val _categorySelected = MutableStateFlow(AdvancedSearchCategory.ALL_CATEGORIES)
-    val categorySelected = _categorySelected.asStateFlow()
-
-    private val _timeSelected = MutableStateFlow<AdvancedSearchTime>(AdvancedSearchTime.All)
-    val timeSelected = _timeSelected.asStateFlow()
-
-    private val _amountSelected = MutableStateFlow<AdvancedSearchAmount>(AdvancedSearchAmount.All)
-    val amountSelected = _amountSelected.asStateFlow()
-
-    private val _noteSelected = MutableStateFlow("")
-    val noteSelected = _noteSelected.asStateFlow()
-
-    private val _withSelected = MutableStateFlow("")
-    val withSelected = _withSelected.asStateFlow()
+    private val _searchedWallets =
+        MutableStateFlow<Resource<List<TransactionEntity>>>(Resource.Default)
+    val searchedWallet = _searchedWallets.asStateFlow()
 
     private val _balance = MutableStateFlow(0.0)
     val balance = _balance.asStateFlow()
@@ -99,28 +89,25 @@ class AdvanceSearchViewModel @Inject constructor(
         _walletSelected.value = walletName
     }
 
-    fun setCategory(category: AdvancedSearchCategory) {
-        _categorySelected.value = category
-    }
-
-    fun setTime(time: AdvancedSearchTime) {
-        _timeSelected.value = time
-    }
-
-    fun setAmount(amount: AdvancedSearchAmount) {
-        _amountSelected.value = amount
-    }
-
-    fun setNote(note: String) {
-        _noteSelected.value = note
-    }
-
-    fun setWith(with: String) {
-        _withSelected.value = with
-    }
-
-    fun querySearch() {
-
+    fun querySearch(
+        amount: AdvancedSearchAmount,
+        time: AdvancedSearchTime,
+        note: String,
+        category: AdvancedSearchCategory,
+        with: String
+    ) {
+        viewModelScope.launch {
+            transactionUseCase(
+                amount,
+                walletSelected.value,
+                time,
+                note,
+                category,
+                with
+            ).collectLatest {
+                _searchedWallets.value = it
+            }
+        }
     }
 
 

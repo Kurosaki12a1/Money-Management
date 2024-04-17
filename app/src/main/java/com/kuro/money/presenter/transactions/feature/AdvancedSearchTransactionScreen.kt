@@ -114,7 +114,13 @@ fun AdvancedSearchTransactionScreen(
                 color = Color.Black,
                 fontWeight = FontWeight.Bold,
                 modifier = Modifier.noRippleClickable {
-
+                    advancedSearchViewModel.querySearch(
+                        amount = amountText.value,
+                        category = categoryText.value,
+                        with = withText.value,
+                        note = noteText.value,
+                        time = timeText.value,
+                    )
                 }
             )
         }
@@ -175,6 +181,8 @@ fun AdvancedSearchTransactionScreen(
                 enableOptionsAmount.value = options
                 if (enableOptionsAmount.value !is AdvancedSearchAmount.All) {
                     enableAmountDialog.value = true
+                } else {
+                    amountText.value = AdvancedSearchAmount.All
                 }
             }
         }
@@ -468,30 +476,27 @@ fun AdvancedSearchTransactionScreen(
             )
         }
     }
-    val decimalFormatter = DecimalFormatter()
     AmountDialog(
         visible = enableAmountDialog.value,
         onDismissRequest = { enableAmountDialog.value = false },
         isBetweenOptions = enableOptionsAmount.value is AdvancedSearchAmount.Between,
         onDone = { value1, value2 ->
-            val formatValue1 = decimalFormatter.formatForVisual(value1)
-            val formatValue2 = decimalFormatter.formatForVisual(value2)
             enableAmountDialog.value = false
             when (enableOptionsAmount.value) {
                 is AdvancedSearchAmount.Over -> {
-                    amountText.value = AdvancedSearchAmount.Over(formatValue1)
+                    amountText.value = AdvancedSearchAmount.Over(value1)
                 }
 
                 is AdvancedSearchAmount.Under -> {
-                    amountText.value = AdvancedSearchAmount.Under(formatValue1)
+                    amountText.value = AdvancedSearchAmount.Under(value1)
                 }
 
                 is AdvancedSearchAmount.Between -> {
-                    amountText.value = AdvancedSearchAmount.Between(formatValue1, formatValue2)
+                    amountText.value = AdvancedSearchAmount.Between(value1, value2)
                 }
 
                 is AdvancedSearchAmount.Exact -> {
-                    amountText.value = AdvancedSearchAmount.Exact(formatValue1)
+                    amountText.value = AdvancedSearchAmount.Exact(value1)
                 }
 
                 else -> {}
@@ -578,7 +583,7 @@ private fun AmountDialog(
     visible: Boolean,
     onDismissRequest: () -> Unit,
     isBetweenOptions: Boolean,
-    onDone: (String, String) -> Unit
+    onDone: (Double, Double) -> Unit
 ) {
     if (!visible) return
     val decimalFormatter = DecimalFormatter()
@@ -672,8 +677,8 @@ private fun AmountDialog(
                     modifier = Modifier.noRippleClickable {
                         // Avoid string start with 0000 so convert to double and convert string
                         onDone(
-                            firstAmount.value.toDouble().string(),
-                            secondAmount.value.toDouble().string()
+                            firstAmount.value.toDouble(),
+                            secondAmount.value.toDouble()
                         )
                     }
                 )

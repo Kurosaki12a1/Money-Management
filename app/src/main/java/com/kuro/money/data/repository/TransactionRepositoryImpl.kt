@@ -1,9 +1,19 @@
 package com.kuro.money.data.repository
 
+import androidx.sqlite.db.SimpleSQLiteQuery
 import com.kuro.money.data.data_source.local.AppDatabase
 import com.kuro.money.data.model.Transaction
 import com.kuro.money.data.model.TransactionEntity
 import com.kuro.money.data.utils.Resource
+import com.kuro.money.domain.model.AdvancedSearchAmount
+import com.kuro.money.domain.model.AdvancedSearchCategory
+import com.kuro.money.domain.model.AdvancedSearchTime
+import com.kuro.money.domain.model.buildAmountCondition
+import com.kuro.money.domain.model.buildCategoryCondition
+import com.kuro.money.domain.model.buildNoteCondition
+import com.kuro.money.domain.model.buildTimeCondition
+import com.kuro.money.domain.model.buildWalletCondition
+import com.kuro.money.domain.model.buildWithCondition
 import com.kuro.money.domain.repository.TransactionRepository
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.Dispatchers
@@ -76,6 +86,39 @@ class TransactionRepositoryImpl @Inject constructor(
         try {
             val listData = appDatabase.transactionDao().getTransactionsByDate(monthYear)
             emit(Resource.Success(listData))
+        } catch (e: Exception) {
+            e.printStackTrace()
+            emit(Resource.failure(e, e.message))
+        }
+    }.flowOn(dispatcher)
+
+    override fun queryTransaction(
+        amount: AdvancedSearchAmount,
+        walletName: String,
+        time: AdvancedSearchTime,
+        note: String,
+        category: AdvancedSearchCategory,
+        with: String
+    ): Flow<Resource<List<TransactionEntity>>> = flow {
+        emit(Resource.Loading)
+        val conditions = listOf(
+            buildWalletCondition(walletName),
+            buildNoteCondition(note),
+            buildWithCondition(with),
+            buildTimeCondition(time),
+            buildAmountCondition(amount),
+            buildCategoryCondition(category)
+        ).filter { it.isNotEmpty() }
+        val query = buildString {
+            append("SELECT * FROM transactions t JOIN accounts w ON w.id = t.walletId " + "JOIN categories c ON c.id = t.categoryId ")
+            if (conditions.isNotEmpty()) {
+                append(" WHERE ")
+                append(conditions.joinToString(" AND "))
+            }
+        }
+        try {
+            val data = appDatabase.transactionDao().queryTransactions(SimpleSQLiteQuery(query))
+            emit(Resource.success(data))
         } catch (e: Exception) {
             e.printStackTrace()
             emit(Resource.failure(e, e.message))
