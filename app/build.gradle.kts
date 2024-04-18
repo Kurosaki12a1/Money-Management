@@ -80,6 +80,7 @@ android {
 
 dependencies {
     implementation(project(":customimagevector"))
+    implementation(project(":chart-compose"))
     val composeBom = platform("androidx.compose:compose-bom:2023.01.00")
     implementation(composeBom)
     androidTestImplementation(composeBom)
@@ -146,6 +147,5 @@ dependencies {
     // Coil load image from url
     implementation(libs.coil.compose)
 
-    implementation("org.mozilla:rhino:1.7.13")
-
+    implementation(libs.rhino)
 }

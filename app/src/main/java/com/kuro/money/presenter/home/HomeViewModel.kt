@@ -44,7 +44,7 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun setSelectedTransaction(entity : TransactionEntity) {
+    fun setSelectedTransaction(entity: TransactionEntity) {
         _selectedTransaction.value = entity
     }
 }

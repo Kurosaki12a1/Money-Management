@@ -9,6 +9,7 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
 import androidx.navigation.navigation
+import com.kuro.money.navigation.routes.NavigationGraphRoute
 import com.kuro.money.navigation.routes.NavigationGraphRoute.HomeGraph
 import com.kuro.money.navigation.routes.NavigationRoute.Home
 import com.kuro.money.navigation.routes.NavigationRoute.Home.TransactionDetails
@@ -52,7 +53,7 @@ fun NavGraphBuilder.homeNavGraph(
             /** Bottom Navigation Account Screen*/
             composable(route = Home.route) {
                 val parentEntry = remember(it) {
-                    navHostController.getBackStackEntry(HomeGraph.route)
+                    navHostController.getBackStackEntry(NavigationGraphRoute.RootGraph.route)
                 }
                 val homeViewModel = hiltViewModel<HomeViewModel>(parentEntry)
                 val myWalletViewModel = hiltViewModel<MyWalletViewModel>(parentEntry)

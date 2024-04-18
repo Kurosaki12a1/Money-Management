@@ -3,6 +3,7 @@ package com.kuro.money.presenter.home
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -21,9 +22,13 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -43,6 +48,7 @@ import com.kuro.money.data.model.TransactionEntity
 import com.kuro.money.data.utils.Resource
 import com.kuro.money.extension.noRippleClickable
 import com.kuro.money.navigation.routes.NavigationRoute
+import com.kuro.money.presenter.home.feature.SpendingReportChart
 import com.kuro.money.presenter.utils.DecimalFormatter
 import com.kuro.money.presenter.utils.string
 import com.kuro.money.presenter.utils.toPainterResource
@@ -169,12 +175,57 @@ fun HomeScreen(
 
 @Composable
 fun SpendingReport(navController: NavController, spendingReportViewModel: SpendingReportViewModel) {
-    Surface(
-        modifier = Modifier.background(Color.White, RoundedCornerShape(16.dp)),
-        shape = RoundedCornerShape(16.dp)
+    val tabSelected = spendingReportViewModel.tabSelected.collectAsState().value
+    Column(
+        modifier = Modifier
+            .background(Color.White, RoundedCornerShape(16.dp))
+            .padding(10.dp),
     ) {
-
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .background(
+                        if (tabSelected == 0) Color.White else Gray, RoundedCornerShape(16.dp)
+                    )
+                    .padding(10.dp)
+                    .noRippleClickable {
+                        spendingReportViewModel.setTabSelected(0)
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = stringResource(id = R.string.week),
+                    color = Color.Black,
+                    style = MaterialTheme.typography.body1
+                )
+            }
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .background(
+                        if (tabSelected == 1) Color.White else Gray, RoundedCornerShape(16.dp)
+                    )
+                    .padding(10.dp)
+                    .noRippleClickable {
+                        spendingReportViewModel.setTabSelected(1)
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = stringResource(id = R.string.month),
+                    color = Color.Black,
+                    style = MaterialTheme.typography.body1
+                )
+            }
+        }
+        SpendingReportChart()
     }
+
 }
 
 @Composable

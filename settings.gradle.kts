@@ -22,3 +22,4 @@ dependencyResolutionManagement {
 rootProject.name = "Money"
 include(":app")
 include(":customimagevector")
+include(":chart-compose")

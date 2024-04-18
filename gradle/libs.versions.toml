@@ -1,10 +1,10 @@
 [versions]
 accompanistPagerIndicators = "0.30.0"
-agp = "8.3.1"
+agp = "8.5.0-alpha05"
 accompanist = "0.34.0"
 coilCompose = "2.6.0"
 kotlin = "1.9.22"
-coreKtx = "1.12.0"
+coreKtx = "1.13.0"
 junit = "4.13.2"
 junitVersion = "1.1.5"
 espressoCore = "3.5.1"
@@ -24,6 +24,7 @@ ksp = "1.9.22-1.0.17"
 kotlinxMetadataJvm = "0.4.2"
 hiltAndroid = "2.50"
 hiltCompose = "1.2.0"
+rhino = "1.7.13"
 room = "2.6.1"
 retrofit = "2.9.0"
 okhttp3 = "4.12.0"
@@ -66,7 +67,7 @@ hilt-compose = { module = "androidx.hilt:hilt-navigation-compose", version.ref =
 hilt-android-compiler = { module = "com.google.dagger:hilt-android-compiler", version.ref = "hiltAndroid" }
 kotlinx-metadata-jvm = { module = "org.jetbrains.kotlinx:kotlinx-metadata-jvm", version.ref = "kotlinxMetadataJvm" }
 play-services-location = { group = "com.google.android.gms", name = "play-services-location", version.ref = "playServicesLocation" }
-androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version.ref = "appcompatVersion" }
+rhino = { module = "org.mozilla:rhino", version.ref = "rhino" }
 [plugins]
 androidApplication = { id = "com.android.application", version.ref = "agp" }
 androidLibrary = { id = "com.android.library", version.ref = "agp" }
