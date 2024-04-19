@@ -20,6 +20,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
+import java.time.LocalDate
 import javax.inject.Inject
 
 class TransactionRepositoryImpl @Inject constructor(
@@ -120,6 +121,20 @@ class TransactionRepositoryImpl @Inject constructor(
             val data = appDatabase.transactionDao().queryTransactions(SimpleSQLiteQuery(query))
             emit(Resource.success(data))
         } catch (e: Exception) {
+            e.printStackTrace()
+            emit(Resource.failure(e, e.message))
+        }
+    }.flowOn(dispatcher)
+
+    override fun getTransactionsBetweenDates(
+        startDate: LocalDate,
+        endDate: LocalDate
+    ): Flow<Resource<List<TransactionEntity>>>  = flow {
+        emit(Resource.Loading)
+        try {
+            val data = appDatabase.transactionDao().getTransactionsBetweenDates(startDate, endDate)
+            emit(Resource.success(data))
+        } catch (e : Exception) {
             e.printStackTrace()
             emit(Resource.failure(e, e.message))
         }

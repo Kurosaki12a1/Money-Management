@@ -7,6 +7,7 @@ import com.kuro.money.domain.model.AdvancedSearchAmount
 import com.kuro.money.domain.model.AdvancedSearchCategory
 import com.kuro.money.domain.model.AdvancedSearchTime
 import kotlinx.coroutines.flow.Flow
+import java.time.LocalDate
 
 interface TransactionRepository {
     fun insert(entity: Transaction): Flow<Resource<Long>>
@@ -28,6 +29,12 @@ interface TransactionRepository {
         note: String,
         category: AdvancedSearchCategory,
         with : String
+    ) : Flow<Resource<List<TransactionEntity>>>
+
+
+    fun getTransactionsBetweenDates(
+        startDate : LocalDate,
+        endDate: LocalDate
     ) : Flow<Resource<List<TransactionEntity>>>
 
 }

@@ -63,11 +63,7 @@ data class SelectionHighlightData(
     val highlightLabelAlignment: Paint.Align = Paint.Align.CENTER,
     val isHighlightBarRequired: Boolean = true,
     val isHighlightFullBar: Boolean = false,
-    val popUpLabel: (Float, Float) -> (String) = { x, y ->
-        val xLabel = "x : ${x.toInt()} "
-        val yLabel = "y : ${String.format("%.2f", y)}"
-        "$xLabel $yLabel"
-    },
+    val popUpLabel: (Float) -> (String) = { value-> value.toString() },
 
     val drawPopUp: DrawScope.(Offset, BarData, Float, Float, BarChartType) -> Unit = { selectedOffset, identifiedPoint, centerPointOfBar, selectedXAxisWidth, barChartType ->
         val highlightTextPaint = TextPaint().apply {
@@ -76,7 +72,8 @@ data class SelectionHighlightData(
             textAlign = highlightLabelAlignment
             typeface = highlightTextTypeface
         }
-        val label = popUpLabel(identifiedPoint.point.x, identifiedPoint.point.y)
+
+        val label = if (barChartType == BarChartType.VERTICAL) popUpLabel(identifiedPoint.point.y) else popUpLabel(identifiedPoint.point.x)
         drawContext.canvas.nativeCanvas.apply {
             val x =
                 if (barChartType == BarChartType.VERTICAL) centerPointOfBar else selectedXAxisWidth + highlightTextOffset.toPx()

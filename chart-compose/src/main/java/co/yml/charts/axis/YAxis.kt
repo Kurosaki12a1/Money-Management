@@ -6,6 +6,7 @@ import android.text.TextUtils
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.runtime.*
@@ -92,20 +93,22 @@ fun YAxis(
                         zoomScale,
                         steps - 1
                     )
-                    drawAxisLineWithPointers(
-                        yPos,
-                        yAxisData,
-                        index,
-                        steps,
-                        isRightAligned,
-                        yAxisWidth,
-                        yAxisHeight,
-                        segmentHeight,
-                        zoomScale,
-                        yAxisScale,
-                        yStart,
-                        barWidth
-                    )
+                    if (shouldDrawAxisLine) {
+                        drawAxisLineWithPointers(
+                            yPos,
+                            yAxisData,
+                            index,
+                            steps,
+                            isRightAligned,
+                            yAxisWidth,
+                            yAxisHeight,
+                            segmentHeight,
+                            zoomScale,
+                            yAxisScale,
+                            yStart,
+                            barWidth
+                        )
+                    }
                     val yPosChangeFromBottom = (axisStepSize.toPx() * (zoomScale * yAxisScale))
                     if (dataCategoryOptions.isDataCategoryStartFromBottom) {
                         yPos -= yPosChangeFromBottom

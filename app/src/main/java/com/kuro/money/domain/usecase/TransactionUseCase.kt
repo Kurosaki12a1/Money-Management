@@ -5,6 +5,7 @@ import com.kuro.money.domain.model.AdvancedSearchAmount
 import com.kuro.money.domain.model.AdvancedSearchCategory
 import com.kuro.money.domain.model.AdvancedSearchTime
 import com.kuro.money.domain.repository.TransactionRepository
+import java.time.LocalDate
 import javax.inject.Inject
 
 class TransactionUseCase @Inject constructor(
@@ -28,4 +29,7 @@ class TransactionUseCase @Inject constructor(
         category: AdvancedSearchCategory,
         with: String
     ) = repo.queryTransaction(amount, walletName, time, note, category, with)
+
+    operator fun invoke(startDate: LocalDate, endDate: LocalDate) =
+        repo.getTransactionsBetweenDates(startDate, endDate)
 }

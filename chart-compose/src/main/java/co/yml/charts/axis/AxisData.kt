@@ -56,6 +56,7 @@ data class AxisData(
     val typeface: Typeface,
     val axisConfig: AxisConfig,
     val startDrawPadding: Dp,
+    val shouldDrawAxisLine: Boolean,
     val shouldDrawAxisLineTillEnd: Boolean,
     val axisLabelDescription: (String) -> String,
     val dataCategoryOptions: DataCategoryOptions
@@ -81,6 +82,7 @@ data class AxisData(
         private var axisLabelColor: Color = Color.Black
         private var startDrawPadding: Dp = 0.dp
         private var axisLabelAngle: Float = 0f
+        private var shouldDrawAxisLine: Boolean = true
         private var shouldDrawAxisLineTillEnd: Boolean = false
         private var dataCategoryOptions: DataCategoryOptions = DataCategoryOptions()
         private var axisLabelDescription: (String) -> String =
@@ -127,6 +129,8 @@ data class AxisData(
 
         fun axisLabelAngle(angle: Float) = apply { this.axisLabelAngle = angle }
 
+        fun shouldDrawAxisLine(flag: Boolean) = apply { this.shouldDrawAxisLine = flag }
+
         fun shouldDrawAxisLineTillEnd(flag: Boolean) =
             apply { this.shouldDrawAxisLineTillEnd = flag }
 
@@ -159,6 +163,7 @@ data class AxisData(
             typeface,
             axisConfig,
             startDrawPadding,
+            shouldDrawAxisLine,
             shouldDrawAxisLineTillEnd,
             axisLabelDescription,
             dataCategoryOptions

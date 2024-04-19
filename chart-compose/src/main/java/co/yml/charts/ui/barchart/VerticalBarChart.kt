@@ -1,5 +1,6 @@
 package co.yml.charts.ui.barchart
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -17,10 +18,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import co.yml.charts.axis.XAxis
 import co.yml.charts.axis.YAxis
@@ -67,8 +70,6 @@ fun VerticalBarChart(
         var rowHeight by remember { mutableStateOf(0f) }
         val paddingRight = paddingEnd
         val points = chartData.map { it.point }
-        val bgColor = MaterialTheme.colorScheme.surface
-
         val (xMin, xMax) = getXMaxAndMinPoints(points)
         val (_, yMax) = getYMaxAndMinPoints(points)
 
@@ -147,7 +148,7 @@ fun VerticalBarChart(
                     }
                 }
 
-                drawUnderScrollMask(columnWidth, paddingRight, bgColor)
+                drawUnderScrollMask(columnWidth, paddingRight, Color.Transparent)
 
                 if (barStyle.selectionHighlightData != null) {
                     // highlighting the selected bar and showing the data points
@@ -173,6 +174,7 @@ fun VerticalBarChart(
                         xAxisData = xAxisData,
                         modifier = Modifier
                             .align(Alignment.BottomStart)
+                            .background(xAxisData.backgroundColor)
                             .fillMaxWidth()
                             .wrapContentHeight()
                             .clip(
@@ -195,6 +197,7 @@ fun VerticalBarChart(
                     YAxis(
                         modifier = Modifier
                             .align(Alignment.TopStart)
+                            .background(yAxisData.backgroundColor)
                             .fillMaxHeight()
                             .wrapContentWidth()
                             .onGloballyPositioned {
@@ -203,7 +206,7 @@ fun VerticalBarChart(
                         yAxisData = yAxisData,
                         scrollOffset = scrollOffset,
                         zoomScale = xZoom,
-                        chartData = points
+                        chartData = points,
                     )
                 }
             }, onPointClicked = { offset: Offset, _: Float ->

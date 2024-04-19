@@ -4,6 +4,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -22,13 +23,9 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -62,7 +59,6 @@ fun HomeScreen(
     paddingValues: PaddingValues,
     homeViewModel: HomeViewModel,
     myWalletViewModel: MyWalletViewModel,
-    spendingReportViewModel: SpendingReportViewModel,
     recentTransactionViewModel: RecentTransactionViewModel
 ) {
 
@@ -148,7 +144,7 @@ fun HomeScreen(
             }
             Spacer(modifier = Modifier.height(20.dp))
             /** Spending Report*/
-            SpendingReport(navController, spendingReportViewModel)
+            SpendingReport(navController, recentTransactionViewModel)
         }
         /** Title Recent Transaction*/
         item {
@@ -174,15 +170,24 @@ fun HomeScreen(
 }
 
 @Composable
-fun SpendingReport(navController: NavController, spendingReportViewModel: SpendingReportViewModel) {
-    val tabSelected = spendingReportViewModel.tabSelected.collectAsState().value
+fun SpendingReport(
+    navController: NavController,
+    recentTransactionViewModel: RecentTransactionViewModel
+) {
+    val tabSelected = recentTransactionViewModel.tabSelected.collectAsState().value
+
     Column(
         modifier = Modifier
+            .fillMaxWidth()
             .background(Color.White, RoundedCornerShape(16.dp))
             .padding(10.dp),
+        verticalArrangement = Arrangement.spacedBy(20.dp)
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Gray, RoundedCornerShape(16.dp))
+                .padding(5.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
@@ -190,11 +195,11 @@ fun SpendingReport(navController: NavController, spendingReportViewModel: Spendi
                 modifier = Modifier
                     .weight(1f)
                     .background(
-                        if (tabSelected == 0) Color.White else Gray, RoundedCornerShape(16.dp)
+                        if (tabSelected == TypeReport.WEEK) Color.White else Gray, RoundedCornerShape(16.dp)
                     )
-                    .padding(10.dp)
+                    .padding(5.dp)
                     .noRippleClickable {
-                        spendingReportViewModel.setTabSelected(0)
+                        recentTransactionViewModel.setTabSelected(TypeReport.WEEK)
                     },
                 contentAlignment = Alignment.Center
             ) {
@@ -208,11 +213,11 @@ fun SpendingReport(navController: NavController, spendingReportViewModel: Spendi
                 modifier = Modifier
                     .weight(1f)
                     .background(
-                        if (tabSelected == 1) Color.White else Gray, RoundedCornerShape(16.dp)
+                        if (tabSelected == TypeReport.MONTH) Color.White else Gray, RoundedCornerShape(16.dp)
                     )
-                    .padding(10.dp)
+                    .padding(5.dp)
                     .noRippleClickable {
-                        spendingReportViewModel.setTabSelected(1)
+                        recentTransactionViewModel.setTabSelected(TypeReport.MONTH)
                     },
                 contentAlignment = Alignment.Center
             ) {
@@ -223,7 +228,9 @@ fun SpendingReport(navController: NavController, spendingReportViewModel: Spendi
                 )
             }
         }
-        SpendingReportChart()
+        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+            SpendingReportChart(recentTransactionViewModel)
+        }
     }
 
 }

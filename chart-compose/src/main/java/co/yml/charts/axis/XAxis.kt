@@ -236,7 +236,7 @@ private fun XAxisPreview() {
         xStart = 0f,
         scrollOffset = 0f,
         zoomScale = 1f,
-        chartData = listOf(),
+        chartData = listOf(Point(0f,0f), Point(1f,1f)),
         axisStart = 0f
     )
 }

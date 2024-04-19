@@ -84,13 +84,9 @@ fun ScrollableCanvasContainer(
                 .align(Alignment.Center)
                 .fillMaxHeight()
                 .fillMaxWidth()
-                .semantics {
-                    this.testTag = "chart_canvas"
-                }
+                .semantics { this.testTag = "chart_canvas" }
                 .background(containerBackgroundColor)
-                .scrollable(
-                    state = scrollState, scrollOrientation, enabled = true
-                )
+                .scrollable(state = scrollState, scrollOrientation, enabled = true)
                 .pointerInput(Unit) {
                     detectTapGestures(onTap = {
                         onPointClicked(it, scrollOffset.value)

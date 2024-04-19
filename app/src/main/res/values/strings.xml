@@ -118,4 +118,6 @@
     <string name="month">Month</string>
     <string name="last_week">Last week</string>
     <string name="this_week">This week</string>
+    <string name="last_month">Last month</string>
+    <string name="this_month_ext">This Month</string>
 </resources>
