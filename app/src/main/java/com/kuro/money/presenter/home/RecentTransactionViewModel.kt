@@ -32,10 +32,6 @@ class RecentTransactionViewModel @Inject constructor(
     private val _tabSelected = MutableStateFlow(TypeReport.WEEK)
     val tabSelected = _tabSelected.asStateFlow()
 
-    init {
-        getTransactionsBetweenDate()
-    }
-
     fun setTabSelected(typeReport: TypeReport) {
         if (typeReport == _tabSelected.value) return
         _tabSelected.value = typeReport
@@ -51,7 +47,7 @@ class RecentTransactionViewModel @Inject constructor(
         }
     }
 
-    private fun getTransactionsBetweenDate() {
+    fun getTransactionsBetweenDate() {
         if (_tabSelected.value == TypeReport.WEEK) {
             // Last week from Monday
             val startDate = LocalDate.now().minusWeeks(1).with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))

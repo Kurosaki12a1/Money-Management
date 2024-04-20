@@ -119,5 +119,7 @@
     <string name="last_week">Last week</string>
     <string name="this_week">This week</string>
     <string name="last_month">Last month</string>
-    <string name="this_month_ext">This Month</string>
+    <string name="this_month_ext">This month</string>
+    <string name="total_spent">Total spent this</string>
+    <string name="empty_spending_report">Enter transactions to view report</string>
 </resources>

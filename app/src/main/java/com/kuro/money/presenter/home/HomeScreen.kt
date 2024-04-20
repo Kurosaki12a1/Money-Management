@@ -1,5 +1,6 @@
 package com.kuro.money.presenter.home
 
+import Minus
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -13,13 +14,18 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDownward
+import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -39,6 +45,7 @@ import androidx.navigation.NavController
 import com.kuro.customimagevector.EyeHidden
 import com.kuro.customimagevector.EyeOpen
 import com.kuro.money.R
+import com.kuro.money.constants.Constants
 import com.kuro.money.data.AppCache
 import com.kuro.money.data.model.AccountEntity
 import com.kuro.money.data.model.TransactionEntity
@@ -47,11 +54,15 @@ import com.kuro.money.extension.noRippleClickable
 import com.kuro.money.navigation.routes.NavigationRoute
 import com.kuro.money.presenter.home.feature.SpendingReportChart
 import com.kuro.money.presenter.utils.DecimalFormatter
+import com.kuro.money.presenter.utils.getBalance
 import com.kuro.money.presenter.utils.string
 import com.kuro.money.presenter.utils.toPainterResource
 import com.kuro.money.ui.theme.Gray
 import com.kuro.money.ui.theme.Green
 import kotlinx.coroutines.flow.collectLatest
+import java.time.DayOfWeek
+import java.time.LocalDate
+import java.time.temporal.TemporalAdjusters
 
 @Composable
 fun HomeScreen(
@@ -144,7 +155,7 @@ fun HomeScreen(
             }
             Spacer(modifier = Modifier.height(20.dp))
             /** Spending Report*/
-            SpendingReport(navController, recentTransactionViewModel)
+            SpendingReport(recentTransactionViewModel)
         }
         /** Title Recent Transaction*/
         item {
@@ -171,10 +182,59 @@ fun HomeScreen(
 
 @Composable
 fun SpendingReport(
-    navController: NavController,
     recentTransactionViewModel: RecentTransactionViewModel
 ) {
     val tabSelected = recentTransactionViewModel.tabSelected.collectAsState().value
+    val decimalFormatter = DecimalFormatter()
+    val listTransaction = remember { mutableStateListOf<TransactionEntity>() }
+    LaunchedEffect(true) {
+        recentTransactionViewModel.getTransactionsBetweenDate()
+        recentTransactionViewModel.reportTransaction.collectLatest {
+            if (it is Resource.Success) {
+                listTransaction.clear()
+                listTransaction.addAll(it.value)
+            }
+        }
+    }
+    val symbol = AppCache.defaultCurrencyEntity.collectAsState().value?.symbol ?: ""
+    val textDescription = StringBuilder().apply {
+        append(stringResource(id = R.string.total_spent))
+    }
+
+    val spendingValues: Pair<Double, Double>
+    if (tabSelected == TypeReport.WEEK) {
+        val startLastWeek =
+            LocalDate.now().minusWeeks(1).with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+        val endLastWeek =
+            LocalDate.now().minusWeeks(1).with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY))
+        val startThisWeek = LocalDate.now().with(TemporalAdjusters.previousOrSame(DayOfWeek.MONDAY))
+        val endThisWeek = LocalDate.now().with(TemporalAdjusters.nextOrSame(DayOfWeek.SUNDAY))
+        spendingValues = Pair(
+            listTransaction
+                .filter { it.category.type == Constants.EXPENSE }
+                .filter { startLastWeek <= it.displayDate && it.displayDate <= endLastWeek }
+                .sumOf { getBalance(it) },
+            listTransaction
+                .filter { it.category.type == Constants.EXPENSE }
+                .filter { startThisWeek <= it.displayDate && it.displayDate <= endThisWeek }
+                .sumOf { getBalance(it) }
+        )
+        textDescription.append(" week")
+    } else {
+        val lastMonth = LocalDate.now().minusMonths(1).month
+        val thisMonth = LocalDate.now().month
+        spendingValues = Pair(
+            listTransaction
+                .filter { it.category.type == Constants.EXPENSE }
+                .filter { it.displayDate.month == lastMonth }
+                .sumOf { getBalance(it) },
+            listTransaction
+                .filter { it.category.type == Constants.EXPENSE }
+                .filter { it.displayDate.month == thisMonth }
+                .sumOf { getBalance(it) },
+        )
+        textDescription.append(" month")
+    }
 
     Column(
         modifier = Modifier
@@ -195,7 +255,8 @@ fun SpendingReport(
                 modifier = Modifier
                     .weight(1f)
                     .background(
-                        if (tabSelected == TypeReport.WEEK) Color.White else Gray, RoundedCornerShape(16.dp)
+                        if (tabSelected == TypeReport.WEEK) Color.White else Gray,
+                        RoundedCornerShape(16.dp)
                     )
                     .padding(5.dp)
                     .noRippleClickable {
@@ -213,7 +274,8 @@ fun SpendingReport(
                 modifier = Modifier
                     .weight(1f)
                     .background(
-                        if (tabSelected == TypeReport.MONTH) Color.White else Gray, RoundedCornerShape(16.dp)
+                        if (tabSelected == TypeReport.MONTH) Color.White else Gray,
+                        RoundedCornerShape(16.dp)
                     )
                     .padding(5.dp)
                     .noRippleClickable {
@@ -228,12 +290,97 @@ fun SpendingReport(
                 )
             }
         }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                painter = painterResource(id = R.drawable.ic_approximation),
+                contentDescription = "Approximation"
+            )
+            Text(
+                text = decimalFormatter.formatForVisual(spendingValues.second.string()) + " " + symbol,
+                style = MaterialTheme.typography.h6,
+                color = Color.Black
+            )
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(3.dp)
+        ) {
+            Text(
+                text = textDescription.toString(),
+                style = MaterialTheme.typography.body1,
+                color = Color.Black.copy(0.5f)
+            )
+            val compareLastTime =
+                if (spendingValues.first == 0.0) 0.0 else spendingValues.second / spendingValues.first
+            when {
+                compareLastTime == 0.0 -> {
+                    Box(
+                        modifier = Modifier
+                            .background(Color.Black.copy(0.2f), CircleShape)
+                            .width(15.dp)
+                            .height(15.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Minus, contentDescription = "UnChanged",
+                            tint = Color.Magenta
+                        )
+                    }
+                    Text(
+                        text = "0 %",
+                        color = Color.Magenta,
+                    )
+                }
+
+                compareLastTime > 1.0 -> {
+                    Box(
+                        modifier = Modifier
+                            .background(Color.Gray, CircleShape)
+                            .width(15.dp)
+                            .height(15.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowUpward, contentDescription = "UpWard",
+                            tint = Color.Red
+                        )
+                    }
+                    Text(
+                        text = "${compareLastTime * 100} %",
+                        color = Color.Red,
+                    )
+                }
+
+                compareLastTime < 1.0 -> {
+                    Box(
+                        modifier = Modifier
+                            .background(Color.Gray, CircleShape)
+                            .width(15.dp)
+                            .height(15.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowDownward, contentDescription = "Downward",
+                            tint = Green
+                        )
+                    }
+                    Text(
+                        text = "${compareLastTime * 100} %",
+                        color = Green,
+                    )
+                }
+            }
+        }
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-            SpendingReportChart(recentTransactionViewModel)
+            SpendingReportChart(tabSelected, spendingValues)
         }
     }
-
 }
+
 
 @Composable
 fun RecentTransaction(
