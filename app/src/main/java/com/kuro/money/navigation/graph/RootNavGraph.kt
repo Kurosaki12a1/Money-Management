@@ -21,7 +21,7 @@ fun RootNavGraph(
             homeNavGraph(navHostController, paddingValues)
             transactionGraph(navHostController, paddingValues)
             addTransactionNavGraph(navHostController)
-            budgetsGraph(navHostController)
+            budgetsGraph(navHostController, paddingValues)
             accountNavGraph(navHostController)
         }
     )

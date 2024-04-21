@@ -34,8 +34,8 @@ fun generateListBottomNavItem(context: Context): MutableList<BottomNavItem> {
             route = NavigationGraphRoute.AddTransactionGraph.route,
         ),
         BottomNavItem(
-            name = context.getString(R.string.budget),
-            route = NavigationGraphRoute.BudgetsGraph.route,
+            name = context.getString(R.string.report),
+            route = NavigationGraphRoute.ReportGraph.route,
             icon = Icons.Default.Payments
         ),
         BottomNavItem(

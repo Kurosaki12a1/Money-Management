@@ -3,7 +3,7 @@
     <string name="home">Home</string>
     <string name="transactions">Transactions</string>
     <string name="add">Add</string>
-    <string name="budget">Budgets</string>
+    <string name="report">Report</string>
     <string name="account">Account</string>
     <string name="add_transaction">Add transaction</string>
 
@@ -122,4 +122,8 @@
     <string name="this_month_ext">This month</string>
     <string name="total_spent">Total spent this</string>
     <string name="empty_spending_report">Enter transactions to view report</string>
+    <string name="top_spending">Top spending</string>
+    <string name="empty_top_spending">Top spending categories \nwill show up here</string>
+    <string name="opening_balance">Opening Balance</string>
+    <string name="ending_balance">Ending Balance</string>
 </resources>

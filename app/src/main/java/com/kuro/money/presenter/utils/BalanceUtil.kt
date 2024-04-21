@@ -1,5 +1,6 @@
 package com.kuro.money.presenter.utils
 
+import com.kuro.money.constants.Constants
 import com.kuro.money.data.AppCache
 import com.kuro.money.data.model.Currency
 import com.kuro.money.data.model.TransactionEntity
@@ -49,4 +50,11 @@ fun getBalance(transactionEntity: TransactionEntity): Double {
         rate.currencyCode.lowercase() == transactionEntity.currency.code.lowercase()
     }?.rate
     return if (rates != null) 1 / rates * transactionEntity.amount else transactionEntity.amount
+}
+
+fun getBalanceFromList(list: List<TransactionEntity>?): Double {
+    if (list.isNullOrEmpty()) return 0.0
+    return list.filter { it.category.type == Constants.INCOME }
+        .sumOf { getBalance(it) } - list.filter { it.category.type == Constants.EXPENSE }
+        .sumOf { getBalance(it) }
 }

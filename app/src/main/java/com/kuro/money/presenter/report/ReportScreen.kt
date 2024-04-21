@@ -1,4 +1,4 @@
-package com.kuro.money.presenter.transactions
+package com.kuro.money.presenter.report
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
@@ -16,22 +16,17 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.Divider
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Surface
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.Notes
+import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -49,13 +44,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.kuro.customimagevector.EmptyBox
 import com.kuro.money.R
-import com.kuro.money.constants.Constants
 import com.kuro.money.data.AppCache
 import com.kuro.money.data.model.AccountEntity
 import com.kuro.money.data.model.TransactionEntity
@@ -65,38 +57,37 @@ import com.kuro.money.extension.noRippleClickable
 import com.kuro.money.navigation.routes.NavigationRoute
 import com.kuro.money.presenter.utils.CrossSlide
 import com.kuro.money.presenter.utils.DecimalFormatter
-import com.kuro.money.presenter.utils.getBalance
+import com.kuro.money.presenter.utils.getBalanceFromList
 import com.kuro.money.presenter.utils.string
 import com.kuro.money.presenter.utils.toPainterResource
 import com.kuro.money.ui.theme.Gray
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.zip
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.time.format.TextStyle
-import java.util.Locale
+import java.time.Month
 
 @Composable
-fun TransactionScreen(
+fun ReportScreen(
     navController: NavController,
-    paddingValues: PaddingValues,
-    transactionViewModel: TransactionViewModel
+    reportViewModel: ReportViewModel,
+    paddingValues: PaddingValues
 ) {
     val listState = rememberLazyListState()
     val listWallet = remember { mutableStateListOf<AccountEntity>() }
-    val selectedWallet = transactionViewModel.selectedWallet.collectAsState().value
-    val monthList = transactionViewModel.monthList.collectAsState().value
-    val monthSelected = transactionViewModel.monthSelected.collectAsState().value
-    val listMonthTransaction = remember { mutableStateListOf<TransactionEntity>() }
+    val selectedWallet = reportViewModel.selectedWallet.collectAsState().value
+    val monthList = reportViewModel.monthList.collectAsState().value
+    val monthSelected = reportViewModel.monthSelected.collectAsState().value
+    // List Transaction selected this time and prev time
+    val listTransactions = remember { mutableStateListOf<TransactionEntity>() }
     // First focus is 17
     val prevIndexSelected = remember { mutableIntStateOf(17) }
     val indexSelected =
         remember(monthSelected) { mutableIntStateOf(monthList.indexOf(monthSelected)) }
 
     LaunchedEffect(true) {
-        transactionViewModel.getBalance()
-        transactionViewModel.getAllWallets()
-        transactionViewModel.setMonthSelected(monthSelected)
+        reportViewModel.getBalance()
+        reportViewModel.getAllWallets()
+        reportViewModel.setMonthSelected(monthSelected)
     }
 
     LaunchedEffect(indexSelected.intValue) {
@@ -104,16 +95,16 @@ fun TransactionScreen(
     }
 
     LaunchedEffect(Unit) {
-        transactionViewModel.transactionByDate.collectLatest {
+        reportViewModel.transactionSelected.collectLatest {
             if (it is Resource.Success) {
-                listMonthTransaction.clear()
-                listMonthTransaction.addAll(it.value)
+                listTransactions.clear()
+                listTransactions.addAll(it.value)
             }
         }
     }
 
     LaunchedEffect(Unit) {
-        transactionViewModel.globalWallet.zip(transactionViewModel.allWallets) { globalWallet, list ->
+        reportViewModel.globalWallet.zip(reportViewModel.allWallets) { globalWallet, list ->
             Pair(globalWallet, list)
         }.collectLatest {
             if (it.second is Resource.Success && it.first != null) {
@@ -121,7 +112,7 @@ fun TransactionScreen(
                 listWallet.add(it.first!!)
                 listWallet.addAll((it.second as Resource.Success).value)
                 if (selectedWallet == null) {
-                    transactionViewModel.setSelectedWallet(it.first!!)
+                    reportViewModel.setSelectedWallet(it.first!!)
                 }
             }
         }
@@ -141,12 +132,15 @@ fun TransactionScreen(
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             if (!listWallet.isEmpty()) {
-                ToolBarTransactions(
+                ToolBarReport(
                     selectedWallet,
-                    onSearchClick = {
+                    onShareClick = {
                         navController.navigate(NavigationRoute.Transaction.SearchTransaction.route) {
                             popUpTo(NavigationRoute.Transaction.route)
                         }
+                    },
+                    onTimeRangeClick = {
+
                     },
                     onWalletClick = {
                         navController.navigate(NavigationRoute.Transaction.SelectWallet.route)
@@ -164,7 +158,7 @@ fun TransactionScreen(
                         date = date,
                         index = index,
                         isSelected = monthSelected == date,
-                        onClick = { transactionViewModel.setMonthSelected(it) }
+                        onClick = { reportViewModel.setMonthSelected(it) }
                     )
                 }
             }
@@ -178,57 +172,31 @@ fun TransactionScreen(
                             prevIndexSelected.intValue = indexSelected.intValue
                         }
                         if (indexSelected.intValue < 17) {
-                            transactionViewModel.setMonthSelected(monthList[indexSelected.intValue + 1])
+                            reportViewModel.setMonthSelected(monthList[indexSelected.intValue + 1])
                         }
                     }, onSwipeRight = {
                         if (indexSelected.intValue != prevIndexSelected.intValue) {
                             prevIndexSelected.intValue = indexSelected.intValue
                         }
                         if (indexSelected.intValue > 0) {
-                            transactionViewModel.setMonthSelected(monthList[indexSelected.intValue - 1])
+                            reportViewModel.setMonthSelected(monthList[indexSelected.intValue - 1])
                         }
                     }),
                 orderedContent = (0..18).toList()
-            ) {
-                if (listMonthTransaction.isEmpty()) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Gray),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        Spacer(modifier = Modifier.weight(1f))
-                        Image(
-                            imageVector = EmptyBox,
-                            contentDescription = "Empty Box",
+            ) { index ->
+                LazyColumn(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Gray)
+                        .padding(bottom = 30.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    item {
+                        ReportBalance(
+                            listTransactions,
+                            // Index of "This month" is 17
+                            LocalDate.now().minusMonths((17 - index).toLong()).month
                         )
-                        Text(
-                            text = stringResource(id = R.string.tap_plus_to_add),
-                            color = Color.Black,
-                            style = MaterialTheme.typography.h6
-                        )
-                        Spacer(modifier = Modifier.weight(1f))
-                    }
-                } else {
-                    val listTransactionOfDayInMonth = listMonthTransaction
-                        .sortedByDescending { it.displayDate }
-                        .groupBy { it.displayDate }
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(Gray)
-                            .padding(bottom = 30.dp),
-                        verticalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        item { ReportSpendingOfMonth(listMonthTransaction) }
-                        items(
-                            listTransactionOfDayInMonth.keys.toList(),
-                            key = { it.dayOfMonth }) { date ->
-                            ListTransactionsOfMonth(date, listTransactionOfDayInMonth[date]) { id ->
-                                navController.navigate("${NavigationRoute.Home.TransactionDetails.route}/$id")
-                            }
-                        }
                     }
                 }
             }
@@ -236,175 +204,104 @@ fun TransactionScreen(
     }
 }
 
-
 @Composable
-private fun ListTransactionsOfMonth(
-    date: LocalDate,
+private fun ReportBalance(
     listTransaction: List<TransactionEntity>?,
-    onClick: (Long) -> Unit
+    month: Month
 ) {
-    if (listTransaction == null) return
-    val decimalFormatter = DecimalFormatter()
-    val income =
-        listTransaction.filter { it.category.type == Constants.INCOME }.sumOf { getBalance(it) }
-    val expense =
-        listTransaction.filter { it.category.type == Constants.EXPENSE }.sumOf { getBalance(it) }
-    val balance = income - expense
-    Column(
-        modifier = Modifier
-            .background(Color.White)
-            .padding(10.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(10.dp)
+    val symbol = AppCache.defaultCurrencyEntity.collectAsState().value?.symbol ?: ""
+    if (listTransaction.isNullOrEmpty()) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 10.dp, horizontal = 5.dp),
+            verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
-            Text(
-                text = DateTimeFormatter.ofPattern("dd").format(date),
-                color = Color.Black,
-                style = MaterialTheme.typography.h5,
-            )
-            Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
                 Text(
-                    text = date.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.getDefault()),
-                    color = Color.Black,
-                    style = MaterialTheme.typography.body1
-                )
-                Text(
-                    text = DateTimeFormatter.ofPattern("MMMM yyyy").format(date),
+                    text = stringResource(id = R.string.opening_balance),
                     color = Color.Black.copy(0.5f),
                     style = MaterialTheme.typography.body1
                 )
+                Spacer(modifier = Modifier.weight(1f))
+                Text(
+                    text = "0 $symbol",
+                    color = Color.Black,
+                    style = MaterialTheme.typography.body1
+                )
             }
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(id = R.string.ending_balance),
+                    color = Color.Black.copy(0.5f),
+                    style = MaterialTheme.typography.body1
+                )
+                Spacer(modifier = Modifier.weight(1f))
+                Text(
+                    text = "0 $symbol",
+                    color = Color.Black,
+                    style = MaterialTheme.typography.body1
+                )
+            }
+        }
+        return
+    }
+    val openingBalance =
+        getBalanceFromList(listTransaction.filter { it.displayDate.month == month - 1 })
+    val endingBalance = getBalanceFromList(listTransaction.filter { it.displayDate.month == month })
+    val decimalFormatter = DecimalFormatter()
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 10.dp, horizontal = 5.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = stringResource(id = R.string.opening_balance),
+                color = Color.Black.copy(0.5f),
+                style = MaterialTheme.typography.body1
+            )
             Spacer(modifier = Modifier.weight(1f))
             Text(
-                text = decimalFormatter.formatForVisual(balance.string()),
+                text = "${decimalFormatter.formatForVisual(openingBalance.string())} $symbol",
                 color = Color.Black,
                 style = MaterialTheme.typography.body1
             )
         }
-        Divider(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(1.dp)
-                .background(Gray)
-        )
-        listTransaction.forEach { transaction ->
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .noRippleClickable { onClick(transaction.id) },
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                Image(
-                    painter = transaction.category.icon.toPainterResource(),
-                    contentDescription = "Icon"
-                )
-                Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
-                    Text(
-                        text = transaction.category.name,
-                        color = Color.Black,
-                        style = MaterialTheme.typography.body1
-                    )
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(
-                            imageVector = Icons.AutoMirrored.Default.Notes,
-                            contentDescription = "Notes",
-                            tint = Gray
-                        )
-                        Text(
-                            text = transaction.note ?: "", color = Color.Black.copy(0.5f),
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-                }
-                Spacer(modifier = Modifier.weight(1f))
-                Text(
-                    text = decimalFormatter.formatForVisual(getBalance(transaction).string()),
-                    color = if (transaction.category.type == Constants.INCOME) Color.Cyan else Color.Red
-                )
-            }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = stringResource(id = R.string.ending_balance),
+                color = Color.Black.copy(0.5f),
+                style = MaterialTheme.typography.body1
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            Text(
+                text = "${decimalFormatter.formatForVisual(endingBalance.string())} $symbol",
+                color = Color.Black,
+                style = MaterialTheme.typography.body1
+            )
         }
     }
 }
 
 @Composable
-private fun ReportSpendingOfMonth(
-    listTransaction: List<TransactionEntity>
+private fun ReportTransactionOfMonth(
+    listTransaction: List<TransactionEntity>?
 ) {
-    val decimalFormatter = DecimalFormatter()
-    val income =
-        listTransaction.filter { it.category.type == Constants.INCOME }.sumOf { getBalance(it) }
-    val expense =
-        listTransaction.filter { it.category.type == Constants.EXPENSE }.sumOf { getBalance(it) }
-    val symbol = AppCache.defaultCurrencyEntity.value?.symbol ?: ""
-    Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .background(Color.White)
-            .padding(10.dp),
-        verticalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = stringResource(id = R.string.inflow),
-                style = MaterialTheme.typography.body2,
-                color = Color.Black.copy(0.5f)
-            )
-            Spacer(modifier = Modifier.weight(1f))
-            Text(
-                text = "${decimalFormatter.formatForVisual(income.string())} $symbol",
-                color = Color.Cyan,
-                style = MaterialTheme.typography.body2
-            )
-        }
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = stringResource(id = R.string.outflow),
-                style = MaterialTheme.typography.body2,
-                color = Color.Black.copy(0.5f)
-            )
-            Spacer(modifier = Modifier.weight(1f))
-            Text(
-                text = "${decimalFormatter.formatForVisual(expense.string())} $symbol",
-                color = Color.Red,
-                style = MaterialTheme.typography.body2
-            )
-        }
-        Divider(
-            modifier = Modifier
-                .fillMaxWidth(0.3f)
-                .height(1.dp)
-                .background(Color.Black.copy(0.5f))
-                .align(Alignment.End)
-        )
-        Text(
-            text = "${decimalFormatter.formatForVisual((income - expense).string())} $symbol",
-            color = Color.Black,
-            modifier = Modifier.align(Alignment.End)
-        )
-        Button(
-            onClick = { /*TODO*/ },
-            shape = RoundedCornerShape(16.dp),
-            modifier = Modifier.align(Alignment.CenterHorizontally),
-            colors = ButtonDefaults.buttonColors(backgroundColor = Gray)
-        ) {
-            Text(
-                text = stringResource(id = R.string.view_report_this_period),
-                color = Color.Black,
-                style = MaterialTheme.typography.body1,
-                textAlign = TextAlign.Center
-            )
-        }
-    }
+
 }
 
 @Composable
@@ -453,10 +350,12 @@ private fun TabOfMonth(
     }
 }
 
+
 @Composable
-private fun ToolBarTransactions(
+private fun ToolBarReport(
     wallet: AccountEntity?,
-    onSearchClick: () -> Unit,
+    onShareClick: () -> Unit,
+    onTimeRangeClick: () -> Unit,
     onWalletClick: () -> Unit
 ) {
     if (wallet == null) return
@@ -479,10 +378,11 @@ private fun ToolBarTransactions(
                 horizontalArrangement = Arrangement.spacedBy(20.dp)
             ) {
                 Icon(
-                    imageVector = Icons.Default.Search,
+                    imageVector = Icons.Default.Share,
                     contentDescription = "Search",
-                    modifier = Modifier.noRippleClickable { onSearchClick() })
-                Icon(imageVector = Icons.Default.MoreVert, contentDescription = "More")
+                    modifier = Modifier.noRippleClickable { onShareClick() })
+                Icon(imageVector = Icons.Default.CalendarMonth, contentDescription = "More",
+                    modifier = Modifier.noRippleClickable { onTimeRangeClick() })
             }
         }
         Row(

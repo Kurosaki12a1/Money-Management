@@ -44,8 +44,8 @@ sealed class NavigationRoute(val route: String) {
         companion object : Transaction("transaction")
     }
 
-    sealed class Budgets(route: String) : NavigationRoute(route) {
-        companion object : Budgets("budgets")
+    sealed class Report(route: String) : NavigationRoute(route) {
+        companion object : Report("report")
     }
 
     sealed class Account(route: String) : NavigationRoute(route) {

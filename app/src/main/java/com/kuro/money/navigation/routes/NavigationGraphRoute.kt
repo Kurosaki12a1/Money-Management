@@ -25,7 +25,7 @@ sealed class NavigationGraphRoute(val route: String) {
         companion object : AddTransactionGraph("add_transaction_graph")
     }
 
-    data object BudgetsGraph : NavigationGraphRoute(route = "budgets_graph")
+    data object ReportGraph : NavigationGraphRoute(route = "report_graph")
 
     sealed class AccountGraph(route: String) : NavigationGraphRoute(route) {
 

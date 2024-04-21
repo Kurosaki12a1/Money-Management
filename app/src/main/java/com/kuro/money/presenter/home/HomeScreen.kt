@@ -63,6 +63,7 @@ import kotlinx.coroutines.flow.collectLatest
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.temporal.TemporalAdjusters
+import kotlin.math.roundToInt
 
 @Composable
 fun HomeScreen(
@@ -187,6 +188,7 @@ fun SpendingReport(
     val tabSelected = recentTransactionViewModel.tabSelected.collectAsState().value
     val decimalFormatter = DecimalFormatter()
     val listTransaction = remember { mutableStateListOf<TransactionEntity>() }
+    val listSpendingThisTime = remember { mutableStateListOf<TransactionEntity>() }
     LaunchedEffect(true) {
         recentTransactionViewModel.getTransactionsBetweenDate()
         recentTransactionViewModel.reportTransaction.collectLatest {
@@ -219,6 +221,12 @@ fun SpendingReport(
                 .filter { startThisWeek <= it.displayDate && it.displayDate <= endThisWeek }
                 .sumOf { getBalance(it) }
         )
+        listSpendingThisTime.clear()
+        listSpendingThisTime.addAll(
+            listTransaction
+                .filter { it.category.type == Constants.EXPENSE }
+                .filter { startThisWeek <= it.displayDate && it.displayDate <= endThisWeek }
+        )
         textDescription.append(" week")
     } else {
         val lastMonth = LocalDate.now().minusMonths(1).month
@@ -233,9 +241,15 @@ fun SpendingReport(
                 .filter { it.displayDate.month == thisMonth }
                 .sumOf { getBalance(it) },
         )
+        listSpendingThisTime.clear()
+        listSpendingThisTime.addAll(
+            listTransaction
+                .filter { it.category.type == Constants.EXPENSE }
+                .filter { it.displayDate.month == thisMonth }
+        )
         textDescription.append(" month")
     }
-
+    val isNoData = spendingValues.first == 0.0 && spendingValues.second == 0.0
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -364,7 +378,8 @@ fun SpendingReport(
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
-                            imageVector = Icons.Default.ArrowDownward, contentDescription = "Downward",
+                            imageVector = Icons.Default.ArrowDownward,
+                            contentDescription = "Downward",
                             tint = Green
                         )
                     }
@@ -378,6 +393,83 @@ fun SpendingReport(
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
             SpendingReportChart(tabSelected, spendingValues)
         }
+        Text(
+            text = stringResource(id = R.string.top_spending),
+            color = Color.Black.copy(0.5f),
+            style = MaterialTheme.typography.body1,
+            fontWeight = FontWeight.Bold
+        )
+        if (isNoData) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(20.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    text = stringResource(id = R.string.empty_top_spending),
+                    color = Color.Black.copy(0.5f),
+                    style = MaterialTheme.typography.body1,
+                    textAlign = TextAlign.Center
+                )
+            }
+        } else {
+            val categoriesSpending = listSpendingThisTime.groupBy { it.category.name }
+            val sortedCategory = categoriesSpending.entries.sortedByDescending { entry ->
+                entry.value.sumOf { item -> getBalance(item) }
+            }
+            sortedCategory.forEach { category ->
+                val balance = category.value.sumOf { getBalance(it) }
+                TopSpendingCategories(
+                    category = category.value,
+                    percent = (balance / spendingValues.second).roundToInt()
+                ) {
+                    // TODO
+                }
+            }
+        }
+    }
+}
+
+@Composable
+private fun TopSpendingCategories(
+    category: List<TransactionEntity>,
+    percent: Int,
+    onClick: () -> Unit // TODO Ring Chart
+) {
+    if (category.isEmpty()) return
+    val balance = category.sumOf { getBalance(it) }
+    val symbol = AppCache.defaultCurrencyEntity.collectAsState().value?.symbol ?: ""
+    val decimalFormatter = DecimalFormatter()
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .noRippleClickable { onClick() },
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(20.dp)
+    ) {
+        Image(painter = category[0].category.icon.toPainterResource(), contentDescription = "Icon")
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(5.dp)
+        ) {
+            Text(
+                text = category[0].category.name,
+                color = Color.Black,
+                style = MaterialTheme.typography.body1,
+                fontWeight = FontWeight.Bold
+            )
+            Text(
+                text = "${decimalFormatter.formatForVisual(balance.string())} $symbol",
+                color = Color.Black.copy(0.5f),
+                style = MaterialTheme.typography.body2
+            )
+        }
+        Text(
+            text = "${percent * 100}%",
+            color = Color.Red,
+            style = MaterialTheme.typography.body1,
+        )
     }
 }
 

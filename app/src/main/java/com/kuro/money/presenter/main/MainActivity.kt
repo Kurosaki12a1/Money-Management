@@ -1,6 +1,5 @@
 package com.kuro.money.presenter.main
 
-import android.annotation.SuppressLint
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -78,7 +77,7 @@ private fun MainScreen() {
         bottomBar = {
             if (navRouteDestination == NavigationRoute.Home.route
                 || navRouteDestination == NavigationRoute.Transaction.route
-                || navRouteDestination == NavigationRoute.Budgets.route
+                || navRouteDestination == NavigationRoute.Report.route
                 || navRouteDestination == NavigationRoute.Account.route
             ) {
                 BottomBar(routeSelected = currentRoute.value) {
@@ -92,7 +91,7 @@ private fun MainScreen() {
         floatingActionButton = {
             if (navRouteDestination == NavigationRoute.Home.route
                 || navRouteDestination == NavigationRoute.Transaction.route
-                || navRouteDestination == NavigationRoute.Budgets.route
+                || navRouteDestination == NavigationRoute.Report.route
                 || navRouteDestination == NavigationRoute.Account.route
             ) {
                 MainFloatingButton {
