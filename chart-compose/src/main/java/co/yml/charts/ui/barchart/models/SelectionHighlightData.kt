@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import co.yml.charts.common.extensions.getTextBackgroundRect
+import java.util.Locale
 
 /**
  * Used to customise the highlighted text and the bar
@@ -127,9 +128,8 @@ data class SelectionHighlightData(
     },
 
     val groupBarPopUpLabel: (String, Float) -> (String) = { name, value ->
-        val xLabel = "Name : $name "
-        val yLabel = "Value : ${String.format("%.2f", value)}"
-        "$xLabel $yLabel"
+        val yLabel = "Value : ${String.format(Locale.getDefault(),"%.2f", value)}"
+        "$name $yLabel"
     },
 
 
@@ -140,7 +140,7 @@ data class SelectionHighlightData(
             textAlign = highlightLabelAlignment
             typeface = highlightTextTypeface
         }
-        val xLabel = "${identifiedPoint.point.x.toInt()}"
+        val xLabel = identifiedPoint.label
         val label = groupBarPopUpLabel(xLabel, identifiedPoint.point.y)
         drawContext.canvas.nativeCanvas.apply {
             val background = getTextBackgroundRect(

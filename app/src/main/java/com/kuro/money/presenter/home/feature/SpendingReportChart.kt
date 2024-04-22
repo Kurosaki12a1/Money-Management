@@ -4,8 +4,6 @@ package com.kuro.money.presenter.home.feature
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.BoxWithConstraintsScope
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
@@ -15,6 +13,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import co.yml.charts.axis.AxisConfig
 import co.yml.charts.axis.AxisData
 import co.yml.charts.axis.DataCategoryOptions
@@ -27,6 +26,7 @@ import co.yml.charts.ui.barchart.models.BarStyle
 import co.yml.charts.ui.barchart.models.SelectionHighlightData
 import com.kuro.money.R
 import com.kuro.money.presenter.home.TypeReport
+import com.kuro.money.presenter.utils.formatLargeNumber
 import com.kuro.money.ui.theme.Gray
 
 
@@ -86,7 +86,9 @@ fun BoxWithConstraintsScope.SpendingReportChart(
         .build()
 
     val yAxisData = AxisData.Builder()
+        .topPadding(30.dp)
         .steps(1)
+        .axisLabelFontSize(10.sp)
         .axisConfig(
             AxisConfig(
                 shouldEllipsizeAxisLabel = !isNoData,
@@ -97,16 +99,14 @@ fun BoxWithConstraintsScope.SpendingReportChart(
         .labelData { index ->
             if (isNoData && index != 0) {
                 ""
-            } else (index * maxOf(spendingValues.first, spendingValues.second)).toString()
+            } else (index * maxOf(spendingValues.first, spendingValues.second)).formatLargeNumber()
         }
         .build()
     BarChart(
         modifier = Modifier
-            .wrapContentWidth()
             .height(200.dp)
             .align(Alignment.Center)
-            .background(Color.White)
-            .padding(top = if (isNoData) 0.dp else 10.dp),
+            .background(Color.White),
         barChartData = BarChartData(
             barChartType = BarChartType.VERTICAL,
             chartData = chartData,

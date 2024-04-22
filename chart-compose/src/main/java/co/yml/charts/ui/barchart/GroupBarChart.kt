@@ -15,7 +15,6 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material.ExperimentalMaterialApi
 import androidx.compose.material.ModalBottomSheetValue
 import androidx.compose.material.rememberModalBottomSheetState
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -86,10 +85,11 @@ fun GroupBarChart(modifier: Modifier, groupBarChartData: GroupBarChartData) {
             var rowHeight by remember { mutableStateOf(0f) }
             val paddingRight = groupBarChartData.paddingEnd
             val valueList = groupBarList.map { it.yMax }
-            val bgColor = MaterialTheme.colorScheme.surface
 
             val xMax = groupBarList.size
-            val yMax = valueList.maxOrNull() ?: 0f
+            val yMax: Float = if (groupBarChartData.yAxisData.maxValue != -1.0) {
+                groupBarChartData.yAxisData.maxValue.toFloat()
+            } else valueList.maxOrNull() ?: 0f
             val xAxisData =
                 groupBarChartData.xAxisData.copy(
                     axisStepSize = ((barStyle.barWidth * groupingSize) + barStyle.paddingBetweenBars),
@@ -138,6 +138,23 @@ fun GroupBarChart(modifier: Modifier, groupBarChartData: GroupBarChartData) {
                         ((barStyle.barWidth.toPx() * groupingSize) + barStyle.paddingBetweenBars.toPx()) * xZoom
                     val xLeft = columnWidth + horizontalGap
                     val dragLocks = mutableMapOf<Int, Pair<BarData, Offset>>()
+                    if (yAxisData.shouldDrawAxisEachStep) {
+                        val ySteps = yBottom - yAxisData.axisTopPadding.toPx()
+
+                        for (i in 0..yAxisData.steps) {
+                            drawLine(
+                                start = Offset(
+                                    x = xLeft - xAxisData.startDrawPadding.toPx(),
+                                    y = ySteps * i / yAxisData.steps + yAxisData.axisTopPadding.toPx()
+                                ),
+                                end = Offset(
+                                    x = size.width,
+                                    y = ySteps * i / yAxisData.steps + yAxisData.axisTopPadding.toPx()
+                                ),
+                                color = xAxisData.axisLineColor, strokeWidth = 1.dp.toPx()
+                            )
+                        }
+                    }
 
                     // Draw bar lines
                     groupBarList.forEachIndexed { index, groupBarData ->
@@ -168,6 +185,7 @@ fun GroupBarChart(modifier: Modifier, groupBarChartData: GroupBarChartData) {
                                 groupBarChartData,
                                 barStyle,
                                 individualOffset,
+                                //   individualOffset.copy(y = drawOffset.y + height / 2f),
                                 height,
                                 subIndex
                             )
@@ -220,7 +238,7 @@ fun GroupBarChart(modifier: Modifier, groupBarChartData: GroupBarChartData) {
                             )
                         }
                     }
-                    drawUnderScrollMask(columnWidth, paddingRight, bgColor)
+                    drawUnderScrollMask(columnWidth, paddingRight, Color.Transparent)
 
                     if (barStyle.selectionHighlightData != null) {
                         // highlighting the selected bar and showing the data points

@@ -12,6 +12,7 @@ import androidx.compose.ui.unit.sp
  *
  * YAxis data class params used in drawing yAxis in any graph.
  * @param steps: No of step for label segmentation
+ * @param maxValue : Max value of yAxis
  * @param axisBottomPadding: Axis Label offset bottom padding
  * @param labelData(Int)-> String: lambda method for providing labels, @param Int will be the index
  * given for each level in Axis
@@ -37,6 +38,7 @@ import androidx.compose.ui.unit.sp
  */
 data class AxisData(
     val steps: Int,
+    val maxValue: Double,
     val labelData: (Int) -> String,
     val axisPos: Gravity,
     val labelAndAxisLinePadding: Dp,
@@ -57,12 +59,14 @@ data class AxisData(
     val axisConfig: AxisConfig,
     val startDrawPadding: Dp,
     val shouldDrawAxisLine: Boolean,
+    val shouldDrawAxisEachStep: Boolean,
     val shouldDrawAxisLineTillEnd: Boolean,
     val axisLabelDescription: (String) -> String,
     val dataCategoryOptions: DataCategoryOptions
 ) {
     class Builder {
         private var steps: Int = 1
+        private var maxValue: Double = -1.0
         private var labelData: (Int) -> String = { _ -> "" }
         private var axisPos: Gravity = Gravity.LEFT
         private var labelAndAxisLinePadding: Dp = 20.dp
@@ -83,12 +87,15 @@ data class AxisData(
         private var startDrawPadding: Dp = 0.dp
         private var axisLabelAngle: Float = 0f
         private var shouldDrawAxisLine: Boolean = true
+        private var shouldDrawAxisEachStep: Boolean = false
         private var shouldDrawAxisLineTillEnd: Boolean = false
         private var dataCategoryOptions: DataCategoryOptions = DataCategoryOptions()
         private var axisLabelDescription: (String) -> String =
             { label -> if (dataCategoryOptions.isDataCategoryInYAxis) "Y Axis label $label" else "X Axis label $label" }
 
         fun steps(count: Int) = apply { this.steps = count }
+
+        fun setMaxValue(value : Double) = apply { this.maxValue = value }
 
         fun axisOffset(offset: Dp) = apply { this.axisOffset = offset }
 
@@ -131,6 +138,8 @@ data class AxisData(
 
         fun shouldDrawAxisLine(flag: Boolean) = apply { this.shouldDrawAxisLine = flag }
 
+        fun shouldDrawAxisEachStep(flag: Boolean) = apply { this.shouldDrawAxisEachStep = flag }
+
         fun shouldDrawAxisLineTillEnd(flag: Boolean) =
             apply { this.shouldDrawAxisLineTillEnd = flag }
 
@@ -144,6 +153,7 @@ data class AxisData(
 
         fun build() = AxisData(
             steps,
+            maxValue,
             labelData,
             axisPos,
             labelAndAxisLinePadding,
@@ -164,6 +174,7 @@ data class AxisData(
             axisConfig,
             startDrawPadding,
             shouldDrawAxisLine,
+            shouldDrawAxisEachStep,
             shouldDrawAxisLineTillEnd,
             axisLabelDescription,
             dataCategoryOptions

@@ -5,6 +5,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -55,6 +56,7 @@ import com.kuro.money.data.utils.Resource
 import com.kuro.money.extension.detectHorizontalWithDelay
 import com.kuro.money.extension.noRippleClickable
 import com.kuro.money.navigation.routes.NavigationRoute
+import com.kuro.money.presenter.report.feature.NetIncomeChart
 import com.kuro.money.presenter.utils.CrossSlide
 import com.kuro.money.presenter.utils.DecimalFormatter
 import com.kuro.money.presenter.utils.getBalanceFromList
@@ -184,6 +186,9 @@ fun ReportScreen(
                     }),
                 orderedContent = (0..18).toList()
             ) { index ->
+                // Index of "This month" is 17
+                val currentMonth = LocalDate.now().minusMonths((17 - index).toLong()).month
+                val listMonthTransaction = listTransactions.filter { it.displayDate.month == currentMonth }
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
@@ -194,9 +199,18 @@ fun ReportScreen(
                     item {
                         ReportBalance(
                             listTransactions,
-                            // Index of "This month" is 17
-                            LocalDate.now().minusMonths((17 - index).toLong()).month
+                            currentMonth
                         )
+                    }
+                    item {
+                        BoxWithConstraints(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(Color.White, RoundedCornerShape(16.dp))
+                                .padding(10.dp)
+                        ) {
+                            NetIncomeChart(listMonthTransaction)
+                        }
                     }
                 }
             }
@@ -297,12 +311,6 @@ private fun ReportBalance(
     }
 }
 
-@Composable
-private fun ReportTransactionOfMonth(
-    listTransaction: List<TransactionEntity>?
-) {
-
-}
 
 @Composable
 private fun TabOfMonth(

@@ -125,3 +125,14 @@ fun NavGraphBuilder.verticalComposable(
         content = content
     )
 }
+
+fun Double.formatLargeNumber() : String{
+    return when {
+        this < 1000.0 -> this.toString()
+        this < 1_000_000 -> String.format(Locale.getDefault(), "%.1fk", this / 1000.0)
+        this < 1_000_000_000 -> String.format(Locale.getDefault(),"%.1fM", this / 1_000_000.0)
+        this < 1_000_000_000_000 -> String.format(Locale.getDefault(),"%.1fB", this / 1_000_000_000.0)
+        this < 1_000_000_000_000_000 -> String.format(Locale.getDefault(),"%.1fT", this / 1_000_000_000_000.0)
+        else -> String.format(Locale.getDefault(),"%.1fQ", this / 1_000_000_000_000_000.0)
+    }
+}
