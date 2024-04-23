@@ -53,11 +53,11 @@ fun BoxWithConstraintsScope.NetIncomeChart(
             point = Point(index.toFloat(), expense.toFloat()),
             label = "Expense"
         )
-        if (maxValue == 0.0) {
-            maxValue = maxOf(income, expense)
+        (if (maxValue == 0.0) {
+            maxOf(income, expense)
         } else {
-            maxValue = maxOf(maxOf(income, expense), maxValue)
-        }
+            maxOf(maxOf(income, expense), maxValue)
+        }).also { maxValue = it }
         val barData = mutableListOf<BarData>()
         barData.add(incomeData)
         barData.add(expenseData)
@@ -78,7 +78,6 @@ fun BoxWithConstraintsScope.NetIncomeChart(
         .axisLabelAngle(-30f)
         .labelAndAxisLinePadding(30.dp)
         .axisLabelFontSize(8.sp)
-        .bottomPadding(20.dp)
         .labelData { index -> groupBarData[index].label }
         .build()
 

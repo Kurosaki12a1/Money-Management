@@ -126,4 +126,6 @@
     <string name="empty_top_spending">Top spending categories \nwill show up here</string>
     <string name="opening_balance">Opening Balance</string>
     <string name="ending_balance">Ending Balance</string>
+    <string name="net_income">Net Income</string>
+    <string name="see_details">See details</string>
 </resources>

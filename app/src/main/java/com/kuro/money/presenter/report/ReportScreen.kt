@@ -60,6 +60,8 @@ import com.kuro.money.presenter.report.feature.NetIncomeChart
 import com.kuro.money.presenter.utils.CrossSlide
 import com.kuro.money.presenter.utils.DecimalFormatter
 import com.kuro.money.presenter.utils.getBalanceFromList
+import com.kuro.money.presenter.utils.getExpenseFromList
+import com.kuro.money.presenter.utils.getIncomeFromList
 import com.kuro.money.presenter.utils.string
 import com.kuro.money.presenter.utils.toPainterResource
 import com.kuro.money.ui.theme.Gray
@@ -70,9 +72,7 @@ import java.time.Month
 
 @Composable
 fun ReportScreen(
-    navController: NavController,
-    reportViewModel: ReportViewModel,
-    paddingValues: PaddingValues
+    navController: NavController, reportViewModel: ReportViewModel, paddingValues: PaddingValues
 ) {
     val listState = rememberLazyListState()
     val listWallet = remember { mutableStateListOf<AccountEntity>() }
@@ -86,6 +86,7 @@ fun ReportScreen(
     val indexSelected =
         remember(monthSelected) { mutableIntStateOf(monthList.indexOf(monthSelected)) }
 
+    val decimalFormatter = DecimalFormatter()
     LaunchedEffect(true) {
         reportViewModel.getBalance()
         reportViewModel.getAllWallets()
@@ -125,43 +126,31 @@ fun ReportScreen(
             .fillMaxSize()
             .background(Color.White)
             .padding(
-                start = 10.dp,
-                end = 10.dp,
-                top = 20.dp,
-                bottom = paddingValues.calculateBottomPadding()
-            ),
-        color = Color.White
+                top = 20.dp, bottom = paddingValues.calculateBottomPadding()
+            ), color = Color.White
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             if (!listWallet.isEmpty()) {
-                ToolBarReport(
-                    selectedWallet,
-                    onShareClick = {
-                        navController.navigate(NavigationRoute.Transaction.SearchTransaction.route) {
-                            popUpTo(NavigationRoute.Transaction.route)
-                        }
-                    },
-                    onTimeRangeClick = {
-
-                    },
-                    onWalletClick = {
-                        navController.navigate(NavigationRoute.Transaction.SelectWallet.route)
+                ToolBarReport(selectedWallet, onShareClick = {
+                    navController.navigate(NavigationRoute.Transaction.SearchTransaction.route) {
+                        popUpTo(NavigationRoute.Transaction.route)
                     }
-                )
+                }, onTimeRangeClick = {
+
+                }, onWalletClick = {
+                    navController.navigate(NavigationRoute.Transaction.SelectWallet.route)
+                })
             }
             LazyRow(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(50.dp),
-                state = listState
+                    .height(50.dp), state = listState
             ) {
                 itemsIndexed(monthList) { index, date ->
-                    TabOfMonth(
-                        date = date,
+                    TabOfMonth(date = date,
                         index = index,
                         isSelected = monthSelected == date,
-                        onClick = { reportViewModel.setMonthSelected(it) }
-                    )
+                        onClick = { reportViewModel.setMonthSelected(it) })
                 }
             }
             CrossSlide(
@@ -188,7 +177,8 @@ fun ReportScreen(
             ) { index ->
                 // Index of "This month" is 17
                 val currentMonth = LocalDate.now().minusMonths((17 - index).toLong()).month
-                val listMonthTransaction = listTransactions.filter { it.displayDate.month == currentMonth }
+                val listMonthTransaction =
+                    listTransactions.filter { it.displayDate.month == currentMonth }
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
@@ -197,19 +187,141 @@ fun ReportScreen(
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     item {
-                        ReportBalance(
-                            listTransactions,
-                            currentMonth
-                        )
+                        ReportBalance(listTransactions, currentMonth)
                     }
                     item {
-                        BoxWithConstraints(
+                        Column(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .background(Color.White, RoundedCornerShape(16.dp))
                                 .padding(10.dp)
                         ) {
-                            NetIncomeChart(listMonthTransaction)
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 10.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = stringResource(id = R.string.net_income),
+                                    color = Color.Black,
+                                    style = MaterialTheme.typography.h6
+                                )
+                                Spacer(modifier = Modifier.weight(1f))
+                                Text(
+                                    text = stringResource(id = R.string.see_details),
+                                    color = Color.Green,
+                                    style = MaterialTheme.typography.body2,
+                                    modifier = Modifier.padding(horizontal = 10.dp)
+                                )
+                            }
+                            Text(
+                                text = decimalFormatter.formatForVisual(
+                                    getBalanceFromList(
+                                        listMonthTransaction
+                                    ).string()
+                                ),
+                                color = Color.Black,
+                                style = MaterialTheme.typography.body1
+                            )
+                            BoxWithConstraints(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(Color.White, RoundedCornerShape(16.dp))
+                                    .padding(10.dp)
+                            ) {
+                                NetIncomeChart(listMonthTransaction)
+                            }
+                        }
+                    }
+                    item {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(Color.White, RoundedCornerShape(16.dp))
+                                .padding(10.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 10.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = stringResource(id = R.string.all_expense),
+                                    color = Color.Black,
+                                    style = MaterialTheme.typography.h6
+                                )
+                                Spacer(modifier = Modifier.weight(1f))
+                                Text(
+                                    text = stringResource(id = R.string.see_details),
+                                    color = Color.Green,
+                                    style = MaterialTheme.typography.body2,
+                                    modifier = Modifier.padding(horizontal = 10.dp)
+                                )
+                            }
+                            Text(
+                                text = decimalFormatter.formatForVisual(
+                                    getExpenseFromList(
+                                        listMonthTransaction
+                                    ).string()
+                                ),
+                                color = Color.Red,
+                                style = MaterialTheme.typography.body1
+                            )
+                            BoxWithConstraints(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(Color.White, RoundedCornerShape(16.dp))
+                                    .padding(10.dp)
+                            ) {
+                                NetIncomeChart(listMonthTransaction)
+                            }
+                        }
+                    }
+                    item {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(Color.White, RoundedCornerShape(16.dp))
+                                .padding(10.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 10.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = stringResource(id = R.string.all_income),
+                                    color = Color.Black,
+                                    style = MaterialTheme.typography.h6
+                                )
+                                Spacer(modifier = Modifier.weight(1f))
+                                Text(
+                                    text = stringResource(id = R.string.see_details),
+                                    color = Color.Green,
+                                    style = MaterialTheme.typography.body2,
+                                    modifier = Modifier.padding(horizontal = 10.dp)
+                                )
+                            }
+                            Text(
+                                text = decimalFormatter.formatForVisual(
+                                    getIncomeFromList(
+                                        listMonthTransaction
+                                    ).string()
+                                ),
+                                color = Color.Green,
+                                style = MaterialTheme.typography.body1
+                            )
+                            BoxWithConstraints(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .background(Color.White, RoundedCornerShape(16.dp))
+                                    .padding(10.dp)
+                            ) {
+                                NetIncomeChart(listMonthTransaction)
+                            }
                         }
                     }
                 }
@@ -220,20 +332,18 @@ fun ReportScreen(
 
 @Composable
 private fun ReportBalance(
-    listTransaction: List<TransactionEntity>?,
-    month: Month
+    listTransaction: List<TransactionEntity>?, month: Month
 ) {
     val symbol = AppCache.defaultCurrencyEntity.collectAsState().value?.symbol ?: ""
     if (listTransaction.isNullOrEmpty()) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 10.dp, horizontal = 5.dp),
+                .padding(10.dp),
             verticalArrangement = Arrangement.spacedBy(10.dp)
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+                modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = stringResource(id = R.string.opening_balance),
@@ -242,14 +352,11 @@ private fun ReportBalance(
                 )
                 Spacer(modifier = Modifier.weight(1f))
                 Text(
-                    text = "0 $symbol",
-                    color = Color.Black,
-                    style = MaterialTheme.typography.body1
+                    text = "0 $symbol", color = Color.Black, style = MaterialTheme.typography.body1
                 )
             }
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically
+                modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
                     text = stringResource(id = R.string.ending_balance),
@@ -258,9 +365,7 @@ private fun ReportBalance(
                 )
                 Spacer(modifier = Modifier.weight(1f))
                 Text(
-                    text = "0 $symbol",
-                    color = Color.Black,
-                    style = MaterialTheme.typography.body1
+                    text = "0 $symbol", color = Color.Black, style = MaterialTheme.typography.body1
                 )
             }
         }
@@ -277,8 +382,7 @@ private fun ReportBalance(
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = stringResource(id = R.string.opening_balance),
@@ -293,8 +397,7 @@ private fun ReportBalance(
             )
         }
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically
         ) {
             Text(
                 text = stringResource(id = R.string.ending_balance),
@@ -314,10 +417,7 @@ private fun ReportBalance(
 
 @Composable
 private fun TabOfMonth(
-    date: String,
-    index: Int,
-    isSelected: Boolean,
-    onClick: (String) -> Unit
+    date: String, index: Int, isSelected: Boolean, onClick: (String) -> Unit
 ) {
     val textMonth = when (index) {
         17 -> stringResource(id = R.string.this_month)
@@ -332,15 +432,13 @@ private fun TabOfMonth(
             .noRippleClickable { onClick(date) },
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
-        Text(
-            text = textMonth,
+        Text(text = textMonth,
             color = if (isSelected) Color.Black else Color.Black.copy(0.5f),
             style = MaterialTheme.typography.caption,
             fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
             modifier = Modifier.onGloballyPositioned {
                 widthText.value = it.size
-            }
-        )
+            })
         if (isSelected) {
             Canvas(
                 modifier = Modifier
@@ -369,7 +467,9 @@ private fun ToolBarReport(
     if (wallet == null) return
     val decimalFormatter = DecimalFormatter()
     Column(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 10.dp),
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         Box(modifier = Modifier.fillMaxWidth()) {
@@ -385,11 +485,11 @@ private fun ToolBarReport(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(20.dp)
             ) {
-                Icon(
-                    imageVector = Icons.Default.Share,
+                Icon(imageVector = Icons.Default.Share,
                     contentDescription = "Search",
                     modifier = Modifier.noRippleClickable { onShareClick() })
-                Icon(imageVector = Icons.Default.CalendarMonth, contentDescription = "More",
+                Icon(imageVector = Icons.Default.CalendarMonth,
+                    contentDescription = "More",
                     modifier = Modifier.noRippleClickable { onTimeRangeClick() })
             }
         }
@@ -417,11 +517,9 @@ private fun ToolBarReport(
                 .padding(5.dp),
             contentAlignment = Alignment.Center
         ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
+            Row(verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(5.dp),
-                modifier = Modifier.noRippleClickable { onWalletClick() }
-            ) {
+                modifier = Modifier.noRippleClickable { onWalletClick() }) {
                 Image(painter = wallet.icon.toPainterResource(), contentDescription = "Icon")
                 Text(text = wallet.name)
                 Icon(imageVector = Icons.Default.ExpandMore, contentDescription = "Expand More")

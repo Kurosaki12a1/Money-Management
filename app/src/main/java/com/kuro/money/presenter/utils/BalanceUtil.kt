@@ -58,3 +58,15 @@ fun getBalanceFromList(list: List<TransactionEntity>?): Double {
         .sumOf { getBalance(it) } - list.filter { it.category.type == Constants.EXPENSE }
         .sumOf { getBalance(it) }
 }
+
+fun getIncomeFromList(list : List<TransactionEntity>?) : Double {
+    if (list.isNullOrEmpty()) return 0.0
+    return list.filter { it.category.type == Constants.INCOME }
+        .sumOf { getBalance(it) }
+}
+
+fun getExpenseFromList(list : List<TransactionEntity>?) : Double {
+    if (list.isNullOrEmpty()) return 0.0
+    return list.filter { it.category.type == Constants.EXPENSE }
+        .sumOf { getBalance(it) }
+}
