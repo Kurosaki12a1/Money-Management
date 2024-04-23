@@ -341,3 +341,8 @@ fun Offset.isStackedBarTapped(
 ) =
     ((tapOffset.x) > x - (barWidth + tapPadding) / 2) && ((tapOffset.x) < x + (barWidth + tapPadding) / 2) &&
             (tapOffset.y > y) && ((tapOffset.y) < barHeight)
+
+fun Double.string(): String {
+    val decimalFormat = DecimalFormat("#.##")
+    return decimalFormat.format(this)
+}

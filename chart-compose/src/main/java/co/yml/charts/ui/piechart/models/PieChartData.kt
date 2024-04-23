@@ -1,6 +1,7 @@
 package co.yml.charts.ui.piechart.models
 
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ImageBitmap
 import co.yml.charts.common.model.PlotData
 import co.yml.charts.common.model.PlotType
 import co.yml.charts.ui.piechart.models.PieChartData.Slice
@@ -28,6 +29,7 @@ data class PieChartData(val slices: List<Slice>, override val plotType: PlotType
         val label: String,
         val value: Float,
         val color: Color,
+        val imageBimap : ImageBitmap? = null,
         val sliceDescription: (Int) -> String = { slicePercentage ->
             "Slice name : $label  \nPercentage  : $slicePercentage %"
         }

@@ -1,6 +1,6 @@
 package co.yml.charts.ui.piechart.charts
 
-import android.graphics.Paint
+import android.icu.text.DecimalFormat
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
@@ -21,26 +21,33 @@ import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.geometry.center
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.NativeCanvas
+import androidx.compose.ui.graphics.Paint
+import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import co.yml.charts.common.components.accessibility.AccessibilityBottomSheetDialog
 import co.yml.charts.common.components.accessibility.SliceInfo
 import co.yml.charts.common.extensions.collectIsTalkbackEnabledAsState
+import co.yml.charts.common.extensions.string
 import co.yml.charts.common.model.PlotType
+import co.yml.charts.common.utils.DecimalFormatter
 import co.yml.charts.ui.piechart.PieChartConstants.NO_SELECTED_SLICE
 import co.yml.charts.ui.piechart.models.PieChartConfig
 import co.yml.charts.ui.piechart.models.PieChartData
@@ -49,6 +56,7 @@ import co.yml.charts.ui.piechart.utils.proportion
 import co.yml.charts.ui.piechart.utils.sweepAngles
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
+import android.graphics.Paint as NativePaint
 
 /**
  * Compose function for Drawing Donut chart
@@ -82,7 +90,7 @@ fun DonutPieChart(
     }
 
     var activePie by rememberSaveable {
-        mutableStateOf(NO_SELECTED_SLICE)
+        mutableIntStateOf(NO_SELECTED_SLICE)
     }
     val accessibilitySheetState =
         rememberModalBottomSheetState(initialValue = ModalBottomSheetValue.Hidden)
@@ -122,12 +130,31 @@ fun DonutPieChart(
                 }
         }
         BoxWithConstraints(
-            modifier = boxModifier
+            modifier = boxModifier,
+            contentAlignment = Alignment.Center
         ) {
+            val density = LocalDensity.current
+            val widthChart: Int
+            val heightChart: Int
+            with(density) {
+                widthChart = if (pieChartConfig.widthChart != (-1).dp) {
+                    pieChartConfig.widthChart.toPx().toInt()
+                } else constraints.maxWidth
+                heightChart = if (pieChartConfig.heightChart != (-1).dp) {
+                    pieChartConfig.heightChart.toPx().toInt()
+                } else constraints.maxHeight
+            }
+
 
             val sideSize = Integer.min(constraints.maxWidth, constraints.maxHeight)
-            val padding = (sideSize * pieChartConfig.chartPadding) / 100f
-            val size = Size(sideSize.toFloat() - padding, sideSize.toFloat() - padding)
+            val padding = (sideSize * pieChartConfig.chartPadding) / 100f + minOf(
+                (constraints.maxWidth - widthChart) / 2,
+                (constraints.maxHeight - heightChart) / 2
+            )
+            val size = Size(
+                sideSize.toFloat() - padding,
+                sideSize.toFloat() - padding
+            )
 
             val pathPortion = remember {
                 Animatable(initialValue = 0f)
@@ -170,13 +197,12 @@ fun DonutPieChart(
                     .width(sideSize.dp)
                     .height(sideSize.dp)
             }
+
             Canvas(
                 modifier = canvasModifier
-
             ) {
 
                 var sAngle = pieChartConfig.startAngle
-
                 sweepAngles.forEachIndexed { index, arcProgress ->
                     drawPie(
                         color = pieChartData.slices[index].color,
@@ -186,11 +212,11 @@ fun DonutPieChart(
                         size = size,
                         padding = padding,
                         isDonut = pieChartData.plotType == PlotType.Donut,
-                        strokeWidth = pieChartConfig.strokeWidth,
                         isActive = activePie == index,
                         pieChartConfig = pieChartConfig
                     )
                     sAngle += arcProgress
+
                 }
                 when {
                     activePie != -1 && pieChartConfig.labelVisible -> {
@@ -202,6 +228,7 @@ fun DonutPieChart(
                                 PieChartConfig.LabelType.PERCENTAGE -> "${
                                     proportions[activePie].roundToInt()
                                 }%"
+
                                 PieChartConfig.LabelType.VALUE -> {
                                     isValue = true
                                     selectedSlice.value.toString()
@@ -219,14 +246,30 @@ fun DonutPieChart(
                                 shouldShowUnit = shouldShowUnit,
                                 fontSize = fontSize,
                                 textToDraw = textToDraw,
-                                sideSize = sideSize
+                                sideSize = sideSize,
+                                paddingX = 0,
+                                paddingY = 150
                             )
+                            if (selectedSlice.imageBimap != null) {
+                                val imageBitmap = selectedSlice.imageBimap
+                                drawIntoCanvas { canvas ->
+                                    canvas.drawImage(
+                                        image = imageBitmap,
+                                        topLeftOffset = Size(
+                                            sideSize.toFloat() - imageBitmap.width,
+                                            sideSize.toFloat() - imageBitmap.height
+                                        ).center,
+                                        paint = Paint()
+                                    )
+                                }
+                            }
                         }
                     }
+
                     activePie == -1 && pieChartConfig.isSumVisible -> {
                         drawContext.canvas.nativeCanvas.apply {
                             val fontSize = pieChartConfig.labelFontSize.toPx()
-                            val textToDraw = "$sumOfValues"
+                            val textToDraw = DecimalFormatter().formatForVisual(sumOfValues.toDouble().string())
                             drawLabel(
                                 canvas = this,
                                 pieChartConfig = pieChartConfig,
@@ -274,17 +317,19 @@ private fun drawLabel(
     shouldShowUnit: Boolean,
     fontSize: Float,
     textToDraw: String,
-    sideSize: Int
+    sideSize: Int,
+    paddingX: Int = 0,
+    paddingY: Int = 0
 ) {
-    val paint = Paint().apply {
+    val paint = NativePaint().apply {
         isAntiAlias = true
         color = labelColor.toArgb()
         textSize = fontSize
-        textAlign = Paint.Align.CENTER
+        textAlign = NativePaint.Align.CENTER
         typeface = pieChartConfig.labelTypeface
     }
-    val x = (sideSize / 2).toFloat()
-    var y: Float = (sideSize / 2).toFloat() + fontSize / 3
+    val x = (sideSize / 2).toFloat() + paddingX
+    var y: Float = (sideSize / 2).toFloat() + fontSize / 3 + paddingY
     if (shouldShowUnit)
         y -= (paint.fontSpacing / 4)
     canvas.drawText(

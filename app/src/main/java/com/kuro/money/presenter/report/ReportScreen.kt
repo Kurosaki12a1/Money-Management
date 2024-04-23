@@ -49,6 +49,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.kuro.money.R
+import com.kuro.money.constants.Constants
 import com.kuro.money.data.AppCache
 import com.kuro.money.data.model.AccountEntity
 import com.kuro.money.data.model.TransactionEntity
@@ -56,6 +57,8 @@ import com.kuro.money.data.utils.Resource
 import com.kuro.money.extension.detectHorizontalWithDelay
 import com.kuro.money.extension.noRippleClickable
 import com.kuro.money.navigation.routes.NavigationRoute
+import com.kuro.money.presenter.report.feature.ExpenseChart
+import com.kuro.money.presenter.report.feature.IncomeChart
 import com.kuro.money.presenter.report.feature.NetIncomeChart
 import com.kuro.money.presenter.utils.CrossSlide
 import com.kuro.money.presenter.utils.DecimalFormatter
@@ -275,7 +278,7 @@ fun ReportScreen(
                                     .background(Color.White, RoundedCornerShape(16.dp))
                                     .padding(10.dp)
                             ) {
-                                NetIncomeChart(listMonthTransaction)
+                                ExpenseChart(listMonthTransaction.filter { it.category.type == Constants.EXPENSE })
                             }
                         }
                     }
@@ -320,7 +323,7 @@ fun ReportScreen(
                                     .background(Color.White, RoundedCornerShape(16.dp))
                                     .padding(10.dp)
                             ) {
-                                NetIncomeChart(listMonthTransaction)
+                                IncomeChart(listMonthTransaction.filter { it.category.type == Constants.INCOME })
                             }
                         }
                     }

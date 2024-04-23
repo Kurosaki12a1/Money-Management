@@ -32,6 +32,7 @@ enum class LetterColor(val letter: Char, val color: Color) {
     Z('Z', Color(0xFFFF5733)); // Orange-red
 
     companion object {
+        fun getColor(index : Int) : Color = entries[index].color
         fun getColor(letter: Char): Color {
             return entries.firstOrNull { it.letter == letter.uppercaseChar() }?.color ?: Color.Black // Default is Black color
         }

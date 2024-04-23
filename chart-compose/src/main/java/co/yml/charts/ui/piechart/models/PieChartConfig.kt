@@ -14,6 +14,7 @@ import co.yml.charts.ui.piechart.PieChartConstants.DEFAULT_PADDING
 import co.yml.charts.ui.piechart.PieChartConstants.DEFAULT_SLICE_LABEL_TEXT_SIZE
 import co.yml.charts.ui.piechart.PieChartConstants.DEFAULT_START_ANGLE
 import co.yml.charts.ui.piechart.PieChartConstants.DEFAULT_STROKE_WIDTH
+import co.yml.charts.ui.piechart.PieChartConstants.DEFAULT_STROKE_WIDTH_ACTIVE
 
 /**
  * PieChartConfig data class used to mention all config related param required to draw PieChart.
@@ -43,6 +44,8 @@ import co.yml.charts.ui.piechart.PieChartConstants.DEFAULT_STROKE_WIDTH
  * @param sumUnit: The unit of the sum of values, only used for Donut Chart
  */
 data class PieChartConfig(
+    val widthChart : Dp = (-1).dp,
+    val heightChart : Dp = (-1).dp,
     val startAngle: Float = DEFAULT_START_ANGLE,
     val showSliceLabels: Boolean = true,
     val sliceLabelTextSize: TextUnit = DEFAULT_SLICE_LABEL_TEXT_SIZE.sp,
@@ -51,6 +54,7 @@ data class PieChartConfig(
     val isAnimationEnable: Boolean = false,
     @IntRange(from = 1) val animationDuration: Int = 500,
     val strokeWidth: Float = DEFAULT_STROKE_WIDTH,
+    val strokeWidthActive : Float = DEFAULT_STROKE_WIDTH_ACTIVE,
     val labelFontSize: TextUnit = 24.sp,
     val labelTypeface: Typeface = Typeface.DEFAULT,
     val labelVisible: Boolean = false,
