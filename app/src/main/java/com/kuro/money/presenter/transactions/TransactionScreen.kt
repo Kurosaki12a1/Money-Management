@@ -87,13 +87,16 @@ fun TransactionScreen(
     val selectedWallet = transactionViewModel.selectedWallet.collectAsState().value
     val monthList = transactionViewModel.monthList.collectAsState().value
     val monthSelected = transactionViewModel.monthSelected.collectAsState().value
+    // Full list transaction of month without filter wallet
     val listMonthTransaction = remember { mutableStateListOf<TransactionEntity>() }
     // First focus is 17
     val prevIndexSelected = remember { mutableIntStateOf(17) }
     val indexSelected =
         remember(monthSelected) { mutableIntStateOf(monthList.indexOf(monthSelected)) }
+    // List transaction with filter wallet
+    val listTransactions = remember { mutableStateListOf<TransactionEntity>() }
 
-    LaunchedEffect(true) {
+    LaunchedEffect(Unit) {
         transactionViewModel.getBalance()
         transactionViewModel.getAllWallets()
         transactionViewModel.setMonthSelected(monthSelected)
@@ -108,8 +111,26 @@ fun TransactionScreen(
             if (it is Resource.Success) {
                 listMonthTransaction.clear()
                 listMonthTransaction.addAll(it.value)
+
+                listTransactions.clear()
+                listTransactions.addAll(
+                    if (selectedWallet?.id == Constants.GLOBAL_WALLET_ID) {
+                        listMonthTransaction
+                    } else
+                        listMonthTransaction.filter { it.wallet.id == selectedWallet?.id }
+                )
             }
         }
+    }
+
+    LaunchedEffect(selectedWallet) {
+        listTransactions.clear()
+        listTransactions.addAll(
+            if (selectedWallet?.id == Constants.GLOBAL_WALLET_ID) {
+                listMonthTransaction
+            } else
+                listMonthTransaction.filter { it.wallet.id == selectedWallet?.id }
+        )
     }
 
     LaunchedEffect(Unit) {
@@ -123,6 +144,7 @@ fun TransactionScreen(
                 if (selectedWallet == null) {
                     transactionViewModel.setSelectedWallet(it.first!!)
                 }
+
             }
         }
     }
@@ -190,7 +212,7 @@ fun TransactionScreen(
                     }),
                 orderedContent = (0..18).toList()
             ) {
-                if (listMonthTransaction.isEmpty()) {
+                if (listTransactions.isEmpty()) {
                     Column(
                         modifier = Modifier
                             .fillMaxSize()
@@ -211,7 +233,7 @@ fun TransactionScreen(
                         Spacer(modifier = Modifier.weight(1f))
                     }
                 } else {
-                    val listTransactionOfDayInMonth = listMonthTransaction
+                    val listTransactionOfDayInMonth = listTransactions
                         .sortedByDescending { it.displayDate }
                         .groupBy { it.displayDate }
                     LazyColumn(
@@ -221,7 +243,7 @@ fun TransactionScreen(
                             .padding(bottom = 30.dp),
                         verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
-                        item { ReportSpendingOfMonth(listMonthTransaction) }
+                        item { ReportSpendingOfMonth(listTransactions) }
                         items(
                             listTransactionOfDayInMonth.keys.toList(),
                             key = { it.dayOfMonth }) { date ->

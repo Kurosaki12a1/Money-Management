@@ -83,14 +83,17 @@ fun ReportScreen(
     val monthList = reportViewModel.monthList.collectAsState().value
     val monthSelected = reportViewModel.monthSelected.collectAsState().value
     // List Transaction selected this time and prev time
-    val listTransactions = remember { mutableStateListOf<TransactionEntity>() }
+    // Full list transaction of month without filter wallet
+    val listMonthTransaction = remember { mutableStateListOf<TransactionEntity>() }
     // First focus is 17
     val prevIndexSelected = remember { mutableIntStateOf(17) }
     val indexSelected =
         remember(monthSelected) { mutableIntStateOf(monthList.indexOf(monthSelected)) }
+    // List transaction with filter wallet
+    val listTransactions = remember { mutableStateListOf<TransactionEntity>() }
 
     val decimalFormatter = DecimalFormatter()
-    LaunchedEffect(true) {
+    LaunchedEffect(Unit) {
         reportViewModel.getBalance()
         reportViewModel.getAllWallets()
         reportViewModel.setMonthSelected(monthSelected)
@@ -103,10 +106,28 @@ fun ReportScreen(
     LaunchedEffect(Unit) {
         reportViewModel.transactionSelected.collectLatest {
             if (it is Resource.Success) {
-                listTransactions.clear()
-                listTransactions.addAll(it.value)
+                listMonthTransaction.clear()
+                listMonthTransaction.addAll(it.value)
             }
+
+            listTransactions.clear()
+            listTransactions.addAll(
+                if (selectedWallet?.id == Constants.GLOBAL_WALLET_ID) {
+                    listMonthTransaction
+                } else
+                    listMonthTransaction.filter { it.wallet.id == selectedWallet?.id }
+            )
         }
+    }
+
+    LaunchedEffect(selectedWallet) {
+        listTransactions.clear()
+        listTransactions.addAll(
+            if (selectedWallet?.id == Constants.GLOBAL_WALLET_ID) {
+                listMonthTransaction
+            } else
+                listMonthTransaction.filter { it.wallet.id == selectedWallet?.id }
+        )
     }
 
     LaunchedEffect(Unit) {
@@ -134,15 +155,16 @@ fun ReportScreen(
     ) {
         Column(modifier = Modifier.fillMaxSize()) {
             if (!listWallet.isEmpty()) {
-                ToolBarReport(selectedWallet, onShareClick = {
-                    navController.navigate(NavigationRoute.Transaction.SearchTransaction.route) {
-                        popUpTo(NavigationRoute.Transaction.route)
-                    }
-                }, onTimeRangeClick = {
+                ToolBarReport(selectedWallet,
+                    onShareClick = {
 
-                }, onWalletClick = {
-                    navController.navigate(NavigationRoute.Transaction.SelectWallet.route)
-                })
+                    },
+                    onTimeRangeClick = {
+
+                    },
+                    onWalletClick = {
+                        navController.navigate(NavigationRoute.Report.SelectWallet.route)
+                    })
             }
             LazyRow(
                 modifier = Modifier
@@ -180,17 +202,17 @@ fun ReportScreen(
             ) { index ->
                 // Index of "This month" is 17
                 val currentMonth = LocalDate.now().minusMonths((17 - index).toLong()).month
-                val listMonthTransaction =
+                val transactions =
                     listTransactions.filter { it.displayDate.month == currentMonth }
                 LazyColumn(
                     modifier = Modifier
                         .fillMaxSize()
                         .background(Gray)
                         .padding(bottom = 30.dp),
-                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                    verticalArrangement = Arrangement.spacedBy(25.dp)
                 ) {
                     item {
-                        ReportBalance(listTransactions, currentMonth)
+                        ReportBalance(transactions, currentMonth)
                     }
                     item {
                         Column(
@@ -221,7 +243,7 @@ fun ReportScreen(
                             Text(
                                 text = decimalFormatter.formatForVisual(
                                     getBalanceFromList(
-                                        listMonthTransaction
+                                        transactions
                                     ).string()
                                 ),
                                 color = Color.Black,
@@ -233,7 +255,7 @@ fun ReportScreen(
                                     .background(Color.White, RoundedCornerShape(16.dp))
                                     .padding(10.dp)
                             ) {
-                                NetIncomeChart(listMonthTransaction)
+                                NetIncomeChart(transactions)
                             }
                         }
                     }
@@ -266,7 +288,7 @@ fun ReportScreen(
                             Text(
                                 text = decimalFormatter.formatForVisual(
                                     getExpenseFromList(
-                                        listMonthTransaction
+                                        transactions
                                     ).string()
                                 ),
                                 color = Color.Red,
@@ -278,7 +300,7 @@ fun ReportScreen(
                                     .background(Color.White, RoundedCornerShape(16.dp))
                                     .padding(10.dp)
                             ) {
-                                ExpenseChart(listMonthTransaction.filter { it.category.type == Constants.EXPENSE })
+                                ExpenseChart(transactions.filter { it.category.type == Constants.EXPENSE })
                             }
                         }
                     }
@@ -311,7 +333,7 @@ fun ReportScreen(
                             Text(
                                 text = decimalFormatter.formatForVisual(
                                     getIncomeFromList(
-                                        listMonthTransaction
+                                        transactions
                                     ).string()
                                 ),
                                 color = Color.Green,
@@ -323,7 +345,7 @@ fun ReportScreen(
                                     .background(Color.White, RoundedCornerShape(16.dp))
                                     .padding(10.dp)
                             ) {
-                                IncomeChart(listMonthTransaction.filter { it.category.type == Constants.INCOME })
+                                IncomeChart(transactions.filter { it.category.type == Constants.INCOME })
                             }
                         }
                     }

@@ -45,6 +45,8 @@ sealed class NavigationRoute(val route: String) {
     }
 
     sealed class Report(route: String) : NavigationRoute(route) {
+        data object SelectWallet : Transaction("report_select_wallet")
+
         companion object : Report("report")
     }
 

@@ -8,9 +8,14 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.kuro.money.navigation.routes.NavigationGraphRoute
+import com.kuro.money.navigation.routes.NavigationGraphRoute.RootGraph
 import com.kuro.money.navigation.routes.NavigationRoute
+import com.kuro.money.navigation.routes.NavigationRoute.Transaction
+import com.kuro.money.presenter.account.feature.wallets.WalletScreen
 import com.kuro.money.presenter.report.ReportScreen
 import com.kuro.money.presenter.report.ReportViewModel
+import com.kuro.money.presenter.transactions.TransactionViewModel
+import com.kuro.money.presenter.utils.horizontalComposable
 
 fun NavGraphBuilder.budgetsGraph(
     navHostController: NavHostController,
@@ -30,6 +35,14 @@ fun NavGraphBuilder.budgetsGraph(
                     viewModel,
                     paddingValues,
                 )
+            }
+            horizontalComposable(route = NavigationRoute.Report.SelectWallet.route) {
+                val parentEntry = remember(it) {
+                    // Lifecycle through lifecycle of app
+                    navHostController.getBackStackEntry(NavigationGraphRoute.ReportGraph.route)
+                }
+                val reportViewModel = hiltViewModel<ReportViewModel>(parentEntry)
+                WalletScreen(navHostController, reportViewModel)
             }
         }
     )

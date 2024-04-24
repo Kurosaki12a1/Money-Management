@@ -63,7 +63,7 @@ fun BoxWithConstraintsScope.ExpenseChart(transactions: List<TransactionEntity>) 
             .fillMaxWidth()
             .background(Color.White)
             .align(Alignment.Center)
-            .height(500.dp),
+            .height(300.dp),
         transactionChartData,
         donutChartConfig
     )

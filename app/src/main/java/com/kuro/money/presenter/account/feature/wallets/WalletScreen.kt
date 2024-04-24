@@ -29,13 +29,13 @@ import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Switch
 import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Sort
 import androidx.compose.material.icons.filled.AddCircle
-import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Sort
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
@@ -69,6 +69,7 @@ import com.kuro.money.extension.noRippleClickable
 import com.kuro.money.navigation.routes.NavigationGraphRoute
 import com.kuro.money.navigation.routes.NavigationRoute
 import com.kuro.money.presenter.home.MyWalletViewModel
+import com.kuro.money.presenter.report.ReportViewModel
 import com.kuro.money.presenter.transactions.TransactionViewModel
 import com.kuro.money.presenter.utils.popBackStackWithLifeCycle
 import com.kuro.money.presenter.utils.string
@@ -176,7 +177,7 @@ fun WalletScreen(
             horizontalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             Icon(
-                imageVector = Icons.Default.ArrowBack,
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                 contentDescription = "Back",
                 modifier = Modifier.clickable {
                     navController.popBackStackWithLifeCycle()
@@ -217,7 +218,7 @@ fun WalletScreen(
                     style = MaterialTheme.typography.h6
                 )
                 Spacer(modifier = Modifier.weight(1f))
-                Icon(imageVector = Icons.Default.Sort, contentDescription = "Sort")
+                Icon(imageVector = Icons.AutoMirrored.Filled.Sort, contentDescription = "Sort")
                 Icon(
                     imageVector = Icons.Default.Search,
                     contentDescription = "Search",
@@ -352,7 +353,7 @@ fun WalletScreen(
             horizontalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             Icon(
-                imageVector = Icons.Default.ArrowBack,
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                 contentDescription = "Back",
                 modifier = Modifier.clickable {
                     navController.popBackStackWithLifeCycle()
@@ -373,15 +374,21 @@ fun WalletScreen(
                 }
             )
         }
-        Divider(modifier = Modifier
-            .fillMaxWidth()
-            .height(20.dp)
-            .background(Gray))
+        Divider(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(20.dp)
+                .background(Gray)
+        )
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(Color.White)
-                .padding(10.dp),
+                .padding(10.dp)
+                .noRippleClickable {
+                    transactionViewModel.setSelectedWallet(transactionViewModel.globalWallet.value!!)
+                    navController.popBackStackWithLifeCycle()
+                },
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(20.dp)
         ) {
@@ -460,6 +467,159 @@ fun WalletScreen(
     }
 }
 
+
+@Composable
+fun WalletScreen(
+    navController: NavController,
+    reportViewModel: ReportViewModel
+) {
+    BackHandler { navController.popBackStackWithLifeCycle() }
+
+    if (navController.currentDestination?.route == NavigationRoute.Home.Wallet.route) {
+        reportViewModel.getAllWallets()
+        reportViewModel.getBalance()
+    }
+
+    val listWallet = remember { mutableStateListOf<AccountEntity>() }
+    val balance = reportViewModel.balance.collectAsState().value
+
+    LaunchedEffect(Unit) {
+        reportViewModel.allWallets.collect { data ->
+            if (data is Resource.Success) {
+                listWallet.clear()
+                data.value.let { listWallet.addAll(it) }
+            }
+        }
+    }
+
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(Gray)
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color.White)
+                .padding(20.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(20.dp)
+        ) {
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                contentDescription = "Back",
+                modifier = Modifier.clickable {
+                    navController.popBackStackWithLifeCycle()
+                })
+
+            Text(
+                text = stringResource(id = R.string.my_wallets),
+                color = Color.Black,
+                textAlign = TextAlign.Center,
+                style = MaterialTheme.typography.h6
+            )
+            Spacer(modifier = Modifier.weight(1f))
+            Icon(
+                imageVector = Icons.Default.Edit,
+                contentDescription = "Search",
+                modifier = Modifier.noRippleClickable {
+                    navController.navigate(NavigationRoute.Account.Wallet.route)
+                }
+            )
+        }
+        Divider(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(20.dp)
+                .background(Gray)
+        )
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Color.White)
+                .padding(10.dp)
+                .noRippleClickable {
+                    reportViewModel.setSelectedWallet(reportViewModel.globalWallet.value!!)
+                    navController.popBackStackWithLifeCycle()
+                },
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(20.dp)
+        ) {
+            Image(painterResource(id = R.drawable.ic_category_all), contentDescription = "All")
+            Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
+                Text(
+                    text = stringResource(id = R.string.total),
+                    style = MaterialTheme.typography.body1,
+                    color = Color.Black
+                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(5.dp)
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_approximation),
+                        contentDescription = "Approximation"
+                    )
+                    Text(
+                        text = "${balance.string()} ${AppCache.defaultCurrencyEntity.value?.symbol ?: ""}",
+                        style = MaterialTheme.typography.body2,
+                        color = Color.Black.copy(0.5f)
+                    )
+                }
+            }
+        }
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Gray)
+                .padding(10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = stringResource(id = R.string.included_in_total),
+                style = MaterialTheme.typography.body1,
+                fontWeight = FontWeight.Bold,
+                color = Color.Black.copy(alpha = 0.7f)
+            )
+        }
+        Box(modifier = Modifier.fillMaxSize()) {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(Color.White)
+                    .padding(10.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                items(listWallet, key = { it.id }) { item ->
+                    WalletItem(item) {
+                        reportViewModel.setSelectedWallet(item)
+                        navController.popBackStackWithLifeCycle()
+                    }
+                }
+            }
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .wrapContentHeight()
+                    .padding(20.dp)
+                    .align(Alignment.BottomEnd)
+            ) {
+                FloatingActionButton(
+                    modifier = Modifier.align(Alignment.BottomEnd),
+                    backgroundColor = Teal200,
+                    onClick = { navController.navigate(NavigationRoute.Account.Wallet.AddWallet.route) }) {
+                    Icon(
+                        imageVector = Icons.Default.AddCircle,
+                        contentDescription = "Add",
+                        tint = Color.White,
+                        modifier = Modifier.size(30.dp)
+                    )
+                }
+            }
+        }
+    }
+}
+
 @Composable
 fun WalletScreen(
     navController: NavController,
@@ -498,7 +658,7 @@ fun WalletScreen(
             horizontalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             Icon(
-                imageVector = Icons.Default.ArrowBack,
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
                 contentDescription = "Back",
                 modifier = Modifier.clickable {
                     navController.popBackStackWithLifeCycle()
@@ -663,10 +823,12 @@ private fun WalletItem(
 @Composable
 private fun WalletItem(
     item: AccountEntity,
-    onClick : () -> Unit = {}
+    onClick: () -> Unit = {}
 ) {
     Row(
-        modifier = Modifier.fillMaxWidth().noRippleClickable { onClick() },
+        modifier = Modifier
+            .fillMaxWidth()
+            .noRippleClickable { onClick() },
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(20.dp)
     ) {
