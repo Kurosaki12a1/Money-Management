@@ -78,3 +78,13 @@ fun weekToString(startWeek: LocalDate, endWeek: LocalDate): String {
     val formater = DateTimeFormatter.ofPattern("dd/MM")
     return formater.format(startWeek) + " - " + formater.format(endWeek)
 }
+
+fun monthToString(date : LocalDate) : String {
+    val formater = DateTimeFormatter.ofPattern("mm/YYYY")
+    return formater.format(date)
+}
+
+fun quarterToString(date : LocalDate) : String {
+    val quarter = (date.monthValue - 1) / 3  + 1
+    return "Q$quarter ${date.year}"
+}

@@ -132,4 +132,5 @@
     <string name="overview">Overview</string>
     <string name="income_details">Income Details</string>
     <string name="expense_details">Expense Details</string>
+    <string name="no_data">No data to display</string>
 </resources>

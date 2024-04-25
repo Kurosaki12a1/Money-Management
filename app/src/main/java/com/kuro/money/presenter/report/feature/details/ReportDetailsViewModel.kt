@@ -20,7 +20,7 @@ import javax.inject.Inject
 @HiltViewModel
 class ReportDetailsViewModel @Inject constructor(
     private val transactionUseCase: TransactionUseCase
-): ViewModel() {
+) : ViewModel() {
 
     private val _tabs = MutableStateFlow<List<String>>(emptyList())
     val tabs = _tabs.asStateFlow()

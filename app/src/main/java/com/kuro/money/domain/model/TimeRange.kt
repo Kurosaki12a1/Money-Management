@@ -21,14 +21,7 @@ sealed class TimeRange {
         }
 
         // This is default
-        fun get(index: Int): TimeRange = when (index) {
-            0 -> DAY(LocalDate.now())
-            1 -> WEEK(LocalDate.now().minusWeeks(1), LocalDate.now())
-            2 -> MONTH(LocalDate.now().minusMonths(1), LocalDate.now())
-            3 -> QUARTER(LocalDate.now().minusMonths(3), LocalDate.now())
-            4 -> YEAR(LocalDate.now().minusYears(1), LocalDate.now())
-            else -> ALL
-        }
+        fun getList() = listOf("Day", "Week", "Month", "Quarter", "Year", "All")
     }
 }
 
