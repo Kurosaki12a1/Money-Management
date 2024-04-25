@@ -128,4 +128,8 @@
     <string name="ending_balance">Ending Balance</string>
     <string name="net_income">Net Income</string>
     <string name="see_details">See details</string>
+
+    <string name="overview">Overview</string>
+    <string name="income_details">Income Details</string>
+    <string name="expense_details">Expense Details</string>
 </resources>

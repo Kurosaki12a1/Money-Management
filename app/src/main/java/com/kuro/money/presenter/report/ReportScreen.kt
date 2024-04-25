@@ -57,9 +57,9 @@ import com.kuro.money.data.utils.Resource
 import com.kuro.money.extension.detectHorizontalWithDelay
 import com.kuro.money.extension.noRippleClickable
 import com.kuro.money.navigation.routes.NavigationRoute
-import com.kuro.money.presenter.report.feature.ExpenseChart
-import com.kuro.money.presenter.report.feature.IncomeChart
-import com.kuro.money.presenter.report.feature.NetIncomeChart
+import com.kuro.money.presenter.report.feature.chart.ExpenseChart
+import com.kuro.money.presenter.report.feature.chart.IncomeChart
+import com.kuro.money.presenter.report.feature.chart.NetIncomeChart
 import com.kuro.money.presenter.utils.CrossSlide
 import com.kuro.money.presenter.utils.DecimalFormatter
 import com.kuro.money.presenter.utils.getBalanceFromList
@@ -224,7 +224,10 @@ fun ReportScreen(
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(horizontal = 10.dp),
+                                    .padding(horizontal = 10.dp)
+                                    .noRippleClickable {
+                                        navController.navigate(NavigationRoute.Report.OverViewDetails.route)
+                                    },
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(

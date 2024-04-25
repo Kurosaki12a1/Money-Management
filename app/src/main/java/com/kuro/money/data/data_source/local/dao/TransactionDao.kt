@@ -49,6 +49,7 @@ interface TransactionDao {
     ): List<TransactionEntity>
 
     @androidx.room.Transaction
+    @TypeConverters(LocalDateConverter::class)
     @RawQuery
     fun queryTransactions(query: SupportSQLiteQuery): List<TransactionEntity>
 }

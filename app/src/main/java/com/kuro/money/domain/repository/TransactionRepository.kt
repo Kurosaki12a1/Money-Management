@@ -6,6 +6,7 @@ import com.kuro.money.data.utils.Resource
 import com.kuro.money.domain.model.AdvancedSearchAmount
 import com.kuro.money.domain.model.AdvancedSearchCategory
 import com.kuro.money.domain.model.AdvancedSearchTime
+import com.kuro.money.domain.model.TimeRange
 import kotlinx.coroutines.flow.Flow
 import java.time.LocalDate
 
@@ -36,5 +37,7 @@ interface TransactionRepository {
         startDate : LocalDate,
         endDate: LocalDate
     ) : Flow<Resource<List<TransactionEntity>>>
+
+    fun queryTransactionWithTimeRange(timeRange : TimeRange) : Flow<Resource<List<TransactionEntity>>>
 
 }

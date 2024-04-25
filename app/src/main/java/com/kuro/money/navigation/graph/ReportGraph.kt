@@ -8,13 +8,12 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.composable
 import androidx.navigation.navigation
 import com.kuro.money.navigation.routes.NavigationGraphRoute
-import com.kuro.money.navigation.routes.NavigationGraphRoute.RootGraph
 import com.kuro.money.navigation.routes.NavigationRoute
-import com.kuro.money.navigation.routes.NavigationRoute.Transaction
 import com.kuro.money.presenter.account.feature.wallets.WalletScreen
 import com.kuro.money.presenter.report.ReportScreen
 import com.kuro.money.presenter.report.ReportViewModel
-import com.kuro.money.presenter.transactions.TransactionViewModel
+import com.kuro.money.presenter.report.feature.details.OverviewDetailsScreen
+import com.kuro.money.presenter.report.feature.details.ReportDetailsViewModel
 import com.kuro.money.presenter.utils.horizontalComposable
 
 fun NavGraphBuilder.budgetsGraph(
@@ -43,6 +42,31 @@ fun NavGraphBuilder.budgetsGraph(
                 }
                 val reportViewModel = hiltViewModel<ReportViewModel>(parentEntry)
                 WalletScreen(navHostController, reportViewModel)
+            }
+            horizontalComposable(route = NavigationRoute.Report.OverViewDetails.route) {
+                val parentEntry = remember(it) {
+                    // Lifecycle through lifecycle of app
+                    navHostController.getBackStackEntry(NavigationRoute.Report.OverViewDetails.route)
+                }
+                val reportDetailsViewModel = hiltViewModel<ReportDetailsViewModel>(parentEntry)
+                OverviewDetailsScreen(
+                    navController = navHostController,
+                    reportDetailsViewModel = reportDetailsViewModel
+                )
+            }
+            horizontalComposable(route = NavigationRoute.Report.IncomeDetails.route) {
+                val parentEntry = remember(it) {
+                    // Lifecycle through lifecycle of app
+                    navHostController.getBackStackEntry(NavigationRoute.Report.IncomeDetails.route)
+                }
+                val reportViewModel = hiltViewModel<ReportViewModel>(parentEntry)
+            }
+            horizontalComposable(route = NavigationRoute.Report.ExpenseDetails.route) {
+                val parentEntry = remember(it) {
+                    // Lifecycle through lifecycle of app
+                    navHostController.getBackStackEntry(NavigationRoute.Report.ExpenseDetails.route)
+                }
+                val reportViewModel = hiltViewModel<ReportViewModel>(parentEntry)
             }
         }
     )

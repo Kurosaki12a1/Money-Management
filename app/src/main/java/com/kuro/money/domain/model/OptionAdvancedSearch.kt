@@ -103,10 +103,10 @@ sealed class AdvancedSearchTime {
 fun buildTimeCondition(time: AdvancedSearchTime): String {
     return when (time) {
         is AdvancedSearchTime.All -> ""
-        is AdvancedSearchTime.After -> "  t.displayDate >= ${time.time}"
-        is AdvancedSearchTime.Before -> "  t.displayDate < ${time.time}"
-        is AdvancedSearchTime.Between -> "  t.displayDate BETWEEN ${time.from} AND ${time.to}"
-        is AdvancedSearchTime.Exact -> "  t.displayDate = ${time.time}"
+        is AdvancedSearchTime.After -> "  t.displayDate >= '${time.time}'"
+        is AdvancedSearchTime.Before -> "  t.displayDate < '${time.time}'"
+        is AdvancedSearchTime.Between -> "  t.displayDate BETWEEN '${time.from}' AND '${time.to}'"
+        is AdvancedSearchTime.Exact -> "  t.displayDate = '${time.time}'"
         else -> ""
     }
 }

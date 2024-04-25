@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalMaterialApi::class)
 
-package com.kuro.money.presenter.report.feature
+package com.kuro.money.presenter.report.feature.chart
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.BoxWithConstraintsScope
@@ -23,7 +23,7 @@ import com.kuro.money.presenter.utils.getBalanceFromList
 import com.kuro.money.presenter.utils.toImageBitmap
 
 @Composable
-fun BoxWithConstraintsScope.IncomeChart(transactions: List<TransactionEntity>){
+fun BoxWithConstraintsScope.ExpenseChart(transactions: List<TransactionEntity>) {
     if (transactions.isEmpty()) return
     val categoryTransaction = transactions.groupBy { it.category.name }
     val listPieCharSlice = mutableListOf<PieChartData.Slice>()

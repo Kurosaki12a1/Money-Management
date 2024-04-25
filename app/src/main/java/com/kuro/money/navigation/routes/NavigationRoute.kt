@@ -31,7 +31,8 @@ sealed class NavigationRoute(val route: String) {
 
         sealed class AdvancedSearchTransaction(route: String) : Transaction(route) {
 
-            data object SearchResult : AdvancedSearchTransaction("transaction_advanced_search_result")
+            data object SearchResult :
+                AdvancedSearchTransaction("transaction_advanced_search_result")
 
             data object SelectWallet :
                 AdvancedSearchTransaction("transaction_advanced_search_select_wallet")
@@ -46,6 +47,12 @@ sealed class NavigationRoute(val route: String) {
 
     sealed class Report(route: String) : NavigationRoute(route) {
         data object SelectWallet : Transaction("report_select_wallet")
+
+        data object OverViewDetails : Transaction("report_over_view_details")
+
+        data object IncomeDetails : Transaction("report_income_details")
+
+        data object ExpenseDetails : Transaction("report_expense_details")
 
         companion object : Report("report")
     }

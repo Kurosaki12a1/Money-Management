@@ -1,4 +1,4 @@
-package com.kuro.money.presenter.report.feature
+package com.kuro.money.presenter.report.feature.chart
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.BoxWithConstraintsScope

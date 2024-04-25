@@ -8,10 +8,12 @@ import com.kuro.money.data.utils.Resource
 import com.kuro.money.domain.model.AdvancedSearchAmount
 import com.kuro.money.domain.model.AdvancedSearchCategory
 import com.kuro.money.domain.model.AdvancedSearchTime
+import com.kuro.money.domain.model.TimeRange
 import com.kuro.money.domain.model.buildAmountCondition
 import com.kuro.money.domain.model.buildCategoryCondition
 import com.kuro.money.domain.model.buildNoteCondition
 import com.kuro.money.domain.model.buildTimeCondition
+import com.kuro.money.domain.model.buildTimeRange
 import com.kuro.money.domain.model.buildWalletCondition
 import com.kuro.money.domain.model.buildWithCondition
 import com.kuro.money.domain.repository.TransactionRepository
@@ -140,4 +142,22 @@ class TransactionRepositoryImpl @Inject constructor(
         }
     }.flowOn(dispatcher)
 
+    override fun queryTransactionWithTimeRange(timeRange: TimeRange): Flow<Resource<List<TransactionEntity>>> = flow {
+        emit(Resource.Loading)
+        val condition = buildTimeRange(timeRange)
+        val query = buildString {
+            append("SELECT t.* FROM transactions t ")
+            if (condition.isNotEmpty()) {
+                append(" WHERE ")
+                append(condition)
+            }
+        }
+        try {
+            val data = appDatabase.transactionDao().queryTransactions(SimpleSQLiteQuery(query))
+            emit(Resource.success(data))
+        } catch (e: Exception){
+            e.printStackTrace()
+            emit(Resource.failure(e, e.message))
+        }
+    }.flowOn(dispatcher)
 }

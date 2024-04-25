@@ -1,6 +1,6 @@
 @file:OptIn(ExperimentalMaterialApi::class)
 
-package com.kuro.money.presenter.report.feature
+package com.kuro.money.presenter.report.feature.chart
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.BoxWithConstraintsScope
@@ -11,22 +11,19 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.ImageBitmap
-import androidx.compose.ui.res.imageResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import co.yml.charts.common.model.PlotType
 import co.yml.charts.ui.piechart.charts.DonutPieChart
 import co.yml.charts.ui.piechart.models.PieChartConfig
 import co.yml.charts.ui.piechart.models.PieChartData
-import com.kuro.money.R
 import com.kuro.money.data.model.TransactionEntity
 import com.kuro.money.domain.model.LetterColor
 import com.kuro.money.presenter.utils.getBalanceFromList
 import com.kuro.money.presenter.utils.toImageBitmap
 
 @Composable
-fun BoxWithConstraintsScope.ExpenseChart(transactions: List<TransactionEntity>) {
+fun BoxWithConstraintsScope.IncomeChart(transactions: List<TransactionEntity>){
     if (transactions.isEmpty()) return
     val categoryTransaction = transactions.groupBy { it.category.name }
     val listPieCharSlice = mutableListOf<PieChartData.Slice>()
