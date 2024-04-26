@@ -59,7 +59,7 @@ fun String.format(): String {
     return result
 }
 
-fun NavController.popBackStackWithLifeCycle(route : String? = null, inclusive : Boolean = false) {
+fun NavController.popBackStackWithLifeCycle(route: String? = null, inclusive: Boolean = false) {
     if (this.currentBackStackEntry?.lifecycle?.currentState == Lifecycle.State.RESUMED) {
         if (route != null) this.popBackStack(route, inclusive)
         else this.popBackStack()
@@ -126,13 +126,25 @@ fun NavGraphBuilder.verticalComposable(
     )
 }
 
-fun Double.formatLargeNumber() : String{
+fun Double.formatLargeNumber(): String {
     return when {
         this < 1000.0 -> this.toString()
         this < 1_000_000 -> String.format(Locale.getDefault(), "%.1fk", this / 1000.0)
-        this < 1_000_000_000 -> String.format(Locale.getDefault(),"%.1fM", this / 1_000_000.0)
-        this < 1_000_000_000_000 -> String.format(Locale.getDefault(),"%.1fB", this / 1_000_000_000.0)
-        this < 1_000_000_000_000_000 -> String.format(Locale.getDefault(),"%.1fT", this / 1_000_000_000_000.0)
-        else -> String.format(Locale.getDefault(),"%.1fQ", this / 1_000_000_000_000_000.0)
+        this < 1_000_000_000 -> String.format(Locale.getDefault(), "%.1fM", this / 1_000_000.0)
+        this < 1_000_000_000_000 -> String.format(
+            Locale.getDefault(),
+            "%.1fB",
+            this / 1_000_000_000.0
+        )
+
+        this < 1_000_000_000_000_000 -> String.format(
+            Locale.getDefault(),
+            "%.1fT",
+            this / 1_000_000_000_000.0
+        )
+
+        else -> String.format(Locale.getDefault(), "%.1fQ", this / 1_000_000_000_000_000.0)
     }
 }
+
+fun LocalDate.endOfMonth(): LocalDate = this.plusMonths(1).withDayOfMonth(1).minusDays(1)

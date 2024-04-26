@@ -1,7 +1,10 @@
 package com.kuro.money.presenter.report.feature.details
 
+import androidx.collection.ArrayMap
+import androidx.collection.arrayMapOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import co.yml.charts.ui.barchart.models.GroupBar
 import com.kuro.money.data.model.TransactionEntity
 import com.kuro.money.data.utils.Resource
 import com.kuro.money.domain.model.TimeRange
@@ -46,6 +49,14 @@ class ReportDetailsViewModel @Inject constructor(
         MutableStateFlow<Resource<List<TransactionEntity>>>(Resource.Default)
     val transactions = _transactions.asStateFlow()
 
+    /**
+     * Key = name of time range
+     * Value = Pair(Income, Expense)
+     */
+    private val _staticsReport =
+        MutableStateFlow<ArrayMap<String, Pair<Float, Float>>>(arrayMapOf())
+    val staticsReport = _staticsReport.asStateFlow()
+
     fun setIndexSelected(index: Int) {
         _indexSelected.value = index
     }
@@ -55,7 +66,31 @@ class ReportDetailsViewModel @Inject constructor(
         _tabs.value = generateTabsName(index)
     }
 
-    fun setCurrentTimeRange(tabIndex: Int) {
+    fun updateStatics(groupBar: List<GroupBar>) {
+        if (groupBar.isEmpty()) {
+            _staticsReport.value = ArrayMap<String, Pair<Float, Float>>()
+            return
+        }
+        val tempList = ArrayMap<String, Pair<Float, Float>>()
+        groupBar.forEach { bar ->
+            var firstValue = 0f
+            var secondValue = 0f
+
+            bar.barList.forEach { item ->
+                when (item.label) {
+                    "Income" -> firstValue = item.point.y
+                    else -> secondValue = item.point.y
+                }
+            }
+
+            if (firstValue != 0f || secondValue != 0f) {
+                tempList[bar.label] = Pair(firstValue, secondValue)
+            }
+        }
+        _staticsReport.value = tempList
+    }
+
+    fun updateTransactions(tabIndex: Int) {
         val dateList = generateDateList(_timeRange.value)
         when (_timeRange.value) {
             0 -> _selectedTime.value = TimeRange.DAY(dateList[tabIndex])
@@ -158,4 +193,5 @@ class ReportDetailsViewModel @Inject constructor(
             else -> emptyList()
         }
     }
+
 }

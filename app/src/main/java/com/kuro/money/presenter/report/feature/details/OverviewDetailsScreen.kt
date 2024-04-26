@@ -17,7 +17,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Divider
@@ -44,13 +46,20 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.core.util.forEach
 import androidx.navigation.NavController
+import co.yml.charts.axis.AxisData
 import co.yml.charts.common.model.Point
+import co.yml.charts.ui.barchart.GroupBarChart
 import co.yml.charts.ui.barchart.models.BarData
+import co.yml.charts.ui.barchart.models.BarPlotData
+import co.yml.charts.ui.barchart.models.BarStyle
 import co.yml.charts.ui.barchart.models.GroupBar
+import co.yml.charts.ui.barchart.models.GroupBarChartData
 import com.kuro.customimagevector.EmptyBox
 import com.kuro.money.R
 import com.kuro.money.constants.Constants
@@ -60,6 +69,9 @@ import com.kuro.money.domain.model.TimeRange
 import com.kuro.money.extension.detectHorizontalWithDelay
 import com.kuro.money.extension.noRippleClickable
 import com.kuro.money.presenter.utils.CrossSlide
+import com.kuro.money.presenter.utils.DecimalFormatter
+import com.kuro.money.presenter.utils.endOfMonth
+import com.kuro.money.presenter.utils.formatLargeNumber
 import com.kuro.money.presenter.utils.getBalance
 import com.kuro.money.presenter.utils.getWeekBoundariesOfMonth
 import com.kuro.money.presenter.utils.monthToString
@@ -83,7 +95,7 @@ fun OverviewDetailsScreen(
     // List Of Tabs
     val tabs = reportDetailsViewModel.tabs.collectAsState().value
     // Option Time Range
-    val timeOptions = reportDetailsViewModel.timeRange.collectAsState().value
+    // val timeOptions = reportDetailsViewModel.timeRange.collectAsState().value
     // Selected Tabs (generate Time Range for query data)
     val selectedTime = reportDetailsViewModel.selectedTime.collectAsState().value
     // Tab Selected
@@ -91,6 +103,8 @@ fun OverviewDetailsScreen(
     val indexSelected = reportDetailsViewModel.indexSelected.collectAsState().value
     val transactions = remember { mutableStateListOf<TransactionEntity>() }
     val enabledTimeRangeOption = remember { mutableStateOf(false) }
+    val staticsReport = reportDetailsViewModel.staticsReport.collectAsState().value
+    val decimalFormatter = DecimalFormatter()
 
     LaunchedEffect(Unit) {
         reportDetailsViewModel.transactions.collectLatest {
@@ -114,7 +128,7 @@ fun OverviewDetailsScreen(
         /*
             Current time always last list
          */
-        reportDetailsViewModel.setCurrentTimeRange(17)
+        reportDetailsViewModel.updateTransactions(17)
     }
 
     LaunchedEffect(Unit) {
@@ -151,6 +165,7 @@ fun OverviewDetailsScreen(
                     isVisible = enabledTimeRangeOption.value,
                     onDismiss = { enabledTimeRangeOption.value = false }) {
                     reportDetailsViewModel.setTimeRange(it)
+                    reportDetailsViewModel.updateTransactions(indexSelected)
                 }
             }
         }
@@ -172,7 +187,7 @@ fun OverviewDetailsScreen(
                     tabName = item,
                     isSelected = index == indexSelected
                 ) {
-                    reportDetailsViewModel.setCurrentTimeRange(index)
+                    reportDetailsViewModel.updateTransactions(index)
                     reportDetailsViewModel.setIndexSelected(index)
                 }
             }
@@ -188,7 +203,7 @@ fun OverviewDetailsScreen(
                     }
                     if (indexSelected < 17) {
                         reportDetailsViewModel.setIndexSelected(indexSelected + 1)
-                        reportDetailsViewModel.setCurrentTimeRange(indexSelected + 1)
+                        reportDetailsViewModel.updateTransactions(indexSelected + 1)
                     }
                 }, onSwipeRight = {
                     if (indexSelected != prevIndexSelected.intValue) {
@@ -196,25 +211,90 @@ fun OverviewDetailsScreen(
                     }
                     if (indexSelected > 0) {
                         reportDetailsViewModel.setIndexSelected(indexSelected - 1)
-                        reportDetailsViewModel.setCurrentTimeRange(indexSelected - 1)
+                        reportDetailsViewModel.updateTransactions(indexSelected - 1)
                     }
                 }),
             orderedContent = (0..18).toList()
         ) {
-            BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-                OverviewChart(transactions, selectedTime)
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(10.dp),
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                item {
+                    BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+                        OverViewChart(transactions, selectedTime, reportDetailsViewModel)
+                    }
+                }
+                item {
+                    Divider(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(1.dp)
+                            .background(Gray)
+                    )
+                }
+                /**
+                 * First = key
+                 * Second = Pair(Income, Expense)
+                 */
+                items(staticsReport.toList()) { static ->
+                    Row(modifier = Modifier.fillMaxWidth()) {
+                        Text(
+                            text = static.first,
+                            modifier = Modifier.weight(1f),
+                            color = Color.Black.copy(0.5f),
+                            style = MaterialTheme.typography.body1,
+                        )
+                        Column(
+                            horizontalAlignment = Alignment.End,
+                            verticalArrangement = Arrangement.spacedBy(10.dp)
+                        ) {
+                            // Income
+                            Text(
+                                text = decimalFormatter.formatForVisual(
+                                    static.second.first.toDouble().string()
+                                ),
+                                color = Color.Blue,
+                                style = MaterialTheme.typography.body1,
+                                textAlign = TextAlign.End
+                            )
+                            // Expense
+                            Text(
+                                text = decimalFormatter.formatForVisual(
+                                    static.second.second.toDouble().string()
+                                ),
+                                color = Color.Red,
+                                style = MaterialTheme.typography.body1,
+                                textAlign = TextAlign.End
+                            )
+                            // Total
+                            Text(
+                                text = decimalFormatter.formatForVisual(
+                                    (static.second.first - static.second.second).toDouble().string()
+                                ),
+                                color = Color.Black,
+                                style = MaterialTheme.typography.body1,
+                                textAlign = TextAlign.End
+                            )
+                        }
+                    }
+                }
             }
         }
     }
 }
 
 @Composable
-private fun BoxWithConstraintsScope.OverviewChart(
+private fun BoxWithConstraintsScope.OverViewChart(
     transactions: List<TransactionEntity>,
-    timeRange: TimeRange?
+    timeRange: TimeRange?,
+    reportDetailsViewModel: ReportDetailsViewModel
 ) {
     if (transactions.isEmpty() || timeRange == null) {
         EmptyResultScreen()
+        reportDetailsViewModel.updateStatics(emptyList())
         return
     }
     val width = this.maxWidth
@@ -237,7 +317,7 @@ private fun BoxWithConstraintsScope.OverviewChart(
         }
         // WEEK
         is TimeRange.WEEK -> {
-            val listDate = List(7) { timeRange.startWeek.minusDays(it.toLong()) }
+            val listDate = List(7) { timeRange.startWeek.plusDays(it.toLong()) }
             listDate.forEachIndexed { index, localDate ->
                 val income = transactions
                     .filter { it.category.type == Constants.INCOME }
@@ -302,19 +382,19 @@ private fun BoxWithConstraintsScope.OverviewChart(
             monthOfQuarter.put(
                 0, Pair(
                     timeRange.startQuarter.withDayOfMonth(1),
-                    timeRange.startQuarter.plusMonths(1).minusDays(1)
+                    timeRange.startQuarter.endOfMonth()
                 )
             )
             monthOfQuarter.put(
                 1, Pair(
                     timeRange.startQuarter.plusMonths(1).withDayOfMonth(1),
-                    timeRange.startQuarter.plusMonths(2).minusDays(1)
+                    timeRange.startQuarter.plusMonths(1).endOfMonth()
                 )
             )
             monthOfQuarter.put(
-                0, Pair(
+                2, Pair(
                     timeRange.startQuarter.plusMonths(2).withDayOfMonth(1),
-                    timeRange.endQuarter
+                    timeRange.endQuarter.endOfMonth()
                 )
             )
             monthOfQuarter.forEach { key, monthQuarter ->
@@ -358,19 +438,18 @@ private fun BoxWithConstraintsScope.OverviewChart(
             val currentDate = LocalDate.now()
             if (timeRange.startYear.year == currentDate.year) {
                 var index = 0
-                while (timeRange.startYear.withMonth((index + 1) * 3).month > currentDate.month) {
+                while (timeRange.startYear.withMonth((index + 1) * 3).month < currentDate.month) {
                     quarterOfYear.put(
                         index, Pair(
                             timeRange.startYear.withMonth(index * 3 + 1).withDayOfMonth(1),
-                            timeRange.startYear.withMonth((index + 1) * 3).withDayOfMonth(31)
+                            timeRange.startYear.withMonth((index + 1) * 3).endOfMonth()
                         )
                     )
                     index++
                 }
-                val nextQuarter = index + 1
                 quarterOfYear.put(
-                    nextQuarter, Pair(
-                        timeRange.startYear.withMonth(nextQuarter * 3 + 1).withDayOfMonth(1),
+                    index, Pair(
+                        timeRange.startYear.withMonth(index * 3 + 1).withDayOfMonth(1),
                         currentDate
                     )
                 )
@@ -379,7 +458,7 @@ private fun BoxWithConstraintsScope.OverviewChart(
                     quarterOfYear.put(
                         index, Pair(
                             timeRange.startYear.withMonth(index * 3 + 1).withDayOfMonth(1),
-                            timeRange.startYear.withMonth((index + 1) * 3).withDayOfMonth(31)
+                            timeRange.startYear.withMonth((index + 1) * 3).endOfMonth()
                         )
                     )
                 }
@@ -425,6 +504,50 @@ private fun BoxWithConstraintsScope.OverviewChart(
             // TODO
         }
     }
+
+    reportDetailsViewModel.updateStatics(groupBarData)
+
+    // Plus 1 because we need startDrawPadding
+    val widthBar = width / (groupBarData.size * groupBarData[0].barList.size + 1)
+
+
+    val xAxisData = AxisData.Builder()
+        .axisStepSize(30.dp)
+        .startDrawPadding(widthBar)
+        .steps(groupBarData.size - 1)
+        .axisLabelAngle(-30f)
+        .labelAndAxisLinePadding(30.dp)
+        .axisLabelFontSize(8.sp)
+        .labelData { index -> groupBarData[index].label }
+        .build()
+
+    val yAxisData = AxisData.Builder()
+        .steps(10)
+        .labelAndAxisLinePadding(30.dp)
+        .axisLabelFontSize(10.sp)
+        .topPadding(30.dp)
+        .axisOffset(20.dp)
+        .labelData { index -> (index * maxValue / 10).formatLargeNumber() }
+        .build()
+
+    val groupBarPlotData = BarPlotData(
+        groupBarList = groupBarData,
+        barColorPaletteList = listOf(Color.Blue, Color.Red),
+        barStyle = BarStyle(barWidth = widthBar, paddingBetweenBars = widthBar)
+    )
+
+    val groupBarChartData = GroupBarChartData(
+        barPlotData = groupBarPlotData,
+        xAxisData = xAxisData,
+        yAxisData = yAxisData
+    )
+
+    GroupBarChart(
+        modifier = Modifier
+            .background(Color.White)
+            .height(300.dp),
+        groupBarChartData = groupBarChartData
+    )
 }
 
 

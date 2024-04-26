@@ -80,7 +80,7 @@ fun weekToString(startWeek: LocalDate, endWeek: LocalDate): String {
 }
 
 fun monthToString(date : LocalDate) : String {
-    val formater = DateTimeFormatter.ofPattern("mm/YYYY")
+    val formater = DateTimeFormatter.ofPattern("MM/yyyy")
     return formater.format(date)
 }
 

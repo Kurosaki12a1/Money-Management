@@ -106,7 +106,7 @@ fun TransactionScreen(
         listState.scrollToItem(indexSelected.intValue)
     }
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(selectedWallet) {
         transactionViewModel.transactionByDate.collectLatest {
             if (it is Resource.Success) {
                 listMonthTransaction.clear()
@@ -114,23 +114,13 @@ fun TransactionScreen(
 
                 listTransactions.clear()
                 listTransactions.addAll(
-                    if (selectedWallet?.id == Constants.GLOBAL_WALLET_ID) {
+                    if (selectedWallet == null || selectedWallet.id == Constants.GLOBAL_WALLET_ID) {
                         listMonthTransaction
                     } else
-                        listMonthTransaction.filter { it.wallet.id == selectedWallet?.id }
+                        listMonthTransaction.filter { w -> w.wallet.id == selectedWallet.id }
                 )
             }
         }
-    }
-
-    LaunchedEffect(selectedWallet) {
-        listTransactions.clear()
-        listTransactions.addAll(
-            if (selectedWallet?.id == Constants.GLOBAL_WALLET_ID) {
-                listMonthTransaction
-            } else
-                listMonthTransaction.filter { it.wallet.id == selectedWallet?.id }
-        )
     }
 
     LaunchedEffect(Unit) {
@@ -144,7 +134,6 @@ fun TransactionScreen(
                 if (selectedWallet == null) {
                     transactionViewModel.setSelectedWallet(it.first!!)
                 }
-
             }
         }
     }

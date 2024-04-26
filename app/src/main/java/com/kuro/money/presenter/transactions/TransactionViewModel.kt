@@ -80,6 +80,7 @@ class TransactionViewModel @Inject constructor(
     }
 
     fun setSelectedWallet(wallet: AccountEntity) {
+        print("Null hay không?")
         _selectedWallet.value = wallet
     }
 
